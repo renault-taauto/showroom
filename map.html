@@ -7,16 +7,12 @@
 
   <style>
     :root {
-      color-scheme: light;
       --ink: #15171a;
-      --muted: #68717d;
-      --line: rgba(21, 23, 26, 0.14);
-      --land: rgba(244, 215, 82, 0.82);
-      --land-2: rgba(238, 191, 65, 0.78);
+      --muted: #666;
+      --line: #15171a;
       --pin: #ffcf00;
-      --pin-border: #15171a;
-      --panel: rgba(255, 255, 255, 0.95);
-      --shadow: 0 18px 50px rgba(8, 18, 32, 0.2);
+      --panel: rgba(255, 255, 255, 0.96);
+      --shadow: 0 16px 45px rgba(0, 0, 0, 0.2);
     }
 
     * {
@@ -29,7 +25,7 @@
       min-height: 100%;
       background: transparent;
       color: var(--ink);
-      font-family: "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Noto Sans KR", Arial, sans-serif;
+      font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", Arial, sans-serif;
     }
 
     button,
@@ -39,79 +35,39 @@
 
     .map-app {
       position: relative;
-      display: grid;
       min-height: 100vh;
+      display: grid;
       place-items: center;
-      overflow: hidden;
+      padding: 24px;
       background: transparent;
-      padding: 28px;
+      overflow: hidden;
     }
 
     .map-stage {
       position: relative;
       width: min(760px, 94vw);
-      aspect-ratio: 720 / 760;
-      isolation: isolate;
+      aspect-ratio: 1027 / 702;
+      background: transparent;
     }
 
-    .base-map {
+    .map-svg {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       overflow: visible;
-      filter: drop-shadow(0 22px 34px rgba(22, 26, 32, 0.13));
-    }
-
-    .region {
-      stroke: rgba(21, 23, 26, 0.42);
-      stroke-width: 2;
-      stroke-linejoin: round;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .region.seoul {
-      fill: rgba(255, 250, 224, 0.96);
-    }
-
-    .region.incheon {
-      fill: rgba(232, 238, 241, 0.96);
-    }
-
-    .region.gyeonggi {
-      fill: var(--land);
-    }
-
-    .region.gangwon {
-      fill: var(--land-2);
-    }
-
-    .coast {
-      fill: none;
-      stroke: rgba(21, 23, 26, 0.26);
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-dasharray: 7 10;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .label {
-      fill: rgba(21, 23, 26, 0.42);
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0;
-      pointer-events: none;
+      filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.12));
     }
 
     .pin {
       position: absolute;
-      z-index: 4;
+      z-index: 5;
       width: 24px;
       height: 24px;
-      border: 2px solid var(--pin-border);
+      border: 2px solid var(--ink);
       border-radius: 50% 50% 50% 0;
       background: var(--pin);
-      box-shadow: 0 9px 20px rgba(0, 0, 0, 0.26);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
       cursor: pointer;
       transform: translate(-50%, -100%) rotate(-45deg);
       transition: scale 0.14s ease, box-shadow 0.14s ease;
@@ -131,89 +87,91 @@
 
     .pin:hover,
     .pin.active {
-      z-index: 6;
-      scale: 1.2;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+      z-index: 7;
+      scale: 1.18;
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.34);
     }
 
-    .pin-label {
+    .pin-name {
       position: absolute;
       z-index: 8;
-      max-width: min(260px, 70vw);
-      padding: 8px 10px;
-      border: 1px solid rgba(21, 23, 26, 0.15);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.96);
-      box-shadow: 0 12px 26px rgba(8, 18, 32, 0.16);
+      padding: 7px 10px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
       color: var(--ink);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
       line-height: 1.35;
+      white-space: nowrap;
       opacity: 0;
       pointer-events: none;
       transform: translate(-50%, -12px);
       transition: opacity 0.12s ease;
-      white-space: nowrap;
     }
 
-    .pin:hover + .pin-label {
+    .pin:hover + .pin-name {
       opacity: 1;
     }
 
-    .detail {
+    .popup {
       position: absolute;
-      right: clamp(12px, 4vw, 42px);
-      bottom: clamp(12px, 4vw, 42px);
-      z-index: 10;
-      width: min(380px, calc(100vw - 32px));
-      padding: 22px;
-      border: 1px solid rgba(21, 23, 26, 0.12);
-      border-radius: 10px;
+      z-index: 20;
+      width: min(360px, calc(100vw - 32px));
+      padding: 20px;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      border-radius: 8px;
       background: var(--panel);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
+      transform: translate(16px, -50%);
     }
 
-    .detail[hidden] {
+    .popup.left {
+      transform: translate(calc(-100% - 16px), -50%);
+    }
+
+    .popup[hidden] {
       display: none;
     }
 
-    .detail h1 {
+    .popup h1 {
       margin: 0 0 14px;
-      font-size: 26px;
+      font-size: 25px;
       line-height: 1.25;
       letter-spacing: 0;
     }
 
     .info {
       display: grid;
-      gap: 9px;
-      margin: 0 0 16px;
-      color: #3c444d;
+      gap: 8px;
+      margin: 0 0 15px;
       font-size: 14px;
       line-height: 1.55;
     }
 
     .info div {
       display: grid;
-      grid-template-columns: 72px minmax(0, 1fr);
-      gap: 10px;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 8px;
     }
 
     .info dt {
+      margin: 0;
       color: var(--muted);
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .info dd {
       margin: 0;
+      color: var(--ink);
     }
 
     .description {
-      margin: 0 0 18px;
-      padding-top: 16px;
-      border-top: 1px solid var(--line);
-      color: #313841;
+      margin: 0 0 17px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(0, 0, 0, 0.14);
       font-size: 14px;
       line-height: 1.65;
       white-space: pre-line;
@@ -222,21 +180,22 @@
     .actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 9px;
+      gap: 8px;
     }
 
-    .actions a {
+    .actions a,
+    .actions span {
       display: inline-flex;
-      min-height: 42px;
+      min-height: 40px;
       align-items: center;
       justify-content: center;
-      padding: 0 15px;
+      padding: 0 14px;
       border: 1px solid #15171a;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #fff;
       color: #15171a;
       font-size: 14px;
-      font-weight: 800;
+      font-weight: 700;
       text-decoration: none;
     }
 
@@ -245,22 +204,21 @@
       color: #fff;
     }
 
-    .test-drive,
-    .event {
-      background: #fff;
-      color: #15171a;
+    .actions span.disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
     }
 
-    .empty {
+    .status {
       position: absolute;
       left: 50%;
       top: 50%;
-      z-index: 12;
+      z-index: 30;
       width: min(360px, calc(100vw - 32px));
-      padding: 18px;
-      border: 1px solid rgba(21, 23, 26, 0.12);
-      border-radius: 10px;
-      background: var(--panel);
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      background: #fff;
       box-shadow: var(--shadow);
       color: var(--muted);
       font-size: 14px;
@@ -269,33 +227,33 @@
       transform: translate(-50%, -50%);
     }
 
-    .empty:empty {
+    .status:empty {
       display: none;
     }
 
     @media (max-width: 720px) {
       .map-app {
-        align-items: start;
-        padding: 14px;
+        padding: 12px;
       }
 
       .map-stage {
         width: 100%;
-        margin-top: 8px;
       }
 
-      .detail {
+      .popup,
+      .popup.left {
         position: fixed;
+        left: 12px !important;
         right: 12px;
         bottom: 12px;
-        left: 12px;
+        top: auto !important;
         width: auto;
         max-height: 48vh;
         overflow: auto;
-        padding: 18px;
+        transform: none;
       }
 
-      .detail h1 {
+      .popup h1 {
         font-size: 21px;
       }
     }
@@ -305,71 +263,89 @@
 <body>
   <main class="map-app">
     <section class="map-stage" id="mapStage" aria-label="르노 대리점 지도">
-      <svg class="base-map" viewBox="0 0 720 760" role="img" aria-label="서울, 인천, 경기, 강원 권역 지도">
-        <path class="region gangwon" d="M435 67 C515 50 604 84 663 139 C694 168 690 216 666 257 C640 302 641 350 661 393 C685 444 646 504 598 534 C545 566 482 547 441 510 C402 475 353 463 309 439 C263 414 245 362 258 310 C270 262 303 225 329 183 C354 144 376 83 435 67 Z" />
-        <path class="region gyeonggi" d="M229 144 C289 111 367 124 420 171 C468 213 481 281 458 339 C435 396 384 438 325 461 C274 481 217 479 170 452 C124 426 93 379 78 328 C63 278 77 224 111 187 C143 152 183 169 229 144 Z" />
-        <path class="region incheon" d="M63 292 C82 260 122 253 148 274 C175 296 168 334 139 354 C104 380 61 365 46 330 C40 316 48 305 63 292 Z" />
-        <path class="region seoul" d="M230 289 C253 272 286 275 309 293 C329 309 330 337 311 354 C286 376 248 373 226 350 C208 330 209 305 230 289 Z" />
-        <path class="coast" d="M52 240 C25 301 28 373 75 428 C121 482 198 508 269 500" />
-
-        <text class="label" x="504" y="244">강원</text>
-        <text class="label" x="210" y="222">경기</text>
-        <text class="label" x="236" y="331">서울</text>
-        <text class="label" x="64" y="326">인천</text>
+      <svg
+        class="map-svg"
+        viewBox="266 0 1027 702"
+        role="img"
+        aria-label="대한민국 수도권 및 강원 권역 지도"
+      >
+        <!-- 지도 출처: Wikimedia Commons, South Korea location map.svg -->
+        <image
+          href="https://upload.wikimedia.org/wikipedia/commons/b/b2/South_Korea_location_map.svg"
+          x="0"
+          y="0"
+          width="1771.627"
+          height="1672.414"
+          preserveAspectRatio="xMidYMid meet"
+        ></image>
       </svg>
 
-      <div class="empty" id="status">대리점 정보를 불러오는 중입니다.</div>
+      <div class="status" id="status">대리점 정보를 불러오는 중입니다.</div>
+
+      <article class="popup" id="popup" hidden>
+        <h1 id="popupName"></h1>
+
+        <dl class="info">
+          <div>
+            <dt>주소</dt>
+            <dd id="popupAddress"></dd>
+          </div>
+          <div>
+            <dt>전화번호</dt>
+            <dd id="popupPhone"></dd>
+          </div>
+          <div>
+            <dt>오시는 길</dt>
+            <dd id="popupDirections"></dd>
+          </div>
+        </dl>
+
+        <p class="description" id="popupDescription"></p>
+
+        <div class="actions" id="popupActions"></div>
+      </article>
     </section>
-
-    <article class="detail" id="detail" hidden>
-      <h1 id="detailName"></h1>
-
-      <dl class="info">
-        <div>
-          <dt>주소</dt>
-          <dd id="detailAddress"></dd>
-        </div>
-        <div>
-          <dt>전화번호</dt>
-          <dd id="detailPhone"></dd>
-        </div>
-        <div>
-          <dt>오시는 길</dt>
-          <dd id="detailDirections"></dd>
-        </div>
-      </dl>
-
-      <p class="description" id="detailDescription"></p>
-
-      <div class="actions" id="detailActions"></div>
-    </article>
   </main>
 
   <script>
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwKxHf3rmSjGrfFRpp-VVH1hJs3M7gK0NPFS1UX-Xgyl1ULHU4bhiT6nLM8YbwuD_hrHw/exec";
 
-    const bounds = {
-      minLat: 36.85,
-      maxLat: 38.65,
-      minLng: 126.05,
-      maxLng: 129.55
+    const mapInfo = {
+      imageWidth: 1771.627,
+      imageHeight: 1672.414,
+      cropX: 266,
+      cropY: 0,
+      cropWidth: 1027,
+      cropHeight: 702,
+      minLat: 33.0,
+      maxLat: 38.9,
+      minLng: 124.5,
+      maxLng: 132.0
     };
 
     const stage = document.querySelector("#mapStage");
     const status = document.querySelector("#status");
-    const detail = document.querySelector("#detail");
-    const detailName = document.querySelector("#detailName");
-    const detailAddress = document.querySelector("#detailAddress");
-    const detailPhone = document.querySelector("#detailPhone");
-    const detailDirections = document.querySelector("#detailDirections");
-    const detailDescription = document.querySelector("#detailDescription");
-    const detailActions = document.querySelector("#detailActions");
+    const popup = document.querySelector("#popup");
+    const popupName = document.querySelector("#popupName");
+    const popupAddress = document.querySelector("#popupAddress");
+    const popupPhone = document.querySelector("#popupPhone");
+    const popupDirections = document.querySelector("#popupDirections");
+    const popupDescription = document.querySelector("#popupDescription");
+    const popupActions = document.querySelector("#popupActions");
 
     let activePin = null;
 
+    stage.addEventListener("click", () => {
+      closePopup();
+    });
+
+    popup.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+
     loadDealers()
       .then((dealers) => {
-        const visibleDealers = dealers.filter(isInsideBounds);
+        const visibleDealers = dealers.filter(isInsideCrop);
 
         if (!visibleDealers.length) {
           status.textContent = "표시할 대리점 좌표가 없습니다. Apps Script 응답에 lat, lng가 있는지 확인해주세요.";
@@ -456,9 +432,13 @@
         pin.style.left = `${position.x}%`;
         pin.style.top = `${position.y}%`;
         pin.setAttribute("aria-label", `${dealer.name} 상세보기`);
-        pin.addEventListener("click", () => showDealer(dealer, pin));
 
-        label.className = "pin-label";
+        pin.addEventListener("click", (event) => {
+          event.stopPropagation();
+          showDealer(dealer, pin, position);
+        });
+
+        label.className = "pin-name";
         label.textContent = dealer.name;
         label.style.left = `${position.x}%`;
         label.style.top = `${position.y}%`;
@@ -467,58 +447,77 @@
       });
     }
 
-    function showDealer(dealer, pin) {
+    function showDealer(dealer, pin, position) {
       if (activePin) activePin.classList.remove("active");
 
       activePin = pin;
       activePin.classList.add("active");
 
-      detailName.textContent = dealer.name;
-      detailAddress.textContent = dealer.address || "-";
-      detailPhone.textContent = dealer.phone || "-";
-      detailDirections.textContent = dealer.directions || "-";
-      detailDescription.textContent = dealer.description || "";
+      popupName.textContent = dealer.name;
+      popupAddress.textContent = dealer.address || "-";
+      popupPhone.textContent = dealer.phone || "-";
+      popupDirections.textContent = dealer.directions || "-";
+      popupDescription.textContent = dealer.description || "";
 
-      detailActions.innerHTML = "";
+      popupActions.innerHTML = "";
 
       if (dealer.testDriveUrl) {
-        detailActions.append(createLink("시승 신청하기", dealer.testDriveUrl, "test-drive"));
+        popupActions.append(createLink("시승 신청하기", dealer.testDriveUrl));
+      } else {
+        popupActions.append(createDisabledButton("시승 신청하기"));
       }
 
       if (dealer.eventUrl) {
-        detailActions.append(createLink("진행중인 이벤트", dealer.eventUrl, "event"));
+        popupActions.append(createLink("진행중인 이벤트", dealer.eventUrl));
       }
 
-      detail.hidden = false;
+      popup.style.left = `${position.x}%`;
+      popup.style.top = `${position.y}%`;
+      popup.classList.toggle("left", position.x > 58);
+      popup.hidden = false;
     }
 
-    function createLink(text, href, className) {
-      const link = document.createElement("a");
+    function closePopup() {
+      popup.hidden = true;
 
-      link.className = className;
+      if (activePin) {
+        activePin.classList.remove("active");
+        activePin = null;
+      }
+    }
+
+    function createLink(text, href) {
+      const link = document.createElement("a");
       link.href = href;
       link.target = "_blank";
       link.rel = "noopener";
       link.textContent = text;
-
       return link;
     }
 
+    function createDisabledButton(text) {
+      const button = document.createElement("span");
+      button.className = "disabled";
+      button.textContent = text;
+      return button;
+    }
+
     function project(dealer) {
-      const x = ((dealer.lng - bounds.minLng) / (bounds.maxLng - bounds.minLng)) * 100;
-      const y = ((bounds.maxLat - dealer.lat) / (bounds.maxLat - bounds.minLat)) * 100;
+      const imageX = ((dealer.lng - mapInfo.minLng) / (mapInfo.maxLng - mapInfo.minLng)) * mapInfo.imageWidth;
+      const imageY = ((mapInfo.maxLat - dealer.lat) / (mapInfo.maxLat - mapInfo.minLat)) * mapInfo.imageHeight;
+
+      const x = ((imageX - mapInfo.cropX) / mapInfo.cropWidth) * 100;
+      const y = ((imageY - mapInfo.cropY) / mapInfo.cropHeight) * 100;
 
       return {
-        x: clamp(x, 2, 98),
-        y: clamp(y, 2, 98)
+        x: clamp(x, 1, 99),
+        y: clamp(y, 1, 99)
       };
     }
 
-    function isInsideBounds(dealer) {
-      return dealer.lat >= bounds.minLat
-        && dealer.lat <= bounds.maxLat
-        && dealer.lng >= bounds.minLng
-        && dealer.lng <= bounds.maxLng;
+    function isInsideCrop(dealer) {
+      const position = project(dealer);
+      return position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100;
     }
 
     function clamp(value, min, max) {
