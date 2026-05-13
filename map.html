@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>르노 대리점 지도</title>
+
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #15171a;
+      --muted: #68717d;
+      --line: rgba(21, 23, 26, 0.14);
+      --land: rgba(244, 215, 82, 0.82);
+      --land-2: rgba(238, 191, 65, 0.78);
+      --pin: #ffcf00;
+      --pin-border: #15171a;
+      --panel: rgba(255, 255, 255, 0.95);
+      --shadow: 0 18px 50px rgba(8, 18, 32, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: transparent;
+      color: var(--ink);
+      font-family: "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Noto Sans KR", Arial, sans-serif;
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    .map-app {
+      position: relative;
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      overflow: hidden;
+      background: transparent;
+      padding: 28px;
+    }
+
+    .map-stage {
+      position: relative;
+      width: min(760px, 94vw);
+      aspect-ratio: 720 / 760;
+      isolation: isolate;
+    }
+
+    .base-map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 22px 34px rgba(22, 26, 32, 0.13));
+    }
+
+    .region {
+      stroke: rgba(21, 23, 26, 0.42);
+      stroke-width: 2;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .region.seoul {
+      fill: rgba(255, 250, 224, 0.96);
+    }
+
+    .region.incheon {
+      fill: rgba(232, 238, 241, 0.96);
+    }
+
+    .region.gyeonggi {
+      fill: var(--land);
+    }
+
+    .region.gangwon {
+      fill: var(--land-2);
+    }
+
+    .coast {
+      fill: none;
+      stroke: rgba(21, 23, 26, 0.26);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 7 10;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .label {
+      fill: rgba(21, 23, 26, 0.42);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0;
+      pointer-events: none;
+    }
+
+    .pin {
+      position: absolute;
+      z-index: 4;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--pin-border);
+      border-radius: 50% 50% 50% 0;
+      background: var(--pin);
+      box-shadow: 0 9px 20px rgba(0, 0, 0, 0.26);
+      cursor: pointer;
+      transform: translate(-50%, -100%) rotate(-45deg);
+      transition: scale 0.14s ease, box-shadow 0.14s ease;
+    }
+
+    .pin::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ink);
+      content: "";
+      transform: translate(-50%, -50%);
+    }
+
+    .pin:hover,
+    .pin.active {
+      z-index: 6;
+      scale: 1.2;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+    }
+
+    .pin-label {
+      position: absolute;
+      z-index: 8;
+      max-width: min(260px, 70vw);
+      padding: 8px 10px;
+      border: 1px solid rgba(21, 23, 26, 0.15);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 12px 26px rgba(8, 18, 32, 0.16);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.35;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -12px);
+      transition: opacity 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .pin:hover + .pin-label {
+      opacity: 1;
+    }
+
+    .detail {
+      position: absolute;
+      right: clamp(12px, 4vw, 42px);
+      bottom: clamp(12px, 4vw, 42px);
+      z-index: 10;
+      width: min(380px, calc(100vw - 32px));
+      padding: 22px;
+      border: 1px solid rgba(21, 23, 26, 0.12);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .detail[hidden] {
+      display: none;
+    }
+
+    .detail h1 {
+      margin: 0 0 14px;
+      font-size: 26px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .info {
+      display: grid;
+      gap: 9px;
+      margin: 0 0 16px;
+      color: #3c444d;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .info div {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .info dt {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .info dd {
+      margin: 0;
+    }
+
+    .description {
+      margin: 0 0 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: #313841;
+      font-size: 14px;
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .actions a {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 15px;
+      border: 1px solid #15171a;
+      border-radius: 8px;
+      background: #fff;
+      color: #15171a;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .actions a:hover {
+      background: #15171a;
+      color: #fff;
+    }
+
+    .test-drive,
+    .event {
+      background: #fff;
+      color: #15171a;
+    }
+
+    .empty {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 12;
+      width: min(360px, calc(100vw - 32px));
+      padding: 18px;
+      border: 1px solid rgba(21, 23, 26, 0.12);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      text-align: center;
+      transform: translate(-50%, -50%);
+    }
+
+    .empty:empty {
+      display: none;
+    }
+
+    @media (max-width: 720px) {
+      .map-app {
+        align-items: start;
+        padding: 14px;
+      }
+
+      .map-stage {
+        width: 100%;
+        margin-top: 8px;
+      }
+
+      .detail {
+        position: fixed;
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        width: auto;
+        max-height: 48vh;
+        overflow: auto;
+        padding: 18px;
+      }
+
+      .detail h1 {
+        font-size: 21px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="map-app">
+    <section class="map-stage" id="mapStage" aria-label="르노 대리점 지도">
+      <svg class="base-map" viewBox="0 0 720 760" role="img" aria-label="서울, 인천, 경기, 강원 권역 지도">
+        <path class="region gangwon" d="M435 67 C515 50 604 84 663 139 C694 168 690 216 666 257 C640 302 641 350 661 393 C685 444 646 504 598 534 C545 566 482 547 441 510 C402 475 353 463 309 439 C263 414 245 362 258 310 C270 262 303 225 329 183 C354 144 376 83 435 67 Z" />
+        <path class="region gyeonggi" d="M229 144 C289 111 367 124 420 171 C468 213 481 281 458 339 C435 396 384 438 325 461 C274 481 217 479 170 452 C124 426 93 379 78 328 C63 278 77 224 111 187 C143 152 183 169 229 144 Z" />
+        <path class="region incheon" d="M63 292 C82 260 122 253 148 274 C175 296 168 334 139 354 C104 380 61 365 46 330 C40 316 48 305 63 292 Z" />
+        <path class="region seoul" d="M230 289 C253 272 286 275 309 293 C329 309 330 337 311 354 C286 376 248 373 226 350 C208 330 209 305 230 289 Z" />
+        <path class="coast" d="M52 240 C25 301 28 373 75 428 C121 482 198 508 269 500" />
+
+        <text class="label" x="504" y="244">강원</text>
+        <text class="label" x="210" y="222">경기</text>
+        <text class="label" x="236" y="331">서울</text>
+        <text class="label" x="64" y="326">인천</text>
+      </svg>
+
+      <div class="empty" id="status">대리점 정보를 불러오는 중입니다.</div>
+    </section>
+
+    <article class="detail" id="detail" hidden>
+      <h1 id="detailName"></h1>
+
+      <dl class="info">
+        <div>
+          <dt>주소</dt>
+          <dd id="detailAddress"></dd>
+        </div>
+        <div>
+          <dt>전화번호</dt>
+          <dd id="detailPhone"></dd>
+        </div>
+        <div>
+          <dt>오시는 길</dt>
+          <dd id="detailDirections"></dd>
+        </div>
+      </dl>
+
+      <p class="description" id="detailDescription"></p>
+
+      <div class="actions" id="detailActions"></div>
+    </article>
+  </main>
+
+  <script>
+    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwKxHf3rmSjGrfFRpp-VVH1hJs3M7gK0NPFS1UX-Xgyl1ULHU4bhiT6nLM8YbwuD_hrHw/exec";
+
+    const bounds = {
+      minLat: 36.85,
+      maxLat: 38.65,
+      minLng: 126.05,
+      maxLng: 129.55
+    };
+
+    const stage = document.querySelector("#mapStage");
+    const status = document.querySelector("#status");
+    const detail = document.querySelector("#detail");
+    const detailName = document.querySelector("#detailName");
+    const detailAddress = document.querySelector("#detailAddress");
+    const detailPhone = document.querySelector("#detailPhone");
+    const detailDirections = document.querySelector("#detailDirections");
+    const detailDescription = document.querySelector("#detailDescription");
+    const detailActions = document.querySelector("#detailActions");
+
+    let activePin = null;
+
+    loadDealers()
+      .then((dealers) => {
+        const visibleDealers = dealers.filter(isInsideBounds);
+
+        if (!visibleDealers.length) {
+          status.textContent = "표시할 대리점 좌표가 없습니다. Apps Script 응답에 lat, lng가 있는지 확인해주세요.";
+          return;
+        }
+
+        status.textContent = "";
+        renderPins(visibleDealers);
+      })
+      .catch((error) => {
+        status.textContent = "대리점 정보를 불러오지 못했습니다. Apps Script 배포 URL과 접근 권한을 확인해주세요.";
+        console.error(error);
+      });
+
+    async function loadDealers() {
+      try {
+        const response = await fetch(SHEET_API_URL, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const payload = await response.json();
+        return normalizePayload(payload);
+      } catch (error) {
+        const payload = await loadJsonp(SHEET_API_URL);
+        return normalizePayload(payload);
+      }
+    }
+
+    function loadJsonp(url) {
+      return new Promise((resolve, reject) => {
+        const callbackName = `dealerMap_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const script = document.createElement("script");
+        const src = new URL(url);
+
+        src.searchParams.set("callback", callbackName);
+
+        window[callbackName] = (payload) => {
+          delete window[callbackName];
+          script.remove();
+          resolve(payload);
+        };
+
+        script.onerror = () => {
+          delete window[callbackName];
+          script.remove();
+          reject(new Error("JSONP load failed"));
+        };
+
+        script.src = src.toString();
+        document.head.appendChild(script);
+      });
+    }
+
+    function normalizePayload(payload) {
+      const rows = Array.isArray(payload) ? payload : payload.dealers;
+      if (!Array.isArray(rows)) return [];
+
+      return rows
+        .map((dealer, index) => ({
+          id: dealer.id || `dealer-${index + 1}`,
+          category: clean(dealer.category),
+          region: clean(dealer.region || dealer.category),
+          name: clean(dealer.name),
+          address: clean(dealer.address),
+          phone: clean(dealer.phone),
+          directions: clean(dealer.directions),
+          description: clean(dealer.description),
+          testDriveUrl: clean(dealer.testDriveUrl),
+          eventUrl: clean(dealer.eventUrl),
+          lat: Number(dealer.lat),
+          lng: Number(dealer.lng)
+        }))
+        .filter((dealer) => dealer.name && Number.isFinite(dealer.lat) && Number.isFinite(dealer.lng));
+    }
+
+    function renderPins(dealers) {
+      dealers.forEach((dealer) => {
+        const position = project(dealer);
+
+        const pin = document.createElement("button");
+        const label = document.createElement("div");
+
+        pin.type = "button";
+        pin.className = "pin";
+        pin.style.left = `${position.x}%`;
+        pin.style.top = `${position.y}%`;
+        pin.setAttribute("aria-label", `${dealer.name} 상세보기`);
+        pin.addEventListener("click", () => showDealer(dealer, pin));
+
+        label.className = "pin-label";
+        label.textContent = dealer.name;
+        label.style.left = `${position.x}%`;
+        label.style.top = `${position.y}%`;
+
+        stage.append(pin, label);
+      });
+    }
+
+    function showDealer(dealer, pin) {
+      if (activePin) activePin.classList.remove("active");
+
+      activePin = pin;
+      activePin.classList.add("active");
+
+      detailName.textContent = dealer.name;
+      detailAddress.textContent = dealer.address || "-";
+      detailPhone.textContent = dealer.phone || "-";
+      detailDirections.textContent = dealer.directions || "-";
+      detailDescription.textContent = dealer.description || "";
+
+      detailActions.innerHTML = "";
+
+      if (dealer.testDriveUrl) {
+        detailActions.append(createLink("시승 신청하기", dealer.testDriveUrl, "test-drive"));
+      }
+
+      if (dealer.eventUrl) {
+        detailActions.append(createLink("진행중인 이벤트", dealer.eventUrl, "event"));
+      }
+
+      detail.hidden = false;
+    }
+
+    function createLink(text, href, className) {
+      const link = document.createElement("a");
+
+      link.className = className;
+      link.href = href;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = text;
+
+      return link;
+    }
+
+    function project(dealer) {
+      const x = ((dealer.lng - bounds.minLng) / (bounds.maxLng - bounds.minLng)) * 100;
+      const y = ((bounds.maxLat - dealer.lat) / (bounds.maxLat - bounds.minLat)) * 100;
+
+      return {
+        x: clamp(x, 2, 98),
+        y: clamp(y, 2, 98)
+      };
+    }
+
+    function isInsideBounds(dealer) {
+      return dealer.lat >= bounds.minLat
+        && dealer.lat <= bounds.maxLat
+        && dealer.lng >= bounds.minLng
+        && dealer.lng <= bounds.maxLng;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function clean(value) {
+      return String(value || "").trim();
+    }
+  </script>
+</body>
+</html>
