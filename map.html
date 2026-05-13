@@ -15,7 +15,7 @@
       --ink: #15171a;
       --muted: #666;
       --pin: #ffcf00;
-      --panel: rgba(255, 255, 255, 0.97);
+      --panel: #fff;
       --shadow: 0 16px 45px rgba(0, 0, 0, 0.22);
     }
 
@@ -27,48 +27,56 @@
     body {
       margin: 0;
       min-height: 100%;
-      background: transparent;
+      background: #fff;
       color: var(--ink);
       font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", Arial, sans-serif;
     }
 
     .map-app {
       position: relative;
-      width: 100%;
       min-height: 100vh;
-      background: transparent;
-      overflow: hidden;
+      padding: 34px 20px;
+      background: #fff;
     }
 
     .map-title {
-      position: absolute;
-      left: 50%;
-      top: 24px;
-      z-index: 20;
-      width: min(920px, calc(100% - 32px));
-      margin: 0;
+      margin: 0 auto 24px;
+      width: min(1120px, 100%);
       color: #15171a;
-      font-size: clamp(26px, 4vw, 46px);
+      font-size: clamp(28px, 4vw, 48px);
       font-weight: 900;
       line-height: 1.18;
       letter-spacing: 0;
       text-align: center;
-      transform: translateX(-50%);
-      pointer-events: none;
-      text-shadow: 0 2px 14px rgba(255, 255, 255, 0.95);
+    }
+
+    .map-shell {
+      position: relative;
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      background: #fff;
+    }
+
+    .map-viewport {
+      position: relative;
+      width: 100%;
+      height: min(680px, calc(100vh - 150px));
+      min-height: 560px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      background: #fff;
     }
 
     #vmap {
       width: 100%;
-      height: 100vh;
-      min-height: 560px;
-      background: transparent;
+      height: 100%;
+      background: #fff;
     }
 
     .dealer-marker {
       position: relative;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       pointer-events: auto;
     }
 
@@ -76,8 +84,8 @@
       position: absolute;
       left: 50%;
       bottom: 0;
-      width: 24px;
-      height: 24px;
+      width: 25px;
+      height: 25px;
       border: 2px solid var(--ink);
       border-radius: 50% 50% 50% 0;
       background: var(--pin);
@@ -106,11 +114,10 @@
     .dealer-name {
       position: absolute;
       left: 50%;
-      bottom: 32px;
+      bottom: 34px;
       z-index: 10;
       padding: 7px 10px;
       border: 1px solid rgba(0, 0, 0, 0.15);
-      border-radius: 6px;
       background: #fff;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
       color: var(--ink);
@@ -129,13 +136,13 @@
     }
 
     .dealer-popup {
+      position: absolute;
+      z-index: 100;
       width: min(360px, calc(100vw - 32px));
       padding: 20px;
       border: 1px solid rgba(0, 0, 0, 0.14);
-      border-radius: 8px;
       background: var(--panel);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
       user-select: text;
     }
 
@@ -198,7 +205,6 @@
       justify-content: center;
       padding: 0 14px;
       border: 1px solid #15171a;
-      border-radius: 6px;
       background: #fff;
       color: #15171a;
       font-size: 14px;
@@ -220,11 +226,10 @@
       position: absolute;
       left: 50%;
       bottom: 24px;
-      z-index: 50;
+      z-index: 120;
       width: min(360px, calc(100vw - 32px));
       padding: 14px 16px;
       border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 8px;
       background: #fff;
       box-shadow: var(--shadow);
       color: var(--muted);
@@ -239,25 +244,28 @@
     }
 
     @media (max-width: 720px) {
+      .map-app {
+        padding: 24px 12px;
+      }
+
       .map-title {
-        top: 18px;
-        width: calc(100% - 24px);
+        margin-bottom: 18px;
         font-size: 26px;
       }
 
-      #vmap {
-        height: 100vh;
+      .map-viewport {
+        height: calc(100vh - 118px);
         min-height: 620px;
       }
 
       .dealer-popup {
-        position: fixed !important;
+        position: fixed;
         left: 50% !important;
         top: 50% !important;
         width: calc(100vw - 28px);
         max-height: 62vh;
         overflow: auto;
-        transform: translate(-50%, -50%) !important;
+        transform: translate(-50%, -50%);
       }
 
       .dealer-popup h1 {
@@ -271,36 +279,42 @@
   <main class="map-app">
     <h1 class="map-title">르노코리아 티에이오토 공식 대리점</h1>
 
-    <div id="vmap"></div>
+    <section class="map-shell">
+      <div class="map-viewport" id="mapViewport">
+        <div id="vmap"></div>
+      </div>
 
-    <article class="dealer-popup" id="popup" hidden>
-      <h1 id="popupName"></h1>
+      <article class="dealer-popup" id="popup" hidden>
+        <h1 id="popupName"></h1>
 
-      <dl class="info">
-        <div>
-          <dt>주소</dt>
-          <dd id="popupAddress"></dd>
-        </div>
-        <div>
-          <dt>전화번호</dt>
-          <dd id="popupPhone"></dd>
-        </div>
-        <div>
-          <dt>오시는 길</dt>
-          <dd id="popupDirections"></dd>
-        </div>
-      </dl>
+        <dl class="info">
+          <div>
+            <dt>주소</dt>
+            <dd id="popupAddress"></dd>
+          </div>
+          <div>
+            <dt>전화번호</dt>
+            <dd id="popupPhone"></dd>
+          </div>
+          <div>
+            <dt>오시는 길</dt>
+            <dd id="popupDirections"></dd>
+          </div>
+        </dl>
 
-      <p class="description" id="popupDescription"></p>
-      <div class="actions" id="popupActions"></div>
-    </article>
+        <p class="description" id="popupDescription"></p>
+        <div class="actions" id="popupActions"></div>
+      </article>
 
-    <div class="status" id="status"></div>
+      <div class="status" id="status"></div>
+    </section>
   </main>
 
   <script>
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwKxHf3rmSjGrfFRpp-VVH1hJs3M7gK0NPFS1UX-Xgyl1ULHU4bhiT6nLM8YbwuD_hrHw/exec";
 
+    const mapShell = document.querySelector(".map-shell");
+    const mapViewport = document.querySelector("#mapViewport");
     const status = document.querySelector("#status");
     const popup = document.querySelector("#popup");
     const popupName = document.querySelector("#popupName");
@@ -311,10 +325,13 @@
     const popupActions = document.querySelector("#popupActions");
 
     let vmap = null;
-    let popupOverlay = null;
     let activePin = null;
+    let activeCoordinate = null;
 
     window.addEventListener("load", init);
+    window.addEventListener("resize", () => {
+      if (activeCoordinate) positionPopup(activeCoordinate);
+    });
 
     function init() {
       if (!window.vw || !window.ol) {
@@ -355,30 +372,23 @@
       const view = vmap.getView();
 
       if (isMobile()) {
-        view.setCenter(ol.proj.fromLonLat([127.15, 37.45]));
-        view.setZoom(9);
+        view.setCenter(ol.proj.fromLonLat([127.18, 37.52]));
+        view.setZoom(10);
       } else {
-        view.setCenter(ol.proj.fromLonLat([127.35, 37.55]));
-        view.setZoom(9);
+        view.setCenter(ol.proj.fromLonLat([127.45, 37.58]));
+        view.setZoom(10);
       }
-
-      popupOverlay = new ol.Overlay({
-        element: popup,
-        positioning: "center-left",
-        offset: [16, 0],
-        stopEvent: true
-      });
-
-      vmap.addOverlay(popupOverlay);
 
       vmap.on("singleclick", function(event) {
         const target = event.originalEvent && event.originalEvent.target;
 
-        if (target && target.closest && target.closest(".dealer-marker")) {
-          return;
-        }
+        if (target && target.closest && target.closest(".dealer-marker")) return;
 
         closePopup();
+      });
+
+      vmap.on("moveend", function() {
+        if (activeCoordinate) positionPopup(activeCoordinate);
       });
     }
 
@@ -485,6 +495,7 @@
       if (activePin) activePin.classList.remove("active");
 
       activePin = pin;
+      activeCoordinate = coordinate;
       activePin.classList.add("active");
 
       popupName.textContent = dealer.name;
@@ -506,19 +517,59 @@
       }
 
       popup.hidden = false;
-      popupOverlay.setPosition(coordinate);
 
       if (isMobile()) {
         vmap.getView().animate({
           center: coordinate,
-          duration: 250
+          duration: 220
         });
+        positionPopup(coordinate);
+        return;
       }
+
+      positionPopup(coordinate);
+    }
+
+    function positionPopup(coordinate) {
+      if (popup.hidden || !vmap) return;
+
+      if (isMobile()) {
+        popup.style.left = "50%";
+        popup.style.top = "50%";
+        return;
+      }
+
+      const pixel = vmap.getPixelFromCoordinate(coordinate);
+      const shellRect = mapShell.getBoundingClientRect();
+      const viewportRect = mapViewport.getBoundingClientRect();
+
+      popup.style.left = "0px";
+      popup.style.top = "0px";
+
+      const popupRect = popup.getBoundingClientRect();
+      const gap = 16;
+      const margin = 12;
+
+      let x = viewportRect.left - shellRect.left + pixel[0] + gap;
+      let y = viewportRect.top - shellRect.top + pixel[1] - popupRect.height / 2;
+
+      const maxX = shellRect.width - popupRect.width - margin;
+      const maxY = Math.max(margin, viewportRect.height - popupRect.height - margin);
+
+      if (x > maxX) {
+        x = viewportRect.left - shellRect.left + pixel[0] - popupRect.width - gap;
+      }
+
+      x = clamp(x, margin, maxX);
+      y = clamp(y, margin, maxY);
+
+      popup.style.left = `${x}px`;
+      popup.style.top = `${y}px`;
     }
 
     function closePopup() {
       popup.hidden = true;
-      popupOverlay.setPosition(undefined);
+      activeCoordinate = null;
 
       if (activePin) {
         activePin.classList.remove("active");
@@ -544,6 +595,10 @@
 
     function isMobile() {
       return window.matchMedia("(max-width: 720px)").matches;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
     }
 
     function clean(value) {
