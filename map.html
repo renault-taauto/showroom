@@ -14,6 +14,7 @@
     :root {
       --ink: #15171a;
       --muted: #666;
+      --line: rgba(0, 0, 0, 0.12);
       --pin: #ffcf00;
       --panel: #fff;
       --shadow: 0 16px 45px rgba(0, 0, 0, 0.22);
@@ -32,17 +33,21 @@
       font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", Arial, sans-serif;
     }
 
+    button,
+    a {
+      font: inherit;
+    }
+
     .map-app {
-      position: relative;
       min-height: 100vh;
       padding: 34px 20px;
       background: #fff;
     }
 
     .map-title {
+      width: min(1240px, 100%);
       margin: 0 auto 24px;
-      width: min(1120px, 100%);
-      color: #15171a;
+      color: var(--ink);
       font-size: clamp(28px, 4vw, 48px);
       font-weight: 900;
       line-height: 1.18;
@@ -50,10 +55,74 @@
       text-align: center;
     }
 
+    .locator-layout {
+      position: relative;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      width: min(1240px, 100%);
+      margin: 0 auto;
+      align-items: stretch;
+    }
+
+    .dealer-list {
+      height: min(680px, calc(100vh - 150px));
+      min-height: 560px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .list-inner {
+      padding: 16px;
+    }
+
+    .list-group + .list-group {
+      margin-top: 20px;
+    }
+
+    .list-group h2 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      line-height: 1.3;
+      font-weight: 900;
+    }
+
+    .dealer-item {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 11px 10px;
+      border: 1px solid transparent;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .dealer-item:hover,
+    .dealer-item.active {
+      border-color: var(--ink);
+      background: #fafafa;
+    }
+
+    .dealer-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .dealer-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .map-shell {
       position: relative;
-      width: min(1120px, 100%);
-      margin: 0 auto;
+      min-width: 0;
       background: #fff;
     }
 
@@ -63,7 +132,7 @@
       height: min(680px, calc(100vh - 150px));
       min-height: 560px;
       overflow: hidden;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--line);
       background: #fff;
     }
 
@@ -138,16 +207,36 @@
     .dealer-popup {
       position: absolute;
       z-index: 100;
-      width: min(360px, calc(100vw - 32px));
-      padding: 20px;
+      width: min(380px, calc(100vw - 32px));
       border: 1px solid rgba(0, 0, 0, 0.14);
       background: var(--panel);
       box-shadow: var(--shadow);
       user-select: text;
+      overflow: hidden;
     }
 
     .dealer-popup[hidden] {
       display: none;
+    }
+
+    .popup-photo {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #eee;
+      display: none;
+    }
+
+    .popup-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .popup-body {
+      padding: 20px;
     }
 
     .dealer-popup h1 {
@@ -204,16 +293,16 @@
       align-items: center;
       justify-content: center;
       padding: 0 14px;
-      border: 1px solid #15171a;
+      border: 1px solid var(--ink);
       background: #fff;
-      color: #15171a;
+      color: var(--ink);
       font-size: 14px;
       font-weight: 700;
       text-decoration: none;
     }
 
     .actions a:hover {
-      background: #15171a;
+      background: var(--ink);
       color: #fff;
     }
 
@@ -229,7 +318,7 @@
       z-index: 120;
       width: min(360px, calc(100vw - 32px));
       padding: 14px 16px;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--line);
       background: #fff;
       box-shadow: var(--shadow);
       color: var(--muted);
@@ -243,7 +332,7 @@
       display: none;
     }
 
-    @media (max-width: 720px) {
+    @media (max-width: 820px) {
       .map-app {
         padding: 24px 12px;
       }
@@ -253,9 +342,24 @@
         font-size: 26px;
       }
 
+      .locator-layout {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .dealer-list {
+        height: auto;
+        min-height: 0;
+        max-height: 220px;
+      }
+
+      .list-inner {
+        padding: 12px;
+      }
+
       .map-viewport {
-        height: calc(100vh - 118px);
-        min-height: 620px;
+        height: calc(100vh - 360px);
+        min-height: 520px;
       }
 
       .dealer-popup {
@@ -263,7 +367,7 @@
         left: 50% !important;
         top: 50% !important;
         width: calc(100vw - 28px);
-        max-height: 62vh;
+        max-height: 72vh;
         overflow: auto;
         transform: translate(-50%, -50%);
       }
@@ -279,44 +383,61 @@
   <main class="map-app">
     <h1 class="map-title">르노코리아 티에이오토 공식 대리점</h1>
 
-    <section class="map-shell">
-      <div class="map-viewport" id="mapViewport">
-        <div id="vmap"></div>
-      </div>
+    <section class="locator-layout">
+      <aside class="dealer-list" aria-label="대리점 목록">
+        <div class="list-inner" id="dealerList"></div>
+      </aside>
 
-      <article class="dealer-popup" id="popup" hidden>
-        <h1 id="popupName"></h1>
+      <section class="map-shell">
+        <div class="map-viewport" id="mapViewport">
+          <div id="vmap"></div>
+        </div>
 
-        <dl class="info">
-          <div>
-            <dt>주소</dt>
-            <dd id="popupAddress"></dd>
+        <article class="dealer-popup" id="popup" hidden>
+          <div class="popup-photo" id="popupPhoto">
+            <img id="popupImage" alt="" />
           </div>
-          <div>
-            <dt>전화번호</dt>
-            <dd id="popupPhone"></dd>
-          </div>
-          <div>
-            <dt>오시는 길</dt>
-            <dd id="popupDirections"></dd>
-          </div>
-        </dl>
 
-        <p class="description" id="popupDescription"></p>
-        <div class="actions" id="popupActions"></div>
-      </article>
+          <div class="popup-body">
+            <h1 id="popupName"></h1>
 
-      <div class="status" id="status"></div>
+            <dl class="info">
+              <div>
+                <dt>주소</dt>
+                <dd id="popupAddress"></dd>
+              </div>
+              <div>
+                <dt>전화번호</dt>
+                <dd id="popupPhone"></dd>
+              </div>
+              <div>
+                <dt>오시는 길</dt>
+                <dd id="popupDirections"></dd>
+              </div>
+            </dl>
+
+            <p class="description" id="popupDescription"></p>
+            <div class="actions" id="popupActions"></div>
+          </div>
+        </article>
+
+        <div class="status" id="status"></div>
+      </section>
     </section>
   </main>
 
   <script>
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwKxHf3rmSjGrfFRpp-VVH1hJs3M7gK0NPFS1UX-Xgyl1ULHU4bhiT6nLM8YbwuD_hrHw/exec";
 
+    const groupOrder = ["서울 대리점", "경기 대리점", "인천 대리점", "강원 대리점"];
+
+    const dealerList = document.querySelector("#dealerList");
     const mapShell = document.querySelector(".map-shell");
     const mapViewport = document.querySelector("#mapViewport");
     const status = document.querySelector("#status");
     const popup = document.querySelector("#popup");
+    const popupPhoto = document.querySelector("#popupPhoto");
+    const popupImage = document.querySelector("#popupImage");
     const popupName = document.querySelector("#popupName");
     const popupAddress = document.querySelector("#popupAddress");
     const popupPhone = document.querySelector("#popupPhone");
@@ -327,6 +448,9 @@
     let vmap = null;
     let activePin = null;
     let activeCoordinate = null;
+    let activeListItem = null;
+    let markerById = new Map();
+    let dealerById = new Map();
 
     window.addEventListener("load", init);
     window.addEventListener("resize", () => {
@@ -349,6 +473,7 @@
           }
 
           status.textContent = "";
+          renderList(dealers);
           renderMarkers(dealers);
         })
         .catch((error) => {
@@ -372,18 +497,16 @@
       const view = vmap.getView();
 
       if (isMobile()) {
-        view.setCenter(ol.proj.fromLonLat([127.18, 37.52]));
+        view.setCenter(ol.proj.fromLonLat([127.15, 37.55]));
         view.setZoom(10);
       } else {
-        view.setCenter(ol.proj.fromLonLat([127.45, 37.58]));
+        view.setCenter(ol.proj.fromLonLat([127.42, 37.6]));
         view.setZoom(10);
       }
 
       vmap.on("singleclick", function(event) {
         const target = event.originalEvent && event.originalEvent.target;
-
         if (target && target.closest && target.closest(".dealer-marker")) return;
-
         closePopup();
       });
 
@@ -393,16 +516,8 @@
     }
 
     async function loadDealers() {
-      try {
-        const response = await fetch(SHEET_API_URL, { cache: "no-store" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const payload = await response.json();
-        return normalizePayload(payload);
-      } catch (error) {
-        const payload = await loadJsonp(SHEET_API_URL);
-        return normalizePayload(payload);
-      }
+      const payload = await loadJsonp(SHEET_API_URL);
+      return normalizePayload(payload);
     }
 
     function loadJsonp(url) {
@@ -446,16 +561,62 @@
           description: clean(dealer.description),
           testDriveUrl: clean(dealer.testDriveUrl),
           eventUrl: clean(dealer.eventUrl),
+          imageUrl: normalizeImageUrl(clean(dealer.imageUrl || dealer.photoUrl || dealer.image)),
           lat: Number(dealer.lat),
           lng: Number(dealer.lng)
         }))
         .filter((dealer) => dealer.name && Number.isFinite(dealer.lat) && Number.isFinite(dealer.lng));
     }
 
+    function renderList(dealers) {
+      dealerList.innerHTML = "";
+
+      const grouped = new Map();
+      dealers.forEach((dealer) => {
+        const key = dealer.category || dealer.region || "기타";
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(dealer);
+      });
+
+      const orderedGroups = [
+        ...groupOrder.filter((group) => grouped.has(group)),
+        ...[...grouped.keys()].filter((group) => !groupOrder.includes(group))
+      ];
+
+      orderedGroups.forEach((group) => {
+        const section = document.createElement("section");
+        section.className = "list-group";
+
+        const title = document.createElement("h2");
+        title.textContent = group;
+        section.append(title);
+
+        grouped.get(group).forEach((dealer) => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "dealer-item";
+          item.dataset.dealerId = dealer.id;
+          item.innerHTML = `
+            <strong>${escapeHtml(dealer.name)}</strong>
+            <span>${escapeHtml(dealer.address)}</span>
+          `;
+
+          item.addEventListener("click", () => focusDealer(dealer.id));
+
+          section.append(item);
+        });
+
+        dealerList.append(section);
+      });
+    }
+
     function renderMarkers(dealers) {
       dealers.forEach((dealer) => {
         const coordinate = ol.proj.fromLonLat([dealer.lng, dealer.lat]);
         const marker = createMarkerElement(dealer);
+
+        dealerById.set(dealer.id, { dealer, coordinate });
+        markerById.set(dealer.id, marker);
 
         const overlay = new ol.Overlay({
           element: marker,
@@ -491,18 +652,52 @@
       return marker;
     }
 
+    function focusDealer(id) {
+      const entry = dealerById.get(id);
+      const marker = markerById.get(id);
+      if (!entry || !marker) return;
+
+      const view = vmap.getView();
+      const targetZoom = Math.max(view.getZoom(), isMobile() ? 12 : 11);
+
+      view.animate({
+        center: entry.coordinate,
+        zoom: targetZoom,
+        duration: 280
+      });
+
+      showDealer(entry.dealer, entry.coordinate, marker.querySelector(".dealer-pin"));
+    }
+
     function showDealer(dealer, coordinate, pin) {
       if (activePin) activePin.classList.remove("active");
+      if (activeListItem) activeListItem.classList.remove("active");
 
       activePin = pin;
       activeCoordinate = coordinate;
       activePin.classList.add("active");
+
+      activeListItem = dealerList.querySelector(`[data-dealer-id="${CSS.escape(dealer.id)}"]`);
+      if (activeListItem) {
+        activeListItem.classList.add("active");
+        activeListItem.scrollIntoView({ block: "nearest" });
+      }
 
       popupName.textContent = dealer.name;
       popupAddress.textContent = dealer.address || "-";
       popupPhone.textContent = dealer.phone || "-";
       popupDirections.textContent = dealer.directions || "-";
       popupDescription.textContent = dealer.description || "";
+
+      if (dealer.imageUrl) {
+        popupPhoto.style.display = "block";
+        popupImage.src = dealer.imageUrl;
+        popupImage.alt = `${dealer.name} 사진`;
+      } else {
+        popupPhoto.style.display = "none";
+        popupImage.removeAttribute("src");
+        popupImage.alt = "";
+      }
 
       popupActions.innerHTML = "";
 
@@ -523,8 +718,6 @@
           center: coordinate,
           duration: 220
         });
-        positionPopup(coordinate);
-        return;
       }
 
       positionPopup(coordinate);
@@ -575,6 +768,11 @@
         activePin.classList.remove("active");
         activePin = null;
       }
+
+      if (activeListItem) {
+        activeListItem.classList.remove("active");
+        activeListItem = null;
+      }
     }
 
     function createLink(text, href) {
@@ -593,8 +791,19 @@
       return button;
     }
 
+    function normalizeImageUrl(url) {
+      if (!url) return "";
+
+      const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+      if (driveMatch) {
+        return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+      }
+
+      return url;
+    }
+
     function isMobile() {
-      return window.matchMedia("(max-width: 720px)").matches;
+      return window.matchMedia("(max-width: 820px)").matches;
     }
 
     function clamp(value, min, max) {
@@ -603,6 +812,16 @@
 
     function clean(value) {
       return String(value || "").trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
     }
   </script>
 </body>
