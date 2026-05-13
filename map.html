@@ -8,7 +8,6 @@
   <script
     type="text/javascript"
     src="https://map.vworld.kr/js/vworldMapInit.js.do?version=2.0&apiKey=F92B09E4-9BE5-3A71-87D1-35D29ABF10E6"
-    defer
   ></script>
 
   <style>
@@ -33,7 +32,6 @@
 
     button, a { font: inherit; }
 
-    /* ── Layout ── */
     .map-app {
       min-height: 100vh;
       padding: 34px 20px;
@@ -60,7 +58,6 @@
       align-items: stretch;
     }
 
-    /* ── Dealer List ── */
     .dealer-list {
       height: min(680px, calc(100vh - 150px));
       min-height: 560px;
@@ -73,7 +70,6 @@
       padding: 16px;
     }
 
-    /* ── Accordion Group ── */
     .list-group {
       border: 1px solid var(--line);
       margin-bottom: 8px;
@@ -121,7 +117,6 @@
       max-height: 2000px;
     }
 
-    /* ── Dealer Item ── */
     .dealer-item {
       display: block;
       width: 100%;
@@ -157,7 +152,6 @@
       line-height: 1.45;
     }
 
-    /* ── Map Shell ── */
     .map-shell {
       position: relative;
       min-width: 0;
@@ -179,7 +173,6 @@
       height: 100%;
     }
 
-    /* ── Marker ── */
     .dealer-marker {
       position: relative;
       width: 30px;
@@ -241,7 +234,6 @@
 
     .dealer-marker:hover .dealer-name { opacity: 1; }
 
-    /* ── Popup ── */
     .dealer-popup {
       position: absolute;
       z-index: 100;
@@ -255,7 +247,6 @@
 
     .dealer-popup[hidden] { display: none; }
 
-    /* Photo — 16:9, cropped to popup width */
     .popup-photo {
       display: none;
       width: 100%;
@@ -346,7 +337,6 @@
       cursor: not-allowed;
     }
 
-    /* ── Skeleton ── */
     .skeleton-list { padding: 16px; }
 
     .skeleton-group { margin-bottom: 10px; }
@@ -374,7 +364,6 @@
       100% { background-position: -200% 0; }
     }
 
-    /* ── Status ── */
     .status {
       position: absolute;
       left: 50%;
@@ -394,7 +383,6 @@
 
     .status:empty { display: none; }
 
-    /* ── Mobile ── */
     @media (max-width: 820px) {
       .map-app { padding: 24px 12px; }
 
@@ -440,7 +428,6 @@
     <section class="locator-layout">
       <aside class="dealer-list" aria-label="대리점 목록">
         <div class="list-inner" id="dealerList">
-          <!-- skeleton -->
           <div class="skeleton-list" id="skeletonList">
             <div class="skeleton-group">
               <div class="skeleton-header"></div>
@@ -525,7 +512,6 @@
     const markerById = new Map();
     const dealerById = new Map();
 
-    /* ── Init ── */
     function waitForVworld(timeout = 8000) {
       return new Promise((resolve, reject) => {
         if (window.vw && window.ol) { resolve(); return; }
@@ -540,7 +526,6 @@
     }
 
     async function init() {
-      // 지도 초기화와 데이터 로드를 병렬 실행
       const [, dealers] = await Promise.all([
         waitForVworld().then(createMap).catch((e) => {
           status.textContent = "VWorld 지도를 불러오지 못했습니다. 인증키와 도메인 설정을 확인해주세요.";
@@ -570,7 +555,6 @@
       if (activeCoordinate) positionPopup(activeCoordinate);
     });
 
-    /* ── Map ── */
     function createMap() {
       vw.ol3.MapOptions = {
         basemapType: vw.ol3.BasemapType.GRAPHIC,
@@ -603,7 +587,6 @@
       });
     }
 
-    /* ── Data ── */
     async function loadDealers() {
       const payload = await loadJsonp(SHEET_API_URL);
       return normalizePayload(payload);
@@ -664,7 +647,6 @@
         .filter((d) => d.name && Number.isFinite(d.lat) && Number.isFinite(d.lng));
     }
 
-    /* ── List (Accordion) ── */
     function renderList(dealers) {
       dealerList.innerHTML = "";
 
@@ -684,13 +666,11 @@
         const section = document.createElement("section");
         section.className = "list-group";
 
-        // Toggle button
         const toggle = document.createElement("button");
         toggle.type = "button";
         toggle.className = "group-toggle" + (gIdx === 0 ? " open" : "");
         toggle.innerHTML = `<span>${escapeHtml(group)}</span><span class="arrow">▼</span>`;
 
-        // Body
         const body = document.createElement("div");
         body.className = "group-body" + (gIdx === 0 ? " open" : "");
 
@@ -718,7 +698,6 @@
       });
     }
 
-    /* ── Markers ── */
     function renderMarkers(dealers) {
       dealers.forEach((dealer) => {
         const coordinate = ol.proj.fromLonLat([dealer.lng, dealer.lat]);
@@ -760,7 +739,6 @@
       return marker;
     }
 
-    /* ── Focus: list → pin (지도 이동 + 팝업) ── */
     function focusDealer(id) {
       const entry = dealerById.get(id);
       const marker = markerById.get(id);
@@ -769,13 +747,11 @@
       const view = vmap.getView();
       const targetZoom = Math.max(view.getZoom(), isMobile() ? 13 : 14);
 
-      // 지도가 이동 완료된 뒤 팝업 위치 재계산
       view.animate({ center: entry.coordinate, zoom: targetZoom, duration: 320 }, () => {
         showDealer(entry.dealer, entry.coordinate, marker.querySelector(".dealer-pin"));
       });
     }
 
-    /* ── Show Popup ── */
     function showDealer(dealer, coordinate, pin) {
       if (activePin) activePin.classList.remove("active");
       if (activeListItem) activeListItem.classList.remove("active");
@@ -786,7 +762,6 @@
 
       activeListItem = dealerList.querySelector(`[data-dealer-id="${CSS.escape(dealer.id)}"]`);
       if (activeListItem) {
-        // 해당 그룹 아코디언이 닫혀 있으면 열기
         const groupBody = activeListItem.closest(".group-body");
         if (groupBody && !groupBody.classList.contains("open")) {
           groupBody.classList.add("open");
@@ -826,7 +801,6 @@
       positionPopup(coordinate);
     }
 
-    /* ── Popup position ── */
     function positionPopup(coordinate) {
       if (popup.hidden || !vmap) return;
       if (isMobile()) return;
@@ -863,7 +837,6 @@
       if (activeListItem) { activeListItem.classList.remove("active"); activeListItem = null; }
     }
 
-    /* ── Helpers ── */
     function createLink(text, href) {
       const a = document.createElement("a");
       a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = text;
