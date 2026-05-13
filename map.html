@@ -4,20 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>르노 대리점 지도</title>
-
   <style>
     :root {
       --ink: #15171a;
       --muted: #666;
-      --line: #15171a;
       --pin: #ffcf00;
-      --panel: rgba(255, 255, 255, 0.96);
+      --panel: rgba(255, 255, 255, 0.97);
       --shadow: 0 16px 45px rgba(0, 0, 0, 0.2);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html,
     body {
@@ -29,25 +25,33 @@
     }
 
     button,
-    a {
-      font: inherit;
-    }
+    a { font: inherit; }
 
     .map-app {
       position: relative;
-      min-height: 100vh;
       display: grid;
+      min-height: 100vh;
       place-items: center;
-      padding: 24px;
-      background: transparent;
       overflow: hidden;
+      background: transparent;
+      padding: 22px;
     }
 
     .map-stage {
       position: relative;
-      width: min(760px, 94vw);
-      aspect-ratio: 1027 / 702;
+      width: min(920px, 96vw);
+      aspect-ratio: 1030 / 590;
+      overflow: hidden;
       background: transparent;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .map-content {
+      position: absolute;
+      inset: 0;
+      transform-origin: 0 0;
+      will-change: transform;
     }
 
     .map-svg {
@@ -57,6 +61,34 @@
       height: 100%;
       overflow: visible;
       filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.12));
+      pointer-events: none;
+    }
+
+    .zoom-controls {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 40;
+      display: flex;
+      gap: 6px;
+    }
+
+    .zoom-controls button {
+      width: 38px;
+      height: 38px;
+      border: 1px solid #15171a;
+      border-radius: 6px;
+      background: #fff;
+      color: #15171a;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .zoom-controls button:hover {
+      background: #15171a;
+      color: #fff;
     }
 
     .pin {
@@ -87,14 +119,14 @@
 
     .pin:hover,
     .pin.active {
-      z-index: 7;
+      z-index: 8;
       scale: 1.18;
       box-shadow: 0 12px 26px rgba(0, 0, 0, 0.34);
     }
 
     .pin-name {
       position: absolute;
-      z-index: 8;
+      z-index: 9;
       padding: 7px 10px;
       border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 6px;
@@ -111,9 +143,7 @@
       transition: opacity 0.12s ease;
     }
 
-    .pin:hover + .pin-name {
-      opacity: 1;
-    }
+    .pin:hover + .pin-name { opacity: 1; }
 
     .popup {
       position: absolute;
@@ -126,15 +156,14 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
       transform: translate(16px, -50%);
+      user-select: text;
     }
 
     .popup.left {
       transform: translate(calc(-100% - 16px), -50%);
     }
 
-    .popup[hidden] {
-      display: none;
-    }
+    .popup[hidden] { display: none; }
 
     .popup h1 {
       margin: 0 0 14px;
@@ -227,18 +256,11 @@
       transform: translate(-50%, -50%);
     }
 
-    .status:empty {
-      display: none;
-    }
+    .status:empty { display: none; }
 
     @media (max-width: 720px) {
-      .map-app {
-        padding: 12px;
-      }
-
-      .map-stage {
-        width: 100%;
-      }
+      .map-app { padding: 10px; }
+      .map-stage { width: 100%; }
 
       .popup,
       .popup.left {
@@ -253,57 +275,53 @@
         transform: none;
       }
 
-      .popup h1 {
-        font-size: 21px;
-      }
+      .popup h1 { font-size: 21px; }
     }
   </style>
 </head>
-
 <body>
   <main class="map-app">
     <section class="map-stage" id="mapStage" aria-label="르노 대리점 지도">
-      <svg
-        class="map-svg"
-        viewBox="266 0 1027 702"
-        role="img"
-        aria-label="대한민국 수도권 및 강원 권역 지도"
-      >
-        <!-- 지도 출처: Wikimedia Commons, South Korea location map.svg -->
-        <image
-          href="https://upload.wikimedia.org/wikipedia/commons/b/b2/South_Korea_location_map.svg"
-          x="0"
-          y="0"
-          width="1771.627"
-          height="1672.414"
-          preserveAspectRatio="xMidYMid meet"
-        ></image>
-      </svg>
+      <div class="map-content" id="mapContent">
+        <svg class="map-svg" viewBox="300 0 1030 590" role="img" aria-label="대한민국 북부 지도">
+          <image
+            href="https://upload.wikimedia.org/wikipedia/commons/b/b2/South_Korea_location_map.svg"
+            x="0"
+            y="0"
+            width="1771.627"
+            height="1672.414"
+            preserveAspectRatio="none"
+          ></image>
+        </svg>
+
+        <article class="popup" id="popup" hidden>
+          <h1 id="popupName"></h1>
+          <dl class="info">
+            <div>
+              <dt>주소</dt>
+              <dd id="popupAddress"></dd>
+            </div>
+            <div>
+              <dt>전화번호</dt>
+              <dd id="popupPhone"></dd>
+            </div>
+            <div>
+              <dt>오시는 길</dt>
+              <dd id="popupDirections"></dd>
+            </div>
+          </dl>
+          <p class="description" id="popupDescription"></p>
+          <div class="actions" id="popupActions"></div>
+        </article>
+      </div>
+
+      <div class="zoom-controls" aria-label="지도 확대 축소">
+        <button type="button" id="zoomIn" aria-label="확대">+</button>
+        <button type="button" id="zoomOut" aria-label="축소">-</button>
+        <button type="button" id="zoomReset" aria-label="초기화">↺</button>
+      </div>
 
       <div class="status" id="status">대리점 정보를 불러오는 중입니다.</div>
-
-      <article class="popup" id="popup" hidden>
-        <h1 id="popupName"></h1>
-
-        <dl class="info">
-          <div>
-            <dt>주소</dt>
-            <dd id="popupAddress"></dd>
-          </div>
-          <div>
-            <dt>전화번호</dt>
-            <dd id="popupPhone"></dd>
-          </div>
-          <div>
-            <dt>오시는 길</dt>
-            <dd id="popupDirections"></dd>
-          </div>
-        </dl>
-
-        <p class="description" id="popupDescription"></p>
-
-        <div class="actions" id="popupActions"></div>
-      </article>
     </section>
   </main>
 
@@ -313,10 +331,10 @@
     const mapInfo = {
       imageWidth: 1771.627,
       imageHeight: 1672.414,
-      cropX: 266,
+      cropX: 300,
       cropY: 0,
-      cropWidth: 1027,
-      cropHeight: 702,
+      cropWidth: 1030,
+      cropHeight: 590,
       minLat: 33.0,
       maxLat: 38.9,
       minLng: 124.5,
@@ -324,6 +342,7 @@
     };
 
     const stage = document.querySelector("#mapStage");
+    const content = document.querySelector("#mapContent");
     const status = document.querySelector("#status");
     const popup = document.querySelector("#popup");
     const popupName = document.querySelector("#popupName");
@@ -333,14 +352,54 @@
     const popupDescription = document.querySelector("#popupDescription");
     const popupActions = document.querySelector("#popupActions");
 
-    let activePin = null;
+    const view = { scale: 1, x: 0, y: 0 };
 
-    stage.addEventListener("click", () => {
+    let activePin = null;
+    let isDragging = false;
+    let didDrag = false;
+    let dragStart = { x: 0, y: 0 };
+    let viewStart = { x: 0, y: 0 };
+
+    stage.addEventListener("pointerdown", startDrag);
+    stage.addEventListener("pointermove", moveDrag);
+    stage.addEventListener("pointerup", endDrag);
+    stage.addEventListener("pointercancel", endDrag);
+
+    stage.addEventListener("click", (event) => {
+      if (didDrag) {
+        didDrag = false;
+        return;
+      }
+
+      if (
+        event.target.closest(".pin") ||
+        event.target.closest(".popup") ||
+        event.target.closest(".zoom-controls")
+      ) {
+        return;
+      }
+
       closePopup();
     });
 
-    popup.addEventListener("click", (event) => {
+    popup.addEventListener("click", (event) => event.stopPropagation());
+
+    document.querySelector("#zoomIn").addEventListener("click", (event) => {
       event.stopPropagation();
+      zoomBy(1.25);
+    });
+
+    document.querySelector("#zoomOut").addEventListener("click", (event) => {
+      event.stopPropagation();
+      zoomBy(0.8);
+    });
+
+    document.querySelector("#zoomReset").addEventListener("click", (event) => {
+      event.stopPropagation();
+      view.scale = 1;
+      view.x = 0;
+      view.y = 0;
+      applyTransform();
     });
 
     loadDealers()
@@ -364,7 +423,6 @@
       try {
         const response = await fetch(SHEET_API_URL, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
         const payload = await response.json();
         return normalizePayload(payload);
       } catch (error) {
@@ -423,7 +481,6 @@
     function renderPins(dealers) {
       dealers.forEach((dealer) => {
         const position = project(dealer);
-
         const pin = document.createElement("button");
         const label = document.createElement("div");
 
@@ -443,7 +500,7 @@
         label.style.left = `${position.x}%`;
         label.style.top = `${position.y}%`;
 
-        stage.append(pin, label);
+        content.append(pin, label);
       });
     }
 
@@ -505,19 +562,89 @@
     function project(dealer) {
       const imageX = ((dealer.lng - mapInfo.minLng) / (mapInfo.maxLng - mapInfo.minLng)) * mapInfo.imageWidth;
       const imageY = ((mapInfo.maxLat - dealer.lat) / (mapInfo.maxLat - mapInfo.minLat)) * mapInfo.imageHeight;
-
       const x = ((imageX - mapInfo.cropX) / mapInfo.cropWidth) * 100;
       const y = ((imageY - mapInfo.cropY) / mapInfo.cropHeight) * 100;
 
-      return {
-        x: clamp(x, 1, 99),
-        y: clamp(y, 1, 99)
-      };
+      return { x, y };
     }
 
     function isInsideCrop(dealer) {
       const position = project(dealer);
       return position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100;
+    }
+
+    function startDrag(event) {
+      if (
+        event.target.closest(".pin") ||
+        event.target.closest(".popup") ||
+        event.target.closest(".zoom-controls")
+      ) {
+        return;
+      }
+
+      isDragging = true;
+      didDrag = false;
+      dragStart = { x: event.clientX, y: event.clientY };
+      viewStart = { x: view.x, y: view.y };
+      stage.setPointerCapture(event.pointerId);
+    }
+
+    function moveDrag(event) {
+      if (!isDragging) return;
+
+      const dx = event.clientX - dragStart.x;
+      const dy = event.clientY - dragStart.y;
+
+      if (Math.abs(dx) + Math.abs(dy) > 4) didDrag = true;
+
+      view.x = viewStart.x + dx;
+      view.y = viewStart.y + dy;
+      clampView();
+      applyTransform();
+    }
+
+    function endDrag(event) {
+      if (!isDragging) return;
+
+      isDragging = false;
+      stage.releasePointerCapture(event.pointerId);
+    }
+
+    function zoomBy(factor) {
+      const rect = stage.getBoundingClientRect();
+      const center = {
+        x: rect.width / 2,
+        y: rect.height / 2
+      };
+
+      const nextScale = clamp(view.scale * factor, 1, 4);
+      const ratio = nextScale / view.scale;
+
+      view.x = center.x - (center.x - view.x) * ratio;
+      view.y = center.y - (center.y - view.y) * ratio;
+      view.scale = nextScale;
+
+      clampView();
+      applyTransform();
+    }
+
+    function clampView() {
+      const rect = stage.getBoundingClientRect();
+      const scaledWidth = rect.width * view.scale;
+      const scaledHeight = rect.height * view.scale;
+
+      if (view.scale <= 1) {
+        view.x = 0;
+        view.y = 0;
+        return;
+      }
+
+      view.x = clamp(view.x, rect.width - scaledWidth, 0);
+      view.y = clamp(view.y, rect.height - scaledHeight, 0);
+    }
+
+    function applyTransform() {
+      content.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
     }
 
     function clamp(value, min, max) {
