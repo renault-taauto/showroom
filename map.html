@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>르노 대리점 지도</title>
 
+  <script
+    type="text/javascript"
+    src="https://map.vworld.kr/js/vworldMapInit.js.do?version=2.0&apiKey=0AF8F2A3-2F71-3FEC-9310-ADB256604DDE"
+  ></script>
+
   <style>
     :root {
       --ink: #15171a;
@@ -27,120 +32,64 @@
       font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", Arial, sans-serif;
     }
 
-    button,
-    a {
-      font: inherit;
-    }
-
     .map-app {
-      display: grid;
-      min-height: 100vh;
-      place-items: center;
-      overflow: hidden;
-      background: transparent;
-      padding: 20px;
-    }
-
-    .map-stage {
       position: relative;
-      width: min(900px, 96vw);
-      aspect-ratio: 520 / 450;
-      overflow: hidden;
-      background: transparent;
-      touch-action: none;
-      user-select: none;
-    }
-
-    .map-content,
-    .pin-layer {
-      position: absolute;
-      inset: 0;
-    }
-
-    .map-content {
-      transform-origin: 0 0;
-      will-change: transform;
-    }
-
-    .map-svg {
       width: 100%;
-      height: 100%;
-      overflow: visible;
-      filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.12));
-      pointer-events: none;
+      min-height: 100vh;
+      background: transparent;
+      overflow: hidden;
     }
 
-    .hint {
+    #vmap {
+      width: 100%;
+      height: 100vh;
+      min-height: 520px;
+      background: transparent;
+    }
+
+    .dealer-marker {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      pointer-events: auto;
+    }
+
+    .dealer-pin {
       position: absolute;
-      right: 12px;
-      top: 12px;
-      z-index: 30;
-      padding: 7px 10px;
-      border: 1px solid rgba(0, 0, 0, 0.14);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.92);
-      color: #444;
-      font-size: 12px;
-      line-height: 1;
-      pointer-events: none;
-    }
-
-    .reset {
-      position: absolute;
-      right: 12px;
-      top: 46px;
-      z-index: 30;
-      min-height: 34px;
-      padding: 0 10px;
-      border: 1px solid #15171a;
-      border-radius: 6px;
-      background: #fff;
-      color: #15171a;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .reset:hover {
-      background: #15171a;
-      color: #fff;
-    }
-
-    .pin {
-      position: absolute;
-      z-index: 5;
-      width: var(--pin-size, 24px);
-      height: var(--pin-size, 24px);
+      left: 50%;
+      bottom: 0;
+      width: 24px;
+      height: 24px;
       border: 2px solid var(--ink);
       border-radius: 50% 50% 50% 0;
       background: var(--pin);
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
       cursor: pointer;
-      transform: translate(-50%, -100%) rotate(-45deg);
-      transition: box-shadow 0.14s ease;
+      transform: translateX(-50%) rotate(-45deg);
     }
 
-    .pin::after {
+    .dealer-pin::after {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 30%;
-      height: 30%;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--ink);
       content: "";
       transform: translate(-50%, -50%);
     }
 
-    .pin:hover,
-    .pin.active {
-      z-index: 8;
+    .dealer-pin:hover,
+    .dealer-pin.active {
       box-shadow: 0 12px 26px rgba(0, 0, 0, 0.34);
     }
 
-    .pin-name {
+    .dealer-name {
       position: absolute;
-      z-index: 9;
+      left: 50%;
+      bottom: 32px;
+      z-index: 10;
       padding: 7px 10px;
       border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 6px;
@@ -153,17 +102,15 @@
       white-space: nowrap;
       opacity: 0;
       pointer-events: none;
-      transform: translate(-50%, -12px);
+      transform: translateX(-50%);
       transition: opacity 0.12s ease;
     }
 
-    .pin:hover + .pin-name {
+    .dealer-marker:hover .dealer-name {
       opacity: 1;
     }
 
-    .popup {
-      position: absolute;
-      z-index: 40;
+    .dealer-popup {
       width: min(360px, calc(100vw - 32px));
       padding: 20px;
       border: 1px solid rgba(0, 0, 0, 0.14);
@@ -171,19 +118,14 @@
       background: var(--panel);
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
-      transform: translate(16px, -50%);
       user-select: text;
     }
 
-    .popup.left {
-      transform: translate(calc(-100% - 16px), -50%);
-    }
-
-    .popup[hidden] {
+    .dealer-popup[hidden] {
       display: none;
     }
 
-    .popup h1 {
+    .dealer-popup h1 {
       margin: 0 0 14px;
       font-size: 25px;
       line-height: 1.25;
@@ -279,28 +221,17 @@
     }
 
     @media (max-width: 720px) {
-      .map-app {
-        padding: 10px;
+      #vmap {
+        min-height: 560px;
       }
 
-      .map-stage {
-        width: 100%;
-      }
-
-      .popup,
-      .popup.left {
-        position: fixed;
-        left: 12px !important;
-        right: 12px;
-        bottom: 12px;
-        top: auto !important;
-        width: auto;
+      .dealer-popup {
+        width: calc(100vw - 24px);
         max-height: 48vh;
         overflow: auto;
-        transform: none;
       }
 
-      .popup h1 {
+      .dealer-popup h1 {
         font-size: 21px;
       }
     }
@@ -309,69 +240,36 @@
 
 <body>
   <main class="map-app">
-    <section class="map-stage" id="mapStage" aria-label="르노 대리점 지도">
-      <div class="map-content" id="mapContent">
-        <svg class="map-svg" viewBox="120 80 520 450" role="img" aria-label="대한민국 북부 백지도">
-          <image
-            href="https://upload.wikimedia.org/wikipedia/commons/d/dc/Map_of_South_Korea-blank.svg"
-            x="0"
-            y="0"
-            width="800"
-            height="1200"
-            preserveAspectRatio="none"
-          ></image>
-        </svg>
-      </div>
+    <div id="vmap"></div>
 
-      <div class="pin-layer" id="pinLayer"></div>
+    <article class="dealer-popup" id="popup" hidden>
+      <h1 id="popupName"></h1>
 
-      <article class="popup" id="popup" hidden>
-        <h1 id="popupName"></h1>
+      <dl class="info">
+        <div>
+          <dt>주소</dt>
+          <dd id="popupAddress"></dd>
+        </div>
+        <div>
+          <dt>전화번호</dt>
+          <dd id="popupPhone"></dd>
+        </div>
+        <div>
+          <dt>오시는 길</dt>
+          <dd id="popupDirections"></dd>
+        </div>
+      </dl>
 
-        <dl class="info">
-          <div>
-            <dt>주소</dt>
-            <dd id="popupAddress"></dd>
-          </div>
-          <div>
-            <dt>전화번호</dt>
-            <dd id="popupPhone"></dd>
-          </div>
-          <div>
-            <dt>오시는 길</dt>
-            <dd id="popupDirections"></dd>
-          </div>
-        </dl>
+      <p class="description" id="popupDescription"></p>
+      <div class="actions" id="popupActions"></div>
+    </article>
 
-        <p class="description" id="popupDescription"></p>
-        <div class="actions" id="popupActions"></div>
-      </article>
-
-      <div class="hint">휠로 확대</div>
-      <button class="reset" type="button" id="resetView">초기화</button>
-      <div class="status" id="status">대리점 정보를 불러오는 중입니다.</div>
-    </section>
+    <div class="status" id="status">대리점 정보를 불러오는 중입니다.</div>
   </main>
 
   <script>
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwKxHf3rmSjGrfFRpp-VVH1hJs3M7gK0NPFS1UX-Xgyl1ULHU4bhiT6nLM8YbwuD_hrHw/exec";
 
-    const mapInfo = {
-      imageWidth: 800,
-      imageHeight: 1200,
-      cropX: 120,
-      cropY: 80,
-      cropWidth: 520,
-      cropHeight: 450,
-      minLat: 33.0,
-      maxLat: 38.9,
-      minLng: 124.5,
-      maxLng: 132.0
-    };
-
-    const stage = document.querySelector("#mapStage");
-    const mapContent = document.querySelector("#mapContent");
-    const pinLayer = document.querySelector("#pinLayer");
     const status = document.querySelector("#status");
     const popup = document.querySelector("#popup");
     const popupName = document.querySelector("#popupName");
@@ -381,71 +279,72 @@
     const popupDescription = document.querySelector("#popupDescription");
     const popupActions = document.querySelector("#popupActions");
 
-    const view = {
-      scale: 1,
-      x: 0,
-      y: 0
-    };
-
-    let pins = [];
+    let vmap = null;
+    let popupOverlay = null;
     let activePin = null;
-    let activeDealer = null;
-    let isDragging = false;
-    let didDrag = false;
-    let dragStart = { x: 0, y: 0 };
-    let viewStart = { x: 0, y: 0 };
 
-    stage.addEventListener("wheel", onWheel, { passive: false });
-    stage.addEventListener("pointerdown", startDrag);
-    stage.addEventListener("pointermove", moveDrag);
-    stage.addEventListener("pointerup", endDrag);
-    stage.addEventListener("pointercancel", endDrag);
+    window.addEventListener("load", init);
 
-    stage.addEventListener("click", (event) => {
-      if (didDrag) {
-        didDrag = false;
+    function init() {
+      if (!window.vw || !window.ol) {
+        status.textContent = "VWorld 지도를 불러오지 못했습니다. 인증키와 도메인 설정을 확인해주세요.";
         return;
       }
 
-      if (
-        event.target.closest(".pin") ||
-        event.target.closest(".popup") ||
-        event.target.closest(".reset")
-      ) {
-        return;
-      }
+      createMap();
 
-      closePopup();
-    });
+      loadDealers()
+        .then((dealers) => {
+          if (!dealers.length) {
+            status.textContent = "표시할 대리점 정보가 없습니다.";
+            return;
+          }
 
-    popup.addEventListener("click", (event) => event.stopPropagation());
+          status.textContent = "";
+          renderMarkers(dealers);
+        })
+        .catch((error) => {
+          status.textContent = "대리점 정보를 불러오지 못했습니다. Apps Script 배포 URL과 접근 권한을 확인해주세요.";
+          console.error(error);
+        });
+    }
 
-    document.querySelector("#resetView").addEventListener("click", (event) => {
-      event.stopPropagation();
-      view.scale = 1;
-      view.x = 0;
-      view.y = 0;
-      closePopup();
-      applyView();
-    });
+    function createMap() {
+      vw.ol3.MapOptions = {
+        basemapType: vw.ol3.BasemapType.GRAPHIC,
+        controlDensity: vw.ol3.DensityType.EMPTY,
+        interactionDensity: vw.ol3.DensityType.BASIC,
+        controlsAutoArrange: true,
+        homePosition: vw.ol3.CameraPosition,
+        initPosition: vw.ol3.CameraPosition
+      };
 
-    loadDealers()
-      .then((dealers) => {
-        const visibleDealers = dealers.filter(isInsideCrop);
+      vmap = new vw.ol3.Map("vmap", vw.ol3.MapOptions);
 
-        if (!visibleDealers.length) {
-          status.textContent = "표시할 대리점 좌표가 없습니다. Apps Script 응답에 lat, lng가 있는지 확인해주세요.";
+      const view = vmap.getView();
+
+      view.setCenter(ol.proj.fromLonLat([127.55, 37.65]));
+      view.setZoom(8);
+
+      popupOverlay = new ol.Overlay({
+        element: popup,
+        positioning: "center-left",
+        offset: [16, 0],
+        stopEvent: true
+      });
+
+      vmap.addOverlay(popupOverlay);
+
+      vmap.on("singleclick", function(event) {
+        const target = event.originalEvent && event.originalEvent.target;
+
+        if (target && target.closest && target.closest(".dealer-marker")) {
           return;
         }
 
-        status.textContent = "";
-        renderPins(visibleDealers);
-        applyView();
-      })
-      .catch((error) => {
-        status.textContent = "대리점 정보를 불러오지 못했습니다. Apps Script 배포 URL과 접근 권한을 확인해주세요.";
-        console.error(error);
+        closePopup();
       });
+    }
 
     async function loadDealers() {
       try {
@@ -507,36 +406,49 @@
         .filter((dealer) => dealer.name && Number.isFinite(dealer.lat) && Number.isFinite(dealer.lng));
     }
 
-    function renderPins(dealers) {
-      pins = dealers.map((dealer) => {
-        const base = project(dealer);
+    function renderMarkers(dealers) {
+      dealers.forEach((dealer) => {
+        const coordinate = ol.proj.fromLonLat([dealer.lng, dealer.lat]);
+        const marker = createMarkerElement(dealer);
 
-        const pin = document.createElement("button");
-        const label = document.createElement("div");
-
-        pin.type = "button";
-        pin.className = "pin";
-        pin.setAttribute("aria-label", `${dealer.name} 상세보기`);
-
-        label.className = "pin-name";
-        label.textContent = dealer.name;
-
-        pin.addEventListener("click", (event) => {
-          event.stopPropagation();
-          showDealer(dealer, pin, base);
+        const overlay = new ol.Overlay({
+          element: marker,
+          positioning: "bottom-center",
+          position: coordinate,
+          stopEvent: true
         });
 
-        pinLayer.append(pin, label);
+        marker.querySelector(".dealer-pin").addEventListener("click", (event) => {
+          event.stopPropagation();
+          showDealer(dealer, coordinate, marker.querySelector(".dealer-pin"));
+        });
 
-        return { dealer, base, pin, label };
+        vmap.addOverlay(overlay);
       });
     }
 
-    function showDealer(dealer, pin, base) {
+    function createMarkerElement(dealer) {
+      const marker = document.createElement("div");
+      marker.className = "dealer-marker";
+
+      const pin = document.createElement("button");
+      pin.type = "button";
+      pin.className = "dealer-pin";
+      pin.setAttribute("aria-label", `${dealer.name} 상세보기`);
+
+      const label = document.createElement("div");
+      label.className = "dealer-name";
+      label.textContent = dealer.name;
+
+      marker.append(pin, label);
+
+      return marker;
+    }
+
+    function showDealer(dealer, coordinate, pin) {
       if (activePin) activePin.classList.remove("active");
 
       activePin = pin;
-      activeDealer = { dealer, base };
       activePin.classList.add("active");
 
       popupName.textContent = dealer.name;
@@ -558,12 +470,12 @@
       }
 
       popup.hidden = false;
-      positionPopup(base);
+      popupOverlay.setPosition(coordinate);
     }
 
     function closePopup() {
       popup.hidden = true;
-      activeDealer = null;
+      popupOverlay.setPosition(undefined);
 
       if (activePin) {
         activePin.classList.remove("active");
@@ -585,143 +497,6 @@
       button.className = "disabled";
       button.textContent = text;
       return button;
-    }
-
-    function onWheel(event) {
-      event.preventDefault();
-
-      const rect = stage.getBoundingClientRect();
-      const pointer = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-      };
-
-      const factor = event.deltaY < 0 ? 1.18 : 0.85;
-      const nextScale = clamp(view.scale * factor, 1, 5);
-      const ratio = nextScale / view.scale;
-
-      view.x = pointer.x - (pointer.x - view.x) * ratio;
-      view.y = pointer.y - (pointer.y - view.y) * ratio;
-      view.scale = nextScale;
-
-      clampView();
-      applyView();
-    }
-
-    function startDrag(event) {
-      if (
-        event.target.closest(".pin") ||
-        event.target.closest(".popup") ||
-        event.target.closest(".reset")
-      ) {
-        return;
-      }
-
-      isDragging = true;
-      didDrag = false;
-      dragStart = { x: event.clientX, y: event.clientY };
-      viewStart = { x: view.x, y: view.y };
-      stage.setPointerCapture(event.pointerId);
-    }
-
-    function moveDrag(event) {
-      if (!isDragging) return;
-
-      const dx = event.clientX - dragStart.x;
-      const dy = event.clientY - dragStart.y;
-
-      if (Math.abs(dx) + Math.abs(dy) > 4) didDrag = true;
-
-      view.x = viewStart.x + dx;
-      view.y = viewStart.y + dy;
-
-      clampView();
-      applyView();
-    }
-
-    function endDrag(event) {
-      if (!isDragging) return;
-
-      isDragging = false;
-      stage.releasePointerCapture(event.pointerId);
-    }
-
-    function applyView() {
-      mapContent.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
-      updatePins();
-
-      if (activeDealer) {
-        positionPopup(activeDealer.base);
-      }
-    }
-
-    function updatePins() {
-      const rect = stage.getBoundingClientRect();
-      const pinSize = clamp(24 / Math.sqrt(view.scale), 15, 24);
-
-      pins.forEach(({ base, pin, label }) => {
-        const screen = baseToScreen(base, rect);
-
-        pin.style.left = `${screen.x}px`;
-        pin.style.top = `${screen.y}px`;
-        pin.style.setProperty("--pin-size", `${pinSize}px`);
-
-        label.style.left = `${screen.x}px`;
-        label.style.top = `${screen.y}px`;
-      });
-    }
-
-    function positionPopup(base) {
-      const rect = stage.getBoundingClientRect();
-      const screen = baseToScreen(base, rect);
-
-      popup.style.left = `${screen.x}px`;
-      popup.style.top = `${screen.y}px`;
-      popup.classList.toggle("left", screen.x > rect.width * 0.62);
-    }
-
-    function baseToScreen(base, rect) {
-      const x = (base.x / 100) * rect.width;
-      const y = (base.y / 100) * rect.height;
-
-      return {
-        x: x * view.scale + view.x,
-        y: y * view.scale + view.y
-      };
-    }
-
-    function clampView() {
-      const rect = stage.getBoundingClientRect();
-      const scaledWidth = rect.width * view.scale;
-      const scaledHeight = rect.height * view.scale;
-
-      if (view.scale <= 1) {
-        view.x = 0;
-        view.y = 0;
-        return;
-      }
-
-      view.x = clamp(view.x, rect.width - scaledWidth, 0);
-      view.y = clamp(view.y, rect.height - scaledHeight, 0);
-    }
-
-    function project(dealer) {
-      const imageX = ((dealer.lng - mapInfo.minLng) / (mapInfo.maxLng - mapInfo.minLng)) * mapInfo.imageWidth;
-      const imageY = ((mapInfo.maxLat - dealer.lat) / (mapInfo.maxLat - mapInfo.minLat)) * mapInfo.imageHeight;
-
-      const x = ((imageX - mapInfo.cropX) / mapInfo.cropWidth) * 100;
-      const y = ((imageY - mapInfo.cropY) / mapInfo.cropHeight) * 100;
-
-      return { x, y };
-    }
-
-    function isInsideCrop(dealer) {
-      const position = project(dealer);
-      return position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100;
-    }
-
-    function clamp(value, min, max) {
-      return Math.min(max, Math.max(min, value));
     }
 
     function clean(value) {
