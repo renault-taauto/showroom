@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>르노 대리점 지도</title>
+  <title>르노코리아 티에이오토 공식 대리점</title>
 
   <script
     type="text/javascript"
@@ -16,7 +16,7 @@
       --muted: #666;
       --pin: #ffcf00;
       --panel: rgba(255, 255, 255, 0.97);
-      --shadow: 0 16px 45px rgba(0, 0, 0, 0.2);
+      --shadow: 0 16px 45px rgba(0, 0, 0, 0.22);
     }
 
     * {
@@ -40,10 +40,28 @@
       overflow: hidden;
     }
 
+    .map-title {
+      position: absolute;
+      left: 50%;
+      top: 24px;
+      z-index: 20;
+      width: min(920px, calc(100% - 32px));
+      margin: 0;
+      color: #15171a;
+      font-size: clamp(26px, 4vw, 46px);
+      font-weight: 900;
+      line-height: 1.18;
+      letter-spacing: 0;
+      text-align: center;
+      transform: translateX(-50%);
+      pointer-events: none;
+      text-shadow: 0 2px 14px rgba(255, 255, 255, 0.95);
+    }
+
     #vmap {
       width: 100%;
       height: 100vh;
-      min-height: 520px;
+      min-height: 560px;
       background: transparent;
     }
 
@@ -201,10 +219,10 @@
     .status {
       position: absolute;
       left: 50%;
-      top: 50%;
+      bottom: 24px;
       z-index: 50;
       width: min(360px, calc(100vw - 32px));
-      padding: 16px;
+      padding: 14px 16px;
       border: 1px solid rgba(0, 0, 0, 0.12);
       border-radius: 8px;
       background: #fff;
@@ -213,7 +231,7 @@
       font-size: 14px;
       line-height: 1.55;
       text-align: center;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
     }
 
     .status:empty {
@@ -221,14 +239,25 @@
     }
 
     @media (max-width: 720px) {
+      .map-title {
+        top: 18px;
+        width: calc(100% - 24px);
+        font-size: 26px;
+      }
+
       #vmap {
-        min-height: 560px;
+        height: 100vh;
+        min-height: 620px;
       }
 
       .dealer-popup {
-        width: calc(100vw - 24px);
-        max-height: 48vh;
+        position: fixed !important;
+        left: 50% !important;
+        top: 50% !important;
+        width: calc(100vw - 28px);
+        max-height: 62vh;
         overflow: auto;
+        transform: translate(-50%, -50%) !important;
       }
 
       .dealer-popup h1 {
@@ -240,6 +269,8 @@
 
 <body>
   <main class="map-app">
+    <h1 class="map-title">르노코리아 티에이오토 공식 대리점</h1>
+
     <div id="vmap"></div>
 
     <article class="dealer-popup" id="popup" hidden>
@@ -264,7 +295,7 @@
       <div class="actions" id="popupActions"></div>
     </article>
 
-    <div class="status" id="status">대리점 정보를 불러오는 중입니다.</div>
+    <div class="status" id="status"></div>
   </main>
 
   <script>
@@ -323,8 +354,13 @@
 
       const view = vmap.getView();
 
-      view.setCenter(ol.proj.fromLonLat([127.55, 37.65]));
-      view.setZoom(8);
+      if (isMobile()) {
+        view.setCenter(ol.proj.fromLonLat([127.15, 37.45]));
+        view.setZoom(9);
+      } else {
+        view.setCenter(ol.proj.fromLonLat([127.35, 37.55]));
+        view.setZoom(9);
+      }
 
       popupOverlay = new ol.Overlay({
         element: popup,
@@ -471,6 +507,13 @@
 
       popup.hidden = false;
       popupOverlay.setPosition(coordinate);
+
+      if (isMobile()) {
+        vmap.getView().animate({
+          center: coordinate,
+          duration: 250
+        });
+      }
     }
 
     function closePopup() {
@@ -497,6 +540,10 @@
       button.className = "disabled";
       button.textContent = text;
       return button;
+    }
+
+    function isMobile() {
+      return window.matchMedia("(max-width: 720px)").matches;
     }
 
     function clean(value) {
