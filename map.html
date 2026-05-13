@@ -8,6 +8,7 @@
   <script
     type="text/javascript"
     src="https://map.vworld.kr/js/vworldMapInit.js.do?version=2.0&apiKey=0AF8F2A3-2F71-3FEC-9310-ADB256604DDE"
+    defer
   ></script>
 
   <style>
@@ -20,12 +21,9 @@
       --shadow: 0 16px 45px rgba(0, 0, 0, 0.22);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       min-height: 100%;
       background: #fff;
@@ -33,11 +31,9 @@
       font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", Arial, sans-serif;
     }
 
-    button,
-    a {
-      font: inherit;
-    }
+    button, a { font: inherit; }
 
+    /* ── Layout ── */
     .map-app {
       min-height: 100vh;
       padding: 34px 20px;
@@ -51,7 +47,6 @@
       font-size: clamp(28px, 4vw, 48px);
       font-weight: 900;
       line-height: 1.18;
-      letter-spacing: 0;
       text-align: center;
     }
 
@@ -65,6 +60,7 @@
       align-items: stretch;
     }
 
+    /* ── Dealer List ── */
     .dealer-list {
       height: min(680px, calc(100vh - 150px));
       min-height: 560px;
@@ -77,33 +73,74 @@
       padding: 16px;
     }
 
-    .list-group + .list-group {
-      margin-top: 20px;
+    /* ── Accordion Group ── */
+    .list-group {
+      border: 1px solid var(--line);
+      margin-bottom: 8px;
     }
 
-    .list-group h2 {
-      margin: 0 0 10px;
-      font-size: 17px;
-      line-height: 1.3;
+    .list-group:last-child { margin-bottom: 0; }
+
+    .group-toggle {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      border: none;
+      background: #f5f5f5;
+      color: var(--ink);
+      font-size: 14px;
       font-weight: 900;
+      cursor: pointer;
+      text-align: left;
+      user-select: none;
+      transition: background 0.15s;
     }
 
+    .group-toggle:hover { background: #ebebeb; }
+
+    .group-toggle .arrow {
+      font-size: 11px;
+      transition: transform 0.22s ease;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .group-toggle.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .group-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.28s ease;
+    }
+
+    .group-body.open {
+      max-height: 2000px;
+    }
+
+    /* ── Dealer Item ── */
     .dealer-item {
       display: block;
       width: 100%;
       margin: 0;
-      padding: 11px 10px;
-      border: 1px solid transparent;
+      padding: 11px 14px;
+      border: none;
+      border-top: 1px solid var(--line);
       background: #fff;
       color: var(--ink);
       cursor: pointer;
       text-align: left;
+      transition: background 0.1s;
     }
 
     .dealer-item:hover,
     .dealer-item.active {
-      border-color: var(--ink);
       background: #fafafa;
+      outline: 2px solid var(--ink);
+      outline-offset: -2px;
     }
 
     .dealer-item strong {
@@ -120,6 +157,7 @@
       line-height: 1.45;
     }
 
+    /* ── Map Shell ── */
     .map-shell {
       position: relative;
       min-width: 0;
@@ -133,15 +171,15 @@
       min-height: 560px;
       overflow: hidden;
       border: 1px solid var(--line);
-      background: #fff;
+      background: #eee;
     }
 
     #vmap {
       width: 100%;
       height: 100%;
-      background: #fff;
     }
 
+    /* ── Marker ── */
     .dealer-marker {
       position: relative;
       width: 30px;
@@ -161,6 +199,7 @@
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
       cursor: pointer;
       transform: translateX(-50%) rotate(-45deg);
+      transition: box-shadow 0.12s;
     }
 
     .dealer-pin::after {
@@ -200,10 +239,9 @@
       transition: opacity 0.12s ease;
     }
 
-    .dealer-marker:hover .dealer-name {
-      opacity: 1;
-    }
+    .dealer-marker:hover .dealer-name { opacity: 1; }
 
+    /* ── Popup ── */
     .dealer-popup {
       position: absolute;
       z-index: 100;
@@ -215,17 +253,18 @@
       overflow: hidden;
     }
 
-    .dealer-popup[hidden] {
-      display: none;
-    }
+    .dealer-popup[hidden] { display: none; }
 
+    /* Photo — 16:9, cropped to popup width */
     .popup-photo {
+      display: none;
       width: 100%;
       aspect-ratio: 16 / 9;
       overflow: hidden;
-      background: #eee;
-      display: none;
+      background: #ddd;
     }
+
+    .popup-photo.visible { display: block; }
 
     .popup-photo img {
       width: 100%;
@@ -235,15 +274,12 @@
       display: block;
     }
 
-    .popup-body {
-      padding: 20px;
-    }
+    .popup-body { padding: 20px; }
 
     .dealer-popup h1 {
       margin: 0 0 14px;
-      font-size: 25px;
+      font-size: 22px;
       line-height: 1.25;
-      letter-spacing: 0;
     }
 
     .info {
@@ -266,10 +302,7 @@
       font-weight: 700;
     }
 
-    .info dd {
-      margin: 0;
-      color: var(--ink);
-    }
+    .info dd { margin: 0; color: var(--ink); }
 
     .description {
       margin: 0 0 17px;
@@ -279,6 +312,8 @@
       line-height: 1.65;
       white-space: pre-line;
     }
+
+    .description:empty { display: none; }
 
     .actions {
       display: flex;
@@ -311,6 +346,35 @@
       cursor: not-allowed;
     }
 
+    /* ── Skeleton ── */
+    .skeleton-list { padding: 16px; }
+
+    .skeleton-group { margin-bottom: 10px; }
+
+    .skeleton-header {
+      height: 38px;
+      margin-bottom: 6px;
+      border-radius: 2px;
+      animation: shimmer 1.2s infinite linear;
+      background: linear-gradient(90deg, #eee 25%, #e0e0e0 50%, #eee 75%);
+      background-size: 200% 100%;
+    }
+
+    .skeleton-item {
+      height: 56px;
+      margin-bottom: 4px;
+      border-radius: 2px;
+      animation: shimmer 1.2s infinite linear;
+      background: linear-gradient(90deg, #f5f5f5 25%, #eee 50%, #f5f5f5 75%);
+      background-size: 200% 100%;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Status ── */
     .status {
       position: absolute;
       left: 50%;
@@ -328,19 +392,13 @@
       transform: translateX(-50%);
     }
 
-    .status:empty {
-      display: none;
-    }
+    .status:empty { display: none; }
 
+    /* ── Mobile ── */
     @media (max-width: 820px) {
-      .map-app {
-        padding: 24px 12px;
-      }
+      .map-app { padding: 24px 12px; }
 
-      .map-title {
-        margin-bottom: 18px;
-        font-size: 26px;
-      }
+      .map-title { margin-bottom: 18px; font-size: 26px; }
 
       .locator-layout {
         grid-template-columns: 1fr;
@@ -353,9 +411,7 @@
         max-height: 220px;
       }
 
-      .list-inner {
-        padding: 12px;
-      }
+      .list-inner { padding: 12px; }
 
       .map-viewport {
         height: calc(100vh - 360px);
@@ -367,14 +423,12 @@
         left: 50% !important;
         top: 50% !important;
         width: calc(100vw - 28px);
-        max-height: 72vh;
+        max-height: 80vh;
         overflow: auto;
         transform: translate(-50%, -50%);
       }
 
-      .dealer-popup h1 {
-        font-size: 21px;
-      }
+      .dealer-popup h1 { font-size: 19px; }
     }
   </style>
 </head>
@@ -385,7 +439,26 @@
 
     <section class="locator-layout">
       <aside class="dealer-list" aria-label="대리점 목록">
-        <div class="list-inner" id="dealerList"></div>
+        <div class="list-inner" id="dealerList">
+          <!-- skeleton -->
+          <div class="skeleton-list" id="skeletonList">
+            <div class="skeleton-group">
+              <div class="skeleton-header"></div>
+              <div class="skeleton-item"></div>
+              <div class="skeleton-item"></div>
+              <div class="skeleton-item"></div>
+            </div>
+            <div class="skeleton-group">
+              <div class="skeleton-header"></div>
+              <div class="skeleton-item"></div>
+              <div class="skeleton-item"></div>
+            </div>
+            <div class="skeleton-group">
+              <div class="skeleton-header"></div>
+              <div class="skeleton-item"></div>
+            </div>
+          </div>
+        </div>
       </aside>
 
       <section class="map-shell">
@@ -395,7 +468,7 @@
 
         <article class="dealer-popup" id="popup" hidden>
           <div class="popup-photo" id="popupPhoto">
-            <img id="popupImage" alt="" />
+            <img id="popupImage" alt="" loading="lazy" />
           </div>
 
           <div class="popup-body">
@@ -427,61 +500,77 @@
   </main>
 
   <script>
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwKxHf3rmSjGrfFRpp-VVH1hJs3M7gK0NPFS1UX-Xgyl1ULHU4bhiT6nLM8YbwuD_hrHw/exec";
-
+    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxal4nT-aee_i_hp7_g28G5lwZt0tHjNfCTvDnggOzao_ib00jN9pa_PslWyYNUjtZyFA/exec";
     const groupOrder = ["서울 대리점", "경기 대리점", "인천 대리점", "강원 대리점"];
 
-    const dealerList = document.querySelector("#dealerList");
-    const mapShell = document.querySelector(".map-shell");
-    const mapViewport = document.querySelector("#mapViewport");
-    const status = document.querySelector("#status");
-    const popup = document.querySelector("#popup");
-    const popupPhoto = document.querySelector("#popupPhoto");
-    const popupImage = document.querySelector("#popupImage");
-    const popupName = document.querySelector("#popupName");
-    const popupAddress = document.querySelector("#popupAddress");
-    const popupPhone = document.querySelector("#popupPhone");
-    const popupDirections = document.querySelector("#popupDirections");
-    const popupDescription = document.querySelector("#popupDescription");
-    const popupActions = document.querySelector("#popupActions");
+    const dealerList      = document.getElementById("dealerList");
+    const skeletonList    = document.getElementById("skeletonList");
+    const mapShell        = document.querySelector(".map-shell");
+    const mapViewport     = document.getElementById("mapViewport");
+    const status          = document.getElementById("status");
+    const popup           = document.getElementById("popup");
+    const popupPhoto      = document.getElementById("popupPhoto");
+    const popupImage      = document.getElementById("popupImage");
+    const popupName       = document.getElementById("popupName");
+    const popupAddress    = document.getElementById("popupAddress");
+    const popupPhone      = document.getElementById("popupPhone");
+    const popupDirections = document.getElementById("popupDirections");
+    const popupDescription = document.getElementById("popupDescription");
+    const popupActions    = document.getElementById("popupActions");
 
     let vmap = null;
     let activePin = null;
     let activeCoordinate = null;
     let activeListItem = null;
-    let markerById = new Map();
-    let dealerById = new Map();
+    const markerById = new Map();
+    const dealerById = new Map();
 
-    window.addEventListener("load", init);
+    /* ── Init ── */
+    function waitForVworld(timeout = 8000) {
+      return new Promise((resolve, reject) => {
+        if (window.vw && window.ol) { resolve(); return; }
+        const start = Date.now();
+        const check = () => {
+          if (window.vw && window.ol) { resolve(); return; }
+          if (Date.now() - start > timeout) { reject(new Error("VWorld timeout")); return; }
+          setTimeout(check, 100);
+        };
+        setTimeout(check, 100);
+      });
+    }
+
+    async function init() {
+      // 지도 초기화와 데이터 로드를 병렬 실행
+      const [, dealers] = await Promise.all([
+        waitForVworld().then(createMap).catch((e) => {
+          status.textContent = "VWorld 지도를 불러오지 못했습니다. 인증키와 도메인 설정을 확인해주세요.";
+          throw e;
+        }),
+        loadDealers().catch((e) => {
+          status.textContent = "대리점 정보를 불러오지 못했습니다. Apps Script 배포 URL과 접근 권한을 확인해주세요.";
+          console.error(e);
+          return [];
+        })
+      ]).catch(() => [null, []]);
+
+      skeletonList.remove();
+
+      if (!dealers || !dealers.length) {
+        status.textContent = status.textContent || "표시할 대리점 정보가 없습니다.";
+        return;
+      }
+
+      status.textContent = "";
+      renderList(dealers);
+      renderMarkers(dealers);
+    }
+
+    window.addEventListener("DOMContentLoaded", init);
     window.addEventListener("resize", () => {
       if (activeCoordinate) positionPopup(activeCoordinate);
     });
 
-    function init() {
-      if (!window.vw || !window.ol) {
-        status.textContent = "VWorld 지도를 불러오지 못했습니다. 인증키와 도메인 설정을 확인해주세요.";
-        return;
-      }
-
-      createMap();
-
-      loadDealers()
-        .then((dealers) => {
-          if (!dealers.length) {
-            status.textContent = "표시할 대리점 정보가 없습니다.";
-            return;
-          }
-
-          status.textContent = "";
-          renderList(dealers);
-          renderMarkers(dealers);
-        })
-        .catch((error) => {
-          status.textContent = "대리점 정보를 불러오지 못했습니다. Apps Script 배포 URL과 접근 권한을 확인해주세요.";
-          console.error(error);
-        });
-    }
-
+    /* ── Map ── */
     function createMap() {
       vw.ol3.MapOptions = {
         basemapType: vw.ol3.BasemapType.GRAPHIC,
@@ -493,7 +582,6 @@
       };
 
       vmap = new vw.ol3.Map("vmap", vw.ol3.MapOptions);
-
       const view = vmap.getView();
 
       if (isMobile()) {
@@ -504,17 +592,18 @@
         view.setZoom(10);
       }
 
-      vmap.on("singleclick", function(event) {
+      vmap.on("singleclick", (event) => {
         const target = event.originalEvent && event.originalEvent.target;
         if (target && target.closest && target.closest(".dealer-marker")) return;
         closePopup();
       });
 
-      vmap.on("moveend", function() {
+      vmap.on("moveend", () => {
         if (activeCoordinate) positionPopup(activeCoordinate);
       });
     }
 
+    /* ── Data ── */
     async function loadDealers() {
       const payload = await loadJsonp(SHEET_API_URL);
       return normalizePayload(payload);
@@ -522,20 +611,27 @@
 
     function loadJsonp(url) {
       return new Promise((resolve, reject) => {
-        const callbackName = `dealerMap_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const cbName = `dealerMap_${Date.now()}_${Math.random().toString(36).slice(2)}`;
         const script = document.createElement("script");
         const src = new URL(url);
+        src.searchParams.set("callback", cbName);
 
-        src.searchParams.set("callback", callbackName);
+        const timer = setTimeout(() => {
+          delete window[cbName];
+          script.remove();
+          reject(new Error("JSONP timeout"));
+        }, 15000);
 
-        window[callbackName] = (payload) => {
-          delete window[callbackName];
+        window[cbName] = (payload) => {
+          clearTimeout(timer);
+          delete window[cbName];
           script.remove();
           resolve(payload);
         };
 
         script.onerror = () => {
-          delete window[callbackName];
+          clearTimeout(timer);
+          delete window[cbName];
           script.remove();
           reject(new Error("JSONP load failed"));
         };
@@ -550,24 +646,25 @@
       if (!Array.isArray(rows)) return [];
 
       return rows
-        .map((dealer, index) => ({
-          id: dealer.id || `dealer-${index + 1}`,
-          category: clean(dealer.category),
-          region: clean(dealer.region || dealer.category),
-          name: clean(dealer.name),
-          address: clean(dealer.address),
-          phone: clean(dealer.phone),
-          directions: clean(dealer.directions),
-          description: clean(dealer.description),
-          testDriveUrl: clean(dealer.testDriveUrl),
-          eventUrl: clean(dealer.eventUrl),
-          imageUrl: normalizeImageUrl(clean(dealer.imageUrl || dealer.photoUrl || dealer.image)),
-          lat: Number(dealer.lat),
-          lng: Number(dealer.lng)
+        .map((d, i) => ({
+          id: d.id || `dealer-${i + 1}`,
+          category: clean(d.category),
+          region: clean(d.region || d.category),
+          name: clean(d.name),
+          address: clean(d.address),
+          phone: clean(d.phone),
+          directions: clean(d.directions),
+          description: clean(d.description),
+          testDriveUrl: clean(d.testDriveUrl),
+          eventUrl: clean(d.eventUrl),
+          imageUrl: normalizeImageUrl(clean(d.imageUrl || d.photoUrl || d.image || "")),
+          lat: Number(d.lat),
+          lng: Number(d.lng)
         }))
-        .filter((dealer) => dealer.name && Number.isFinite(dealer.lat) && Number.isFinite(dealer.lng));
+        .filter((d) => d.name && Number.isFinite(d.lat) && Number.isFinite(d.lng));
     }
 
+    /* ── List (Accordion) ── */
     function renderList(dealers) {
       dealerList.innerHTML = "";
 
@@ -579,17 +676,29 @@
       });
 
       const orderedGroups = [
-        ...groupOrder.filter((group) => grouped.has(group)),
-        ...[...grouped.keys()].filter((group) => !groupOrder.includes(group))
+        ...groupOrder.filter((g) => grouped.has(g)),
+        ...[...grouped.keys()].filter((g) => !groupOrder.includes(g))
       ];
 
-      orderedGroups.forEach((group) => {
+      orderedGroups.forEach((group, gIdx) => {
         const section = document.createElement("section");
         section.className = "list-group";
 
-        const title = document.createElement("h2");
-        title.textContent = group;
-        section.append(title);
+        // Toggle button
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "group-toggle" + (gIdx === 0 ? " open" : "");
+        toggle.innerHTML = `<span>${escapeHtml(group)}</span><span class="arrow">▼</span>`;
+
+        // Body
+        const body = document.createElement("div");
+        body.className = "group-body" + (gIdx === 0 ? " open" : "");
+
+        toggle.addEventListener("click", () => {
+          const isOpen = body.classList.contains("open");
+          body.classList.toggle("open", !isOpen);
+          toggle.classList.toggle("open", !isOpen);
+        });
 
         grouped.get(group).forEach((dealer) => {
           const item = document.createElement("button");
@@ -600,16 +709,16 @@
             <strong>${escapeHtml(dealer.name)}</strong>
             <span>${escapeHtml(dealer.address)}</span>
           `;
-
           item.addEventListener("click", () => focusDealer(dealer.id));
-
-          section.append(item);
+          body.append(item);
         });
 
+        section.append(toggle, body);
         dealerList.append(section);
       });
     }
 
+    /* ── Markers ── */
     function renderMarkers(dealers) {
       dealers.forEach((dealer) => {
         const coordinate = ol.proj.fromLonLat([dealer.lng, dealer.lat]);
@@ -648,27 +757,25 @@
       label.textContent = dealer.name;
 
       marker.append(pin, label);
-
       return marker;
     }
 
+    /* ── Focus: list → pin (지도 이동 + 팝업) ── */
     function focusDealer(id) {
       const entry = dealerById.get(id);
       const marker = markerById.get(id);
       if (!entry || !marker) return;
 
       const view = vmap.getView();
-      const targetZoom = Math.max(view.getZoom(), isMobile() ? 12 : 11);
+      const targetZoom = Math.max(view.getZoom(), isMobile() ? 13 : 14);
 
-      view.animate({
-        center: entry.coordinate,
-        zoom: targetZoom,
-        duration: 280
+      // 지도가 이동 완료된 뒤 팝업 위치 재계산
+      view.animate({ center: entry.coordinate, zoom: targetZoom, duration: 320 }, () => {
+        showDealer(entry.dealer, entry.coordinate, marker.querySelector(".dealer-pin"));
       });
-
-      showDealer(entry.dealer, entry.coordinate, marker.querySelector(".dealer-pin"));
     }
 
+    /* ── Show Popup ── */
     function showDealer(dealer, coordinate, pin) {
       if (activePin) activePin.classList.remove("active");
       if (activeListItem) activeListItem.classList.remove("active");
@@ -679,6 +786,12 @@
 
       activeListItem = dealerList.querySelector(`[data-dealer-id="${CSS.escape(dealer.id)}"]`);
       if (activeListItem) {
+        // 해당 그룹 아코디언이 닫혀 있으면 열기
+        const groupBody = activeListItem.closest(".group-body");
+        if (groupBody && !groupBody.classList.contains("open")) {
+          groupBody.classList.add("open");
+          groupBody.previousElementSibling.classList.add("open");
+        }
         activeListItem.classList.add("active");
         activeListItem.scrollIntoView({ block: "nearest" });
       }
@@ -690,138 +803,94 @@
       popupDescription.textContent = dealer.description || "";
 
       if (dealer.imageUrl) {
-        popupPhoto.style.display = "block";
         popupImage.src = dealer.imageUrl;
         popupImage.alt = `${dealer.name} 사진`;
+        popupPhoto.classList.add("visible");
       } else {
-        popupPhoto.style.display = "none";
+        popupPhoto.classList.remove("visible");
         popupImage.removeAttribute("src");
         popupImage.alt = "";
       }
 
       popupActions.innerHTML = "";
-
       if (dealer.testDriveUrl) {
         popupActions.append(createLink("시승 신청하기", dealer.testDriveUrl));
       } else {
         popupActions.append(createDisabledButton("시승 신청하기"));
       }
-
       if (dealer.eventUrl) {
         popupActions.append(createLink("진행중인 이벤트", dealer.eventUrl));
       }
 
       popup.hidden = false;
-
-      if (isMobile()) {
-        vmap.getView().animate({
-          center: coordinate,
-          duration: 220
-        });
-      }
-
       positionPopup(coordinate);
     }
 
+    /* ── Popup position ── */
     function positionPopup(coordinate) {
       if (popup.hidden || !vmap) return;
-
-      if (isMobile()) {
-        popup.style.left = "50%";
-        popup.style.top = "50%";
-        return;
-      }
+      if (isMobile()) return;
 
       const pixel = vmap.getPixelFromCoordinate(coordinate);
       const shellRect = mapShell.getBoundingClientRect();
       const viewportRect = mapViewport.getBoundingClientRect();
 
       popup.style.left = "0px";
-      popup.style.top = "0px";
+      popup.style.top  = "0px";
 
       const popupRect = popup.getBoundingClientRect();
-      const gap = 16;
+      const gap    = 16;
       const margin = 12;
 
       let x = viewportRect.left - shellRect.left + pixel[0] + gap;
-      let y = viewportRect.top - shellRect.top + pixel[1] - popupRect.height / 2;
+      let y = viewportRect.top  - shellRect.top  + pixel[1] - popupRect.height / 2;
 
-      const maxX = shellRect.width - popupRect.width - margin;
+      const maxX = shellRect.width  - popupRect.width  - margin;
       const maxY = Math.max(margin, viewportRect.height - popupRect.height - margin);
 
       if (x > maxX) {
         x = viewportRect.left - shellRect.left + pixel[0] - popupRect.width - gap;
       }
 
-      x = clamp(x, margin, maxX);
-      y = clamp(y, margin, maxY);
-
-      popup.style.left = `${x}px`;
-      popup.style.top = `${y}px`;
+      popup.style.left = `${clamp(x, margin, maxX)}px`;
+      popup.style.top  = `${clamp(y, margin, maxY)}px`;
     }
 
     function closePopup() {
       popup.hidden = true;
       activeCoordinate = null;
-
-      if (activePin) {
-        activePin.classList.remove("active");
-        activePin = null;
-      }
-
-      if (activeListItem) {
-        activeListItem.classList.remove("active");
-        activeListItem = null;
-      }
+      if (activePin)      { activePin.classList.remove("active");      activePin = null; }
+      if (activeListItem) { activeListItem.classList.remove("active"); activeListItem = null; }
     }
 
+    /* ── Helpers ── */
     function createLink(text, href) {
-      const link = document.createElement("a");
-      link.href = href;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = text;
-      return link;
+      const a = document.createElement("a");
+      a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = text;
+      return a;
     }
 
     function createDisabledButton(text) {
-      const button = document.createElement("span");
-      button.className = "disabled";
-      button.textContent = text;
-      return button;
+      const s = document.createElement("span");
+      s.className = "disabled"; s.textContent = text;
+      return s;
     }
 
     function normalizeImageUrl(url) {
       if (!url) return "";
-
-      const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-      if (driveMatch) {
-        return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
-      }
-
+      const m = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+      if (m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
       return url;
     }
 
-    function isMobile() {
-      return window.matchMedia("(max-width: 820px)").matches;
-    }
+    function isMobile() { return window.matchMedia("(max-width: 820px)").matches; }
+    function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+    function clean(v) { return String(v || "").trim(); }
 
-    function clamp(value, min, max) {
-      return Math.min(max, Math.max(min, value));
-    }
-
-    function clean(value) {
-      return String(value || "").trim();
-    }
-
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[char]);
+    function escapeHtml(v) {
+      return String(v).replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+      );
     }
   </script>
 </body>
