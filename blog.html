@@ -202,7 +202,7 @@
 </main>
 
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycbx3hCyBm-2d-ffOG_BRGrrwfsoYkO_BfMazIiWLzKUFPm0YKXbjKwREwwipOYSUmKVM/exec';
+const API_URL='https://script.google.com/macros/s/AKfycbygxfnE64FR7nwB6TTze5cSVW3VB7n8TeNKLvABd5X4kej1ySprd1WYqbTe3Zr2q7qA/exec';
 
 const state={step:0,total:5,options:null,salespersonId:'',submitting:false,inspectionFiles:[]};
 const $=id=>document.getElementById(id);
@@ -471,11 +471,34 @@ function showResult(result){
     <b>${esc(result.message||'제출이 완료되었습니다.')}</b>
     ${result.resultFolderUrl?`<p><a href="${esc(result.resultFolderUrl)}" target="_blank" rel="noopener">결과물 폴더 열기</a></p>`:''}
     <p>제목: ${esc(result.deliveryTitle||'')}</p>
+    <p><button type="button" class="primary" onclick="resetFormForNewSubmission()">추가 제출</button></p>
   `;
   $('resultBox').classList.add('active');
   $('submitBtn').disabled=true;
 }
+  
+function resetFormForNewSubmission(){
+  document.getElementById('briefForm').reset();
 
+  state.step = 0;
+  state.salespersonId = '';
+  state.submitting = false;
+  state.inspectionFiles = [];
+
+  renderFileList();
+  clearError();
+
+  $('resultBox').classList.remove('active');
+  $('resultBox').innerHTML = '';
+
+  $('deliveryDate').value = new Date().toISOString().slice(0,10);
+
+  refreshVehicleChildren();
+  syncProfileMode();
+  renderStep();
+}
+}
+  
 async function apiGet(params){
   const url=new URL(API_URL);
   Object.keys(params).forEach(key=>url.searchParams.set(key,params[key]));
