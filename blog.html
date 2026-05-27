@@ -102,9 +102,11 @@
         </div>
 
         <div class="field">
-          <label for="uploadMedia">제출일 *</label>
-          <input id="uploadMedia" type="date" required>
+          <label for="uploadMedia">업로드 *</label>
+          <select id="uploadMedia" required><option value="">업로드 선택</option></select>
         </div>
+
+        <input id="submissionDate" type="hidden">
 
         <div class="field full">
           <label for="personalUrl">본인 URL</label>
@@ -225,7 +227,7 @@ document.addEventListener('DOMContentLoaded', init);
 async function init() {
   const today = new Date().toISOString().slice(0, 10);
   $('deliveryDate').value = today;
-  $('uploadMedia').value = today;
+  $('submissionDate').value = today;
   $('prevBtn').onclick = prevStep;
   $('nextBtn').onclick = nextStep;
   $('lookupBtn').onclick = lookupSalesperson;
@@ -259,6 +261,7 @@ async function init() {
 function populate(o) {
   fillSelect('agency', [...(o.agencies || [])].sort((a, b) => a.localeCompare(b, 'ko')), '대리점 선택');
   fillSelect('position', o.positions || [], '직책 선택');
+  fillSelect('uploadMedia', o.uploadMediaOptions || [], '업로드 선택');
   fillSelect('vehicleModel', Object.keys(o.vehicles || {}), '모델 선택');
   renderChecks('visitRoutes', 'visitRoutes', o.visitRoutes || []);
   renderChecks('satisfactionPoints', 'satisfactionPoints', o.satisfactionPoints || []);
@@ -468,6 +471,7 @@ async function buildPayload() {
     businessCardUrl: $('businessCardUrl').value.trim(),
     businessCardFile: card ? await fileToPayload(card) : null,
     uploadMedia: $('uploadMedia').value,
+    submissionDate: $('submissionDate').value,
     deliveryDate: $('deliveryDate').value,
     vehicleModel: $('vehicleModel').value,
     trim: $('trim').value,
@@ -526,7 +530,7 @@ function resetFormForNewSubmission() {
 
   const today = new Date().toISOString().slice(0, 10);
   $('deliveryDate').value = today;
-  $('uploadMedia').value = today;
+  $('submissionDate').value = today;
 
   refreshVehicleChildren();
   syncProfileMode();
