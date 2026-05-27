@@ -96,9 +96,14 @@
           <select id="position"><option value="">직책 선택</option></select>
         </div>
 
-        <div class="field full">
+        <div class="field">
           <label for="agency">대리점 *</label>
           <select id="agency" required><option value="">대리점 선택</option></select>
+        </div>
+
+        <div class="field">
+          <label for="uploadMedia">제출일 *</label>
+          <input id="uploadMedia" type="date" required>
         </div>
 
         <div class="field full">
@@ -218,7 +223,9 @@ const $ = id => document.getElementById(id);
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-  $('deliveryDate').value = new Date().toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  $('deliveryDate').value = today;
+  $('uploadMedia').value = today;
   $('prevBtn').onclick = prevStep;
   $('nextBtn').onclick = nextStep;
   $('lookupBtn').onclick = lookupSalesperson;
@@ -460,6 +467,7 @@ async function buildPayload() {
     personalUrl: $('personalUrl').value.trim(),
     businessCardUrl: $('businessCardUrl').value.trim(),
     businessCardFile: card ? await fileToPayload(card) : null,
+    uploadMedia: $('uploadMedia').value,
     deliveryDate: $('deliveryDate').value,
     vehicleModel: $('vehicleModel').value,
     trim: $('trim').value,
@@ -516,7 +524,9 @@ function resetFormForNewSubmission() {
   $('resultBox').classList.remove('active');
   $('resultBox').innerHTML = '';
 
-  $('deliveryDate').value = new Date().toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  $('deliveryDate').value = today;
+  $('uploadMedia').value = today;
 
   refreshVehicleChildren();
   syncProfileMode();
