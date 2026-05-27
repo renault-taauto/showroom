@@ -46,7 +46,7 @@
     .file-list{display:grid;gap:6px;margin-top:6px}
     .file-item{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid #d8dee8;border-radius:8px;padding:8px 10px;background:#fbfcfd;font-size:13px}
     .file-item button{min-height:30px;padding:4px 8px;background:#edf1f6;color:#44546a}
-    (max-width:720px){
+    @media(max-width:720px){
       .app{padding:16px 10px 34px}
       .top{display:block}
       h1{font-size:21px}
@@ -70,6 +70,7 @@
   <div class="bar"><span id="progressBar"></span></div>
 
   <form id="briefForm">
+    <!-- Step 1: 영업담당 정보 -->
     <section class="step active">
       <h2>영업담당 정보</h2>
       <div class="grid">
@@ -92,17 +93,12 @@
 
         <div class="field">
           <label for="position">직책</label>
-          <select id="position"></select>
+          <select id="position"><option value="">직책 선택</option></select>
         </div>
 
-        <div class="field">
+        <div class="field full">
           <label for="agency">대리점 *</label>
-          <select id="agency" required></select>
-        </div>
-
-        <div class="field">
-          <label for="uploadMedia">업로드 *</label>
-          <select id="uploadMedia" required></select>
+          <select id="agency" required><option value="">대리점 선택</option></select>
         </div>
 
         <div class="field full">
@@ -118,6 +114,7 @@
       </div>
     </section>
 
+    <!-- Step 2: 차량 정보 -->
     <section class="step">
       <h2>차량 정보</h2>
       <div class="grid">
@@ -128,26 +125,27 @@
 
         <div class="field">
           <label for="vehicleModel">모델 *</label>
-          <select id="vehicleModel" required></select>
+          <select id="vehicleModel" required><option value="">모델 선택</option></select>
         </div>
 
         <div class="field">
           <label for="trim">트림 *</label>
-          <select id="trim" required></select>
+          <select id="trim" required><option value="">트림 선택</option></select>
         </div>
 
         <div class="field">
           <label for="color">색상 *</label>
-          <select id="color" required></select>
+          <select id="color" required><option value="">색상 선택</option></select>
         </div>
 
         <div class="field full">
           <label for="wheel">휠</label>
-          <select id="wheel"></select>
+          <select id="wheel"><option value="">휠 선택</option></select>
         </div>
       </div>
     </section>
 
+    <!-- Step 3: 사진 -->
     <section class="step">
       <h2>사진</h2>
       <div class="field">
@@ -159,6 +157,7 @@
       </div>
     </section>
 
+    <!-- Step 4: 고객 히스토리 -->
     <section class="step">
       <h2>고객 히스토리</h2>
       <div class="grid">
@@ -184,6 +183,7 @@
       </div>
     </section>
 
+    <!-- Step 5: 제출 확인 -->
     <section class="step">
       <h2>제출 확인</h2>
       <div id="reviewBox" class="result active"></div>
@@ -193,7 +193,7 @@
     <div class="actions">
       <div id="statusText" class="status"></div>
       <div class="btns">
-        <button class="ghost" type="button" id="prevBtn">이전</button>
+        <button class="ghost" type="button" id="prevBtn" style="display:none">이전</button>
         <button class="primary" type="button" id="nextBtn">다음</button>
         <button class="primary" type="submit" id="submitBtn" style="display:none">제출</button>
       </div>
@@ -202,183 +202,209 @@
 </main>
 
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycbw1lGs5ibJxnS_fAwTbQLUv7nt-jxkjKUefawn0qgm8fD4i-5WOqc1XZglM6aw40hkv/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw1lGs5ibJxnS_fAwTbQLUv7nt-jxkjKUefawn0qgm8fD4i-5WOqc1XZglM6aw40hkv/exec';
 
-const state={step:0,total:5,options:null,salespersonId:'',submitting:false,inspectionFiles:[]};
-const $=id=>document.getElementById(id);
+const state = {
+  step: 0,
+  total: 5,
+  options: null,
+  salespersonId: '',
+  submitting: false,
+  inspectionFiles: []
+};
 
-document.addEventListener('DOMContentLoaded',init);
+const $ = id => document.getElementById(id);
 
-async function init(){
-  $('deliveryDate').value=new Date().toISOString().slice(0,10);
-  $('prevBtn').onclick=prevStep;
-  $('nextBtn').onclick=nextStep;
-  $('lookupBtn').onclick=lookupSalesperson;
-  document.querySelectorAll('input[name="profileMode"]').forEach(input=>input.onchange=syncProfileMode);
-  $('vehicleModel').onchange=refreshVehicleChildren;
-  $('trim').onchange=refreshWheels;
-  $('inspectionFiles').onchange=addInspectionFiles;
-  $('briefForm').onsubmit=submitForm;
+document.addEventListener('DOMContentLoaded', init);
 
-  try{
+async function init() {
+  $('deliveryDate').value = new Date().toISOString().slice(0, 10);
+  $('prevBtn').onclick = prevStep;
+  $('nextBtn').onclick = nextStep;
+  $('lookupBtn').onclick = lookupSalesperson;
+
+  document.querySelectorAll('input[name="profileMode"]').forEach(input => {
+    input.onchange = syncProfileMode;
+  });
+
+  $('vehicleModel').onchange = refreshVehicleChildren;
+  $('trim').onchange = refreshWheels;
+  $('inspectionFiles').onchange = addInspectionFiles;
+  $('briefForm').onsubmit = submitForm;
+
+  // ── 초기 상태 적용 (기존 불러오기가 기본 체크이므로 버튼 보임)
+  syncProfileMode();
+  renderStep();
+
+  try {
     setStatus('선택지를 불러오는 중입니다.');
-    const res=await apiGet({action:'options'});
-    if(!res.ok)throw new Error(res.error||'선택지를 불러오지 못했습니다.');
-    state.options=res.data;
+    const res = await apiGet({ action: 'options' });
+    if (!res.ok) throw new Error(res.error || '선택지를 불러오지 못했습니다.');
+    state.options = res.data;
     populate(res.data);
     setStatus('');
-    renderStep();
-  }catch(error){
-    showError(error);
+  } catch (error) {
+    // API 실패 시 폼은 계속 사용 가능하도록 에러만 표시
+    showError('선택지를 불러오지 못했습니다. 네트워크를 확인하거나 직접 입력해주세요.');
   }
 }
 
-function populate(o){
-  fillSelect('agency',[...(o.agencies||[])].sort((a,b)=>a.localeCompare(b,'ko')),'대리점 선택');
-  fillSelect('position',o.positions||[],'직책 선택');
-  fillSelect('uploadMedia',o.uploadMediaOptions||[],'업로드 선택');
-  fillSelect('vehicleModel',Object.keys(o.vehicles||{}),'모델 선택');
-  renderChecks('visitRoutes','visitRoutes',o.visitRoutes||[]);
-  renderChecks('satisfactionPoints','satisfactionPoints',o.satisfactionPoints||[]);
+function populate(o) {
+  fillSelect('agency', [...(o.agencies || [])].sort((a, b) => a.localeCompare(b, 'ko')), '대리점 선택');
+  fillSelect('position', o.positions || [], '직책 선택');
+  fillSelect('vehicleModel', Object.keys(o.vehicles || {}), '모델 선택');
+  renderChecks('visitRoutes', 'visitRoutes', o.visitRoutes || []);
+  renderChecks('satisfactionPoints', 'satisfactionPoints', o.satisfactionPoints || []);
   refreshVehicleChildren();
-  syncProfileMode();
 }
 
-function fillSelect(id,values,placeholder){
-  $(id).innerHTML=`<option value="">${esc(placeholder)}</option>`+(values||[]).map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+function fillSelect(id, values, placeholder) {
+  $(id).innerHTML = `<option value="">${esc(placeholder)}</option>` +
+    (values || []).map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
 }
 
-function renderChecks(containerId,name,values){
-  $(containerId).innerHTML=(values||[]).map(v=>`<label class="chip"><input type="checkbox" name="${name}" value="${esc(v)}"><span>${esc(v)}</span></label>`).join('');
+function renderChecks(containerId, name, values) {
+  $(containerId).innerHTML = (values || []).map(v =>
+    `<label class="chip"><input type="checkbox" name="${name}" value="${esc(v)}"><span>${esc(v)}</span></label>`
+  ).join('');
 }
 
-function syncProfileMode(){
-  const mode=document.querySelector('input[name="profileMode"]:checked').value;
-  $('lookupBtn').style.display=mode==='new'?'none':'';
-  if(mode==='new')state.salespersonId='';
+// ── 핵심 수정: 새로 등록 선택 시 불러오기 버튼 숨김
+function syncProfileMode() {
+  const mode = document.querySelector('input[name="profileMode"]:checked').value;
+  const lookupBtn = $('lookupBtn');
+
+  if (mode === 'new') {
+    lookupBtn.style.display = 'none';
+    state.salespersonId = '';
+  } else {
+    lookupBtn.style.display = '';
+  }
 }
 
-async function lookupSalesperson(){
-  const name=$('salesName').value.trim();
-  if(!name)return showError('영업담당 이름을 먼저 입력해주세요.');
+async function lookupSalesperson() {
+  const name = $('salesName').value.trim();
+  if (!name) return showError('영업담당 이름을 먼저 입력해주세요.');
 
-  try{
+  try {
     setStatus('영업담당 정보를 불러오는 중입니다.');
-    const res=await apiGet({action:'findSalesperson',name});
-    if(!res.ok)throw new Error(res.error||'영업담당 정보를 불러오지 못했습니다.');
-    const matches=res.data||[];
+    const res = await apiGet({ action: 'findSalesperson', name });
+    if (!res.ok) throw new Error(res.error || '영업담당 정보를 불러오지 못했습니다.');
+    const matches = res.data || [];
 
-    if(!matches.length){
-      state.salespersonId='';
-      document.querySelector('input[name="profileMode"][value="new"]').checked=true;
+    if (!matches.length) {
+      state.salespersonId = '';
+      document.querySelector('input[name="profileMode"][value="new"]').checked = true;
       syncProfileMode();
       setStatus('기존 기록이 없습니다. 새로 등록으로 진행할 수 있습니다.');
       return;
     }
 
-    const p=matches[0];
-    state.salespersonId=p.id;
-    $('salesName').value=p.name||name;
-    setValueIfExists('position',p.position);
-    setValueIfExists('agency',p.agency);
-    $('personalUrl').value=p.personalUrl||'';
-    $('businessCardUrl').value=p.businessCardUrl||'';
-    document.querySelector('input[name="profileMode"][value="existing"]').checked=true;
+    const p = matches[0];
+    state.salespersonId = p.id;
+    $('salesName').value = p.name || name;
+    setValueIfExists('position', p.position);
+    setValueIfExists('agency', p.agency);
+    $('personalUrl').value = p.personalUrl || '';
+    $('businessCardUrl').value = p.businessCardUrl || '';
+    document.querySelector('input[name="profileMode"][value="existing"]').checked = true;
     syncProfileMode();
     setStatus('기존 영업담당 정보를 불러왔습니다.');
-  }catch(error){
+  } catch (error) {
     showError(error);
   }
 }
 
-function setValueIfExists(id,value){
-  if(value&&[...$(id).options].some(o=>o.value===value))$(id).value=value;
+function setValueIfExists(id, value) {
+  if (value && [...$(id).options].some(o => o.value === value)) $(id).value = value;
 }
 
-function refreshVehicleChildren(){
-  const vehicle=state.options&&state.options.vehicles[$('vehicleModel').value];
-  fillSelect('trim',vehicle?vehicle.trims:[],'트림 선택');
-  fillSelect('color',vehicle?vehicle.colors:[],'색상 선택');
+function refreshVehicleChildren() {
+  const vehicle = state.options && state.options.vehicles[$('vehicleModel').value];
+  fillSelect('trim', vehicle ? vehicle.trims : [], '트림 선택');
+  fillSelect('color', vehicle ? vehicle.colors : [], '색상 선택');
   refreshWheels();
 }
 
-function refreshWheels(){
-  const model=$('vehicleModel').value;
-  const trim=$('trim').value;
-  const vehicle=state.options&&state.options.vehicles[model];
-  let wheels=vehicle?vehicle.wheels:[];
+function refreshWheels() {
+  const model = $('vehicleModel').value;
+  const trim = $('trim').value;
+  const vehicle = state.options && state.options.vehicles[model];
+  let wheels = vehicle ? vehicle.wheels : [];
 
-  if(model.includes('그랑 콜레오스')&&(trim==='에스카파드'||trim==='에스카파드 4WD')){
-    wheels=['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠'];
+  if (model.includes('그랑 콜레오스') && (trim === '에스카파드' || trim === '에스카파드 4WD')) {
+    wheels = ['20" 다크 틴티드 하이랜드 알로이 휠', '20" 다크 틴티드 투톤 피크 알로이 휠'];
   }
 
-  fillSelect('wheel',wheels,'휠 선택');
+  fillSelect('wheel', wheels, '휠 선택');
 }
 
-function addInspectionFiles(){
-  [...$('inspectionFiles').files].forEach(file=>{
-    const key=`${file.name}_${file.size}_${file.lastModified}`;
-    if(!state.inspectionFiles.some(item=>item.key===key)){
-      state.inspectionFiles.push({key,file});
+function addInspectionFiles() {
+  [...$('inspectionFiles').files].forEach(file => {
+    const key = `${file.name}_${file.size}_${file.lastModified}`;
+    if (!state.inspectionFiles.some(item => item.key === key)) {
+      state.inspectionFiles.push({ key, file });
     }
   });
-  $('inspectionFiles').value='';
+  $('inspectionFiles').value = '';
   renderFileList();
 }
 
-function renderFileList(){
-  $('fileCount').textContent=state.inspectionFiles.length?`${state.inspectionFiles.length}장 선택됨`:'선택된 사진이 없습니다.';
-  $('fileList').innerHTML=state.inspectionFiles.map((item,index)=>`
+function renderFileList() {
+  $('fileCount').textContent = state.inspectionFiles.length
+    ? `${state.inspectionFiles.length}장 선택됨`
+    : '선택된 사진이 없습니다.';
+  $('fileList').innerHTML = state.inspectionFiles.map((item, index) => `
     <div class="file-item">
-      <span>${index+1}. ${esc(item.file.name)}</span>
+      <span>${index + 1}. ${esc(item.file.name)}</span>
       <button type="button" onclick="removeInspectionFile(${index})">삭제</button>
     </div>
   `).join('');
 }
 
-function removeInspectionFile(index){
-  state.inspectionFiles.splice(index,1);
+function removeInspectionFile(index) {
+  state.inspectionFiles.splice(index, 1);
   renderFileList();
 }
 
-function nextStep(){
-  if(validateCurrentStep()&&state.step<state.total-1){
+function nextStep() {
+  if (validateCurrentStep() && state.step < state.total - 1) {
     state.step++;
     renderStep();
   }
 }
 
-function prevStep(){
-  if(state.step>0){
+function prevStep() {
+  if (state.step > 0) {
     state.step--;
     renderStep();
   }
 }
 
-function renderStep(){
-  document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===state.step));
-  $('progressText').textContent=`${state.step+1} / ${state.total}`;
-  $('progressBar').style.width=`${(state.step+1)/state.total*100}%`;
-  $('prevBtn').style.display=state.step?'':'none';
-  $('nextBtn').style.display=state.step===state.total-1?'none':'';
-  $('submitBtn').style.display=state.step===state.total-1?'':'none';
-  if(state.step===state.total-1)renderReview();
-  scrollTo({top:0,behavior:'smooth'});
+function renderStep() {
+  document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('active', i === state.step));
+  $('progressText').textContent = `${state.step + 1} / ${state.total}`;
+  $('progressBar').style.width = `${(state.step + 1) / state.total * 100}%`;
+  $('prevBtn').style.display = state.step ? '' : 'none';
+  $('nextBtn').style.display = state.step === state.total - 1 ? 'none' : '';
+  $('submitBtn').style.display = state.step === state.total - 1 ? '' : 'none';
+  if (state.step === state.total - 1) renderReview();
+  scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function validateCurrentStep(){
+function validateCurrentStep() {
   clearError();
-  const active=document.querySelector('.step.active');
+  const active = document.querySelector('.step.active');
 
-  for(const field of active.querySelectorAll('[required]')){
-    if(!field.value){
+  for (const field of active.querySelectorAll('[required]')) {
+    if (!field.value) {
       field.focus();
       showError('필수 항목을 입력해주세요.');
       return false;
     }
   }
 
-  if(state.step===2&&state.inspectionFiles.length<6){
+  if (state.step === 2 && state.inspectionFiles.length < 6) {
     showError('검수 진행 사진은 최소 6장 이상 선택해주세요.');
     return false;
   }
@@ -386,98 +412,97 @@ function validateCurrentStep(){
   return true;
 }
 
-function renderReview(){
-  $('reviewBox').innerHTML=`
-    <b>${esc($('salesName').value||'-')}</b> / ${esc($('agency').value||'-')} / ${esc($('position').value||'-')}<br>
-    ${esc($('vehicleModel').value||'-')} ${esc($('trim').value||'')} ${esc($('color').value||'')}<br>
-    업로드: ${esc($('uploadMedia').value||'-')}<br>
+function renderReview() {
+  $('reviewBox').innerHTML = `
+    <b>${esc($('salesName').value || '-')}</b> / ${esc($('agency').value || '-')} / ${esc($('position').value || '-')}<br>
+    ${esc($('vehicleModel').value || '-')} ${esc($('trim').value || '')} ${esc($('color').value || '')}<br>
     사진: ${state.inspectionFiles.length}장
   `;
 }
 
-async function submitForm(event){
+async function submitForm(event) {
   event.preventDefault();
-  if(!validateCurrentStep()||state.submitting)return;
+  if (!validateCurrentStep() || state.submitting) return;
 
-  state.submitting=true;
-  $('submitBtn').disabled=true;
+  state.submitting = true;
+  $('submitBtn').disabled = true;
   setStatus('사진을 준비하고 제출하는 중입니다.');
 
-  try{
-    const payload=await buildPayload();
-    const res=await fetch(API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(payload)
+  try {
+    const payload = await buildPayload();
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
     });
 
-    const result=await res.json();
-    if(!result.ok)throw new Error(result.error||'제출에 실패했습니다.');
+    const result = await res.json();
+    if (!result.ok) throw new Error(result.error || '제출에 실패했습니다.');
 
     showResult(result.data);
     setStatus('');
-  }catch(error){
+  } catch (error) {
     showError(error);
-  }finally{
-    state.submitting=false;
-    $('submitBtn').disabled=false;
+  } finally {
+    state.submitting = false;
+    $('submitBtn').disabled = false;
   }
 }
 
-async function buildPayload(){
-  const card=$('businessCardFile').files[0];
+async function buildPayload() {
+  const card = $('businessCardFile').files[0];
 
   return {
-    salespersonId:state.salespersonId,
-    salesName:$('salesName').value.trim(),
-    position:$('position').value,
-    agency:$('agency').value,
-    personalUrl:$('personalUrl').value.trim(),
-    businessCardUrl:$('businessCardUrl').value.trim(),
-    businessCardFile:card?await fileToPayload(card):null,
-    uploadMedia:$('uploadMedia').value,
-    deliveryDate:$('deliveryDate').value,
-    vehicleModel:$('vehicleModel').value,
-    trim:$('trim').value,
-    color:$('color').value,
-    wheel:$('wheel').value,
-    inspectionFiles:await Promise.all(state.inspectionFiles.map(item=>fileToPayload(item.file))),
-    visitRoutes:checkedValues('visitRoutes'),
-    customerHistory:$('customerHistory').value.trim(),
-    satisfactionPoints:checkedValues('satisfactionPoints'),
-    deliveryMood:$('deliveryMood').value.trim()
+    salespersonId: state.salespersonId,
+    salesName: $('salesName').value.trim(),
+    position: $('position').value,
+    agency: $('agency').value,
+    personalUrl: $('personalUrl').value.trim(),
+    businessCardUrl: $('businessCardUrl').value.trim(),
+    businessCardFile: card ? await fileToPayload(card) : null,
+    deliveryDate: $('deliveryDate').value,
+    vehicleModel: $('vehicleModel').value,
+    trim: $('trim').value,
+    color: $('color').value,
+    wheel: $('wheel').value,
+    inspectionFiles: await Promise.all(state.inspectionFiles.map(item => fileToPayload(item.file))),
+    visitRoutes: checkedValues('visitRoutes'),
+    customerHistory: $('customerHistory').value.trim(),
+    satisfactionPoints: checkedValues('satisfactionPoints'),
+    deliveryMood: $('deliveryMood').value.trim()
   };
 }
 
-function checkedValues(name){
-  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(input=>input.value);
+function checkedValues(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(input => input.value);
 }
 
-function fileToPayload(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve({
-      name:file.name,
-      mimeType:file.type||'application/octet-stream',
-      data:reader.result
+function fileToPayload(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({
+      name: file.name,
+      mimeType: file.type || 'application/octet-stream',
+      data: reader.result
     });
-    reader.onerror=()=>reject(new Error(`${file.name} 파일을 읽지 못했습니다.`));
+    reader.onerror = () => reject(new Error(`${file.name} 파일을 읽지 못했습니다.`));
     reader.readAsDataURL(file);
   });
 }
 
-function showResult(result){
-  $('resultBox').innerHTML=`
-    <b>${esc(result.message||'제출이 완료되었습니다.')}</b>
-    ${result.resultFolderUrl?`<p><a href="${esc(result.resultFolderUrl)}" target="_blank" rel="noopener">결과물 폴더 열기</a></p>`:''}
-    <p>제목: ${esc(result.deliveryTitle||'')}</p>
+function showResult(result) {
+  $('resultBox').innerHTML = `
+    <b>${esc(result.message || '제출이 완료되었습니다.')}</b>
+    ${result.resultFolderUrl ? `<p><a href="${esc(result.resultFolderUrl)}" target="_blank" rel="noopener">결과물 폴더 열기</a></p>` : ''}
+    <p>제목: ${esc(result.deliveryTitle || '')}</p>
     <p><button type="button" class="primary" onclick="resetFormForNewSubmission()">추가 제출</button></p>
   `;
   $('resultBox').classList.add('active');
-  $('submitBtn').disabled=true;
+  $('submitBtn').disabled = true;
 }
-  
-function resetFormForNewSubmission(){
+
+// ── 핵심 수정: 함수가 전역 스코프에 위치해야 onclick에서 호출 가능
+function resetFormForNewSubmission() {
   document.getElementById('briefForm').reset();
 
   state.step = 0;
@@ -491,42 +516,37 @@ function resetFormForNewSubmission(){
   $('resultBox').classList.remove('active');
   $('resultBox').innerHTML = '';
 
-  $('deliveryDate').value = new Date().toISOString().slice(0,10);
+  $('deliveryDate').value = new Date().toISOString().slice(0, 10);
 
   refreshVehicleChildren();
   syncProfileMode();
   renderStep();
 }
-}
-  
-async function apiGet(params){
-  const url=new URL(API_URL);
-  Object.keys(params).forEach(key=>url.searchParams.set(key,params[key]));
-  const res=await fetch(url.toString());
+
+async function apiGet(params) {
+  const url = new URL(API_URL);
+  Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+  const res = await fetch(url.toString());
   return res.json();
 }
 
-function setStatus(message){
-  $('statusText').className='status';
-  $('statusText').textContent=message||'';
+function setStatus(message) {
+  $('statusText').className = 'status';
+  $('statusText').textContent = message || '';
 }
 
-function showError(error){
-  $('statusText').className='status error';
-  $('statusText').textContent=error&&error.message?error.message:String(error);
+function showError(error) {
+  $('statusText').className = 'status error';
+  $('statusText').textContent = error && error.message ? error.message : String(error);
 }
 
-function clearError(){
-  if($('statusText').classList.contains('error'))setStatus('');
+function clearError() {
+  if ($('statusText').classList.contains('error')) setStatus('');
 }
 
-function esc(value){
-  return String(value??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#039;'
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
   }[c]));
 }
 </script>
