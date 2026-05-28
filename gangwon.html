@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>강원도 맘카페 패밀리카 시승 신청</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f7f7f7;
+      color: #111;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+
+    .page {
+      width: min(100%, 1366px);
+      margin: 0 auto;
+      position: relative;
+      background: #fff;
+    }
+
+    .poster {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .dealer-link {
+      position: absolute;
+      left: 34.1%;
+      width: 31.9%;
+      height: 4.9%;
+      border-radius: 18px;
+      color: transparent;
+      overflow: hidden;
+      text-decoration: none;
+      -webkit-tap-highlight-color: rgba(239, 48, 34, 0.2);
+    }
+
+    .dealer-link:focus-visible {
+      outline: 4px solid #005fcc;
+      outline-offset: 4px;
+    }
+
+    .dealer-link--wonju {
+      top: 74.0%;
+    }
+
+    .dealer-link--chuncheon {
+      top: 80.8%;
+    }
+
+    .dealer-link--gangneung {
+      top: 87.7%;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <img
+      class="poster"
+      src="assets/gangwon-webpage.png"
+      alt="강원도 맘카페 회원님들을 위한 르노코리아 시승 신청 이벤트"
+    >
+
+    <a class="dealer-link dealer-link--wonju" href="https://renault-taauto.com/td/reservation/01" aria-label="르노코리아 원주대리점 시승 신청하기">
+      르노코리아 원주대리점
+    </a>
+
+    <a class="dealer-link dealer-link--chuncheon" href="https://renault-taauto.com/td/reservation/01" aria-label="르노코리아 춘천대리점 시승 신청하기">
+      르노코리아 춘천대리점
+    </a>
+
+    <a class="dealer-link dealer-link--gangneung" href="https://renault-taauto.com/td/reservation/01" aria-label="르노코리아 강릉대리점 시승 신청하기">
+      르노코리아 강릉대리점
+    </a>
+  </main>
+</body>
+</html>
