@@ -6,74 +6,112 @@
   <title>블로그 제작 요청</title>
   <style>
     *{box-sizing:border-box}
-    body{margin:0;background:#f6f7f9;color:#1f2933;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif;line-height:1.5}
-    .app{max-width:980px;margin:0 auto;padding:22px 14px 48px}
-    h1{margin:0;font-size:26px;letter-spacing:0}h2{margin:0 0 16px;font-size:20px}h3{margin:0;font-size:17px}
-    p{margin:6px 0 0;color:#697586}.top{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:18px}
+    body{margin:0;background:transparent;color:#1f2933;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif;line-height:1.5}
+    .app{max-width:1080px;margin:0 auto;padding:42px 16px 52px}
+    h1{margin:0;font-size:25px;letter-spacing:0}h2{margin:0 0 16px;font-size:20px}h3{margin:0;font-size:17px}
+    p{margin:6px 0 0;color:#697586}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:12px}.brand-logo{width:38px;height:38px;object-fit:contain;flex:0 0 auto}
     .status{min-height:22px;color:#697586;font-size:13px}.error{color:#b42318;font-weight:800}
     .view{display:none}.view.active{display:block}
-    .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:#fff;border:1px solid #d8dee8;border-radius:8px;box-shadow:0 14px 36px rgba(20,28,38,.08);overflow:hidden}
-    .panel-head{padding:18px;border-bottom:1px solid #e7ebf1}.panel-body{padding:18px}
-    .skin-preview{height:150px;border:1px dashed #cfd6df;border-radius:8px;background:linear-gradient(135deg,#eef2f7,#f9fafb);display:flex;align-items:center;justify-content:center;color:#7a8798;font-weight:800;margin-bottom:14px}
-    .home-action{width:100%;justify-content:center}.soon{display:inline-flex;margin-top:8px;padding:5px 9px;border-radius:999px;background:#fff4e5;color:#9a5b00;font-size:12px;font-weight:800}
-    .history-list{display:grid;gap:8px;margin-top:12px}.history-item{display:block;border:1px solid #d8dee8;border-radius:8px;padding:11px 12px;background:#fbfcfd;color:#1f2933;text-decoration:none}
-    .history-item:hover{border-color:#0f766e;background:#eef7f5}.history-title{font-weight:900}.history-meta{margin-top:4px;color:#697586;font-size:13px}.history-empty{padding:14px;border:1px dashed #cfd6df;border-radius:8px;color:#697586;background:#fbfcfd}
+    .notice{margin:0 0 18px;padding:16px 18px;border-radius:12px;background:#f7f7f5;color:#111827}
+    .notice-title{margin:0 0 8px;color:#d64b36;font-weight:800;font-size:15px}
+    .notice ul{margin:0;padding-left:22px}.notice li{font-size:14px;line-height:1.8}
+    .portal{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+    .support-section{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;overflow:visible}
+    .request-tile{width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 8px 14px;border:0;border-radius:0;background:transparent;text-align:center}
+    .request-tile.enabled{cursor:pointer}.request-tile.enabled:hover .request-title{color:#0f766e}.request-title{font-weight:800;color:#1f2933;font-size:16px}.icon-circle{width:158px;height:158px;border-radius:50%;background:transparent;border:1px solid #dce3eb;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .icon-circle img{width:158px;height:158px;object-fit:cover}.icon-circle.disabled{opacity:.52}.soon{display:inline-flex;padding:5px 9px;border-radius:999px;background:#fff4e5;color:#9a5b00;font-size:11px;font-weight:600}.request-spacer{min-height:25px}
+    .section-history{margin-top:14px;padding:14px;border-radius:14px;background:#f7f7f5}.history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.history-head h2{font-size:14px;margin:0}.history-search-panel{margin-top:18px;padding:14px;border-radius:14px;background:#f7f7f5}.history-search-title{margin:0 0 10px;font-size:14px;font-weight:800}.history-search{display:grid;grid-template-columns:1fr 160px;gap:8px}.history-search input,.history-search select{min-height:38px;border-radius:9px;background:#fff;font-size:13px;padding:7px 10px}.history-search-results{display:grid;gap:0;margin-top:12px;border-top:1px solid #e7e7e4}
+    .history-list{display:block;border-top:1px solid #e7e7e4}.history-row{display:grid;grid-template-columns:58px 70px minmax(92px,1fr) 94px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid #e7e7e4;color:#37352f;text-decoration:none;font-size:12px;font-weight:400}.history-row:hover .history-name{text-decoration:underline}.notion-tag{display:inline-flex;width:max-content;align-items:center;gap:4px;min-height:20px;border-radius:5px;padding:1px 7px;background:#e9e9e7;color:#37352f;font-size:11px;font-weight:400;line-height:17px}.status-ring{display:inline-flex;width:max-content;align-items:center;gap:4px;min-height:20px;border:1px solid #d3d3d1;border-radius:999px;padding:1px 7px;background:#fff;color:#37352f;font-size:11px;font-weight:400;line-height:17px}.status-ring::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#9b9a97}.status-ring.progress{border-color:#9ec6e4;color:#1f6fae}.status-ring.progress::before{background:#1f6fae}.status-ring.done{border-color:#9fd0ae;color:#2d7d46}.status-ring.done::before{background:#2d7d46}.notion-tag.branch{background:#f4e6b8;color:#84610f}.notion-tag.personal{background:#d6eadf;color:#2d7d46}.history-name{font-weight:400;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.history-date{color:#787774;font-size:10px;font-weight:300;text-align:right;white-space:nowrap}.history-empty{padding:10px 0;color:#787774;font-size:12px;font-weight:400}.history-pagination{display:flex;justify-content:center;gap:5px;padding-top:10px}.history-page{min-height:26px;min-width:26px;padding:4px 7px;border-radius:6px;background:transparent;color:#787774;font-size:12px;font-weight:400}.history-page.active{background:#ededeb;color:#37352f}
     .bar{height:8px;background:#e5e9f0;border-radius:99px;overflow:hidden;margin:16px 0}.bar span{display:block;height:100%;background:#0f766e;transition:.18s}
-    form{background:#fff;border:1px solid #d8dee8;border-radius:8px;box-shadow:0 14px 36px rgba(20,28,38,.08);overflow:hidden}
+    form{background:#fff;border:1px solid #d8dee8;border-radius:20px;box-shadow:0 14px 36px rgba(20,28,38,.08);overflow:hidden}
     .step{display:none;padding:22px}.step.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px;min-width:0}.full{grid-column:1/-1}
     label,.label{font-weight:800;font-size:14px}.hint{font-size:13px;color:#697586}
-    input,select,textarea{width:100%;min-height:46px;border:1px solid #d8dee8;border-radius:8px;background:#fff;color:#1f2933;padding:10px 12px;font:inherit;outline:none}
+    input,select,textarea{width:100%;min-height:46px;border:1px solid #d8dee8;border-radius:14px;background:#fff;color:#1f2933;padding:10px 12px;font:inherit;outline:none}
     textarea{min-height:112px;resize:vertical}textarea::placeholder,input::placeholder{color:#9aa4b2}
     input:focus,select:focus,textarea:focus{border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
     .chips{display:flex;flex-wrap:wrap;gap:8px}.chip input{position:absolute;opacity:0;pointer-events:none}
     .chip span{display:inline-flex;align-items:center;min-height:38px;border:1px solid #d8dee8;border-radius:99px;padding:8px 12px;background:#fff;font-size:14px;cursor:pointer}.chip input:checked+span{border-color:#0f766e;background:#eef7f5;color:#0b5f59;font-weight:800}
     .lookup{display:grid;grid-template-columns:1fr auto;gap:8px}.actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 22px;border-top:1px solid #d8dee8;background:#fbfcfd}.btns{display:flex;gap:8px;margin-left:auto}
-    button{min-height:44px;border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#0f766e;color:#fff}.secondary{background:#e8edf3;color:#223044}.ghost{background:transparent;color:#697586}button:disabled{opacity:.55;cursor:not-allowed}
-    .result{display:none;margin-top:14px;padding:15px;border:1px solid #a7d7ce;border-radius:8px;background:#eef7f5}.result.active{display:block}.result a{color:#0b5f59;font-weight:800;word-break:break-all}
-    .file-list{display:grid;gap:6px;margin-top:6px}.file-item{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid #d8dee8;border-radius:8px;padding:8px 10px;background:#fbfcfd;font-size:13px}.file-item button{min-height:30px;padding:4px 8px;background:#edf1f6;color:#44546a}
-    @media(max-width:760px){.app{padding:16px 10px 34px}.top{display:block}h1{font-size:22px}.home-grid,.grid,.lookup{grid-template-columns:1fr}.step{padding:18px 14px}.actions{position:sticky;bottom:0;z-index:5;align-items:stretch;padding:12px}.btns{width:100%}.btns button{flex:1}}
+    button{min-height:44px;border:0;border-radius:999px;padding:10px 18px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#0f766e;color:#fff}.secondary{background:#e8edf3;color:#223044}.ghost{background:transparent;color:#697586}button:disabled{opacity:.55;cursor:not-allowed}
+    .result{display:none;margin-top:14px;padding:15px;border:1px solid #a7d7ce;border-radius:18px;background:#eef7f5}.result.active{display:block}.result a{color:#0b5f59;font-weight:800;word-break:break-all}
+    .file-list{display:grid;gap:6px;margin-top:6px}.file-item{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid #d8dee8;border-radius:14px;padding:8px 10px;background:#fbfcfd;font-size:13px}.file-item button{min-height:30px;padding:4px 8px;background:#edf1f6;color:#44546a}
+    @media(max-width:760px){.app{padding:28px 10px 34px}.top{display:block;margin-bottom:20px}.brand{align-items:flex-start}.brand-logo{width:32px;height:32px}h1{font-size:20px}.notice{padding:14px;margin-bottom:18px}.notice-title{font-size:14px}.notice li{font-size:12px;line-height:1.65}.portal,.grid,.lookup{grid-template-columns:1fr}.support-section{padding:0}.icon-circle{width:136px;height:136px}.icon-circle img{width:136px;height:136px}.section-history,.history-search-panel{padding:12px}.history-search{grid-template-columns:1fr 112px}.history-search input,.history-search select{font-size:11px}.history-row{grid-template-columns:52px 64px minmax(68px,1fr) 66px;font-size:10px;gap:4px}.status-ring,.notion-tag{font-size:9px;padding:1px 5px;min-height:18px}.history-date{font-size:8.5px}.step{padding:18px 14px}.actions{position:sticky;bottom:0;z-index:5;align-items:stretch;padding:12px}.btns{width:100%}.btns button{flex:1}}
   </style>
 </head>
 <body>
 <main class="app">
   <section id="homeView" class="view active">
     <div class="top">
-      <div>
-        <h1>블로그 제작 요청</h1>
-        <p>필요한 제작 유형을 선택하고 현재 요청 현황을 확인합니다.</p>
+      <div class="brand">
+        <img class="brand-logo" src="renault-logo.png" alt="Renault">
+        <div>
+          <h1>티에이오토 영업담당 블로그 마케팅 서포트</h1>
+        </div>
       </div>
       <button class="secondary" type="button" onclick="loadCustomerHistory()">현황 새로고침</button>
     </div>
 
-    <div class="home-grid">
-      <section class="panel">
-        <div class="panel-head">
-          <h2>블로그 스킨 제작 요청</h2>
-          <p>지점 블로그 스킨 제작 요청 메뉴입니다.</p>
-        </div>
-        <div class="panel-body">
-          <div class="skin-preview">BLOG SKIN</div>
-          <button class="primary home-action" type="button" disabled>블로그 스킨 제작 요청</button>
+    <section class="notice" aria-label="정도영업 관련 주의사항">
+      <div class="notice-title">정도영업 관련 주의사항</div>
+      <ul>
+        <li>제목/태그 등에 본인이 소속한 대리점 이외에 다른 지역을 언급 및 태그하는 경우</li>
+        <li>이면할인/값비싼 금액의 추가 기프트 증정의 내용등을 기재하는 경우</li>
+        <li>‘오직 여기에서만!’ ‘다른 곳 가지말고 여기로오세요!’등의 문구를 추가하는 경우</li>
+      </ul>
+    </section>
+
+    <div class="portal">
+      <section class="support-section">
+        <div class="request-tile" aria-disabled="true">
           <div class="soon">오픈 예정입니다</div>
+          <div class="icon-circle disabled">
+            <img alt="" src="icon-skin.png">
+          </div>
+          <div class="request-title">블로그 스킨 제작 요청</div>
+        </div>
+        <div class="section-history">
+          <div class="history-head">
+            <h2>현황</h2>
+          </div>
           <div class="history-list">
-            <div class="history-empty">스킨 제작 요청 현황은 오픈 후 표시됩니다.</div>
+            <div class="history-empty">오픈 후 요청 현황이 표시됩니다.</div>
           </div>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2>블로그 원고 제작 요청</h2>
-          <p>출고 후기 원고와 가공 사진 제작에 필요한 자료를 제출합니다.</p>
-        </div>
-        <div class="panel-body">
-          <button class="primary home-action" type="button" onclick="showFormView()">블로그 원고 제작 요청</button>
+      <section class="support-section">
+        <button class="request-tile enabled" type="button" onclick="showFormView()">
+          <div class="request-spacer" aria-hidden="true"></div>
+          <div class="icon-circle">
+            <img alt="" src="icon-blog.png">
+          </div>
+          <div class="request-title">블로그 원고 제작 요청</div>
+        </button>
+        <div class="section-history">
+          <div class="history-head">
+            <h2>현황</h2>
+          </div>
           <div class="history-list" id="customerHistoryList">
             <div class="history-empty">현황을 불러오는 중입니다.</div>
           </div>
+          <div class="history-pagination" id="customerHistoryPagination"></div>
         </div>
       </section>
     </div>
+
+    <section class="history-search-panel" aria-label="내 원고 확인하기">
+      <div class="history-search-title">내 원고 확인하기</div>
+      <div class="history-search">
+        <input id="historyNameSearch" placeholder="영업담당 이름">
+        <select id="historyAgencyFilter">
+          <option value="">전체 대리점</option>
+        </select>
+      </div>
+      <div class="history-search-results" id="historySearchResults">
+        <div class="history-empty">영업담당 이름을 입력하거나 대리점을 선택하세요.</div>
+      </div>
+    </section>
   </section>
 
   <section id="formView" class="view">
@@ -105,6 +143,7 @@
           </div>
           <div class="field"><label for="position">직책</label><select id="position"><option value="">직책 선택</option></select></div>
           <div class="field"><label for="agency">대리점 *</label><select id="agency" required><option value="">대리점 선택</option></select></div>
+          <div class="field"><label for="email">알림 이메일</label><input id="email" type="email" autocomplete="email"></div>
           <div class="field"><label for="uploadMedia">업로드 *</label><select id="uploadMedia" required><option value="">업로드 선택</option></select></div>
           <input id="submissionDate" type="hidden">
           <div class="field full"><label for="personalUrl">본인 URL</label><input id="personalUrl" type="url" inputmode="url"></div>
@@ -163,8 +202,10 @@
 </main>
 
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycbzy28jZ_MNgS7sLgpYg-xFNBx9FoAFNG8tHr8xnaRl5SweHKrYPaV0GbH6zcNxBy8qZ/exec';
-const state={step:0,total:5,options:null,salespersonId:'',submitting:false,inspectionFiles:[]};
+const API_URL='https://script.google.com/macros/s/AKfycbwPxzS5O5eg_VZK3-t_Y1tj6lZGVXf0-f81eqoaqg8Nautgz53509-mf6YRziucjLMv/exec';
+const state={step:0,total:5,options:null,salespersonId:'',submitting:false,inspectionFiles:[],historyItems:[],historyPage:1,historyFilters:{name:'',agency:''}};
+const HISTORY_CACHE_KEY='taautoCustomerHistory_v4';
+const HISTORY_PAGE_SIZE=10;
 const $=id=>document.getElementById(id);
 
 document.addEventListener('DOMContentLoaded',init);
@@ -175,6 +216,7 @@ async function init(){
   $('prevBtn').onclick=prevStep;$('nextBtn').onclick=nextStep;$('lookupBtn').onclick=lookupSalesperson;
   document.querySelectorAll('input[name="profileMode"]').forEach(input=>input.addEventListener('change',syncProfileMode));
   $('vehicleModel').onchange=refreshVehicleChildren;$('trim').onchange=refreshWheels;$('inspectionFiles').onchange=addInspectionFiles;$('briefForm').onsubmit=submitForm;
+  $('historyNameSearch').oninput=applyHistoryFilters;$('historyAgencyFilter').onchange=applyHistoryFilters;
   syncProfileMode();renderStep();
   await loadOptions();await loadCustomerHistory();setInterval(loadCustomerHistory,60000);
 }
@@ -185,33 +227,71 @@ async function loadOptions(){
 
 async function loadCustomerHistory(){
   const list=$('customerHistoryList');
+  const cached=readHistoryCache();
+  if(cached.length){renderCustomerHistory(cached,state.historyPage);renderHistorySearchResults()}
   try{
-    const res=await apiGet({action:'customerHistory',limit:20});
+    const res=await apiGet({action:'customerHistory',limit:50});
     if(!res.ok)throw new Error(res.error||'현황을 불러오지 못했습니다.');
-    renderCustomerHistory(res.data||[]);
+    const items=sortHistoryItems(res.data||[]);
+    writeHistoryCache(items);
+    renderCustomerHistory(items,1);
+    renderHistorySearchResults();
   }catch(error){
-    list.innerHTML='<div class="history-empty">현황을 불러오지 못했습니다.</div>';
+    if(!cached.length)list.innerHTML='<div class="history-empty">현황을 불러오지 못했습니다.</div>';
   }
 }
 
-function renderCustomerHistory(items){
+function readHistoryCache(){try{return JSON.parse(localStorage.getItem(HISTORY_CACHE_KEY)||'[]')}catch(error){return[]}}
+function writeHistoryCache(items){try{localStorage.setItem(HISTORY_CACHE_KEY,JSON.stringify(items))}catch(error){}}
+function sortHistoryItems(items){return [...items].sort((a,b)=>String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')))}
+
+function renderCustomerHistory(items,page){
   const list=$('customerHistoryList');
-  if(!items.length){list.innerHTML='<div class="history-empty">아직 표시할 요청이 없습니다.</div>';return}
-  list.innerHTML=items.map(item=>{
+  const pagination=$('customerHistoryPagination');
+  state.historyItems=sortHistoryItems(items);
+  const totalPages=Math.max(1,Math.ceil(state.historyItems.length/HISTORY_PAGE_SIZE));
+  state.historyPage=Math.min(Math.max(page||1,1),totalPages);
+  if(!items.length){list.innerHTML='<div class="history-empty">아직 표시할 요청이 없습니다.</div>';pagination.innerHTML='';return}
+  const start=(state.historyPage-1)*HISTORY_PAGE_SIZE;
+  const visible=state.historyItems.slice(start,start+HISTORY_PAGE_SIZE);
+  list.innerHTML=visible.map(item=>{
     const url=item.targetUrl||item.notionUrl||'#';
-    const disabled=!item.targetUrl;
-    return `<a class="history-item" href="${esc(url)}" target="_blank" rel="noopener" ${disabled?'aria-disabled="true"':''}>
-      <div class="history-title">${esc(item.title||'제목 없음')}</div>
-      <div class="history-meta">${esc(item.submittedAt||'-')} · ${esc(item.uploadMedia||'-')}${disabled?' · 연결 URL 없음':''}</div>
+    const disabled=!url||url==='#';
+    const uploadPending=String(item.uploadMedia||'').includes('지점')&&!item.uploadUrl;
+    const stateLabel=normalizeHistoryStatus(item.status);
+    const stateClass=statusClass(stateLabel);
+    return `<a class="history-row" href="${esc(url)}" target="_blank" rel="noopener" ${disabled?'aria-disabled="true"':''} ${uploadPending?'onclick="return showUploadPending(event)"':''}>
+      <span class="status-ring ${stateClass}">${esc(stateLabel)}</span>
+      <span class="notion-tag ${uploadClass(item.uploadMedia)}">${esc(item.uploadMedia||'업로드')}</span>
+      <span class="history-name">${esc(item.title||'제목 없음')}${disabled?' · 연결 URL 없음':''}</span>
+      <span class="history-date">${esc(formatSubmittedAt(item.submittedAt))}</span>
     </a>`;
   }).join('');
+  pagination.innerHTML=totalPages>1?Array.from({length:totalPages},(_,i)=>`<button type="button" class="history-page ${i+1===state.historyPage?'active':''}" onclick="goHistoryPage(${i+1})">${i+1}</button>`).join(''):'';
 }
+
+function goHistoryPage(page){renderCustomerHistory(state.historyItems,page)}
+function applyHistoryFilters(){state.historyFilters.name=$('historyNameSearch').value.trim().toLowerCase();state.historyFilters.agency=normalizeFilterText($('historyAgencyFilter').value);renderHistorySearchResults()}
+function filterHistoryItems(items){return items.filter(item=>{const keyword=state.historyFilters.name;const name=String(item.salesName||'').toLowerCase();const title=String(item.title||'').toLowerCase();const agency=normalizeFilterText(item.agency);return(!keyword||name.includes(keyword)||title.includes(keyword))&&(!state.historyFilters.agency||agency===state.historyFilters.agency)})}
+function normalizeFilterText(value){return String(value||'').replace(/\s+/g,'').trim()}
+function renderHistorySearchResults(){const box=$('historySearchResults');if(!box)return;const hasFilter=Boolean(state.historyFilters.name||state.historyFilters.agency);if(!hasFilter){box.innerHTML='<div class="history-empty">영업담당 이름을 입력하거나 대리점을 선택하세요.</div>';return}const results=filterHistoryItems(state.historyItems);if(!results.length){box.innerHTML='<div class="history-empty">검색 조건에 맞는 원고가 없습니다.</div>';return}box.innerHTML=results.map(item=>{const url=item.targetUrl||item.notionUrl||'#';const disabled=!url||url==='#';const uploadPending=String(item.uploadMedia||'').includes('지점')&&!item.uploadUrl;const stateLabel=normalizeHistoryStatus(item.status);const stateClass=statusClass(stateLabel);return `<a class="history-row" href="${esc(url)}" target="_blank" rel="noopener" ${disabled?'aria-disabled="true"':''} ${uploadPending?'onclick="return showUploadPending(event)"':''}>
+      <span class="status-ring ${stateClass}">${esc(stateLabel)}</span>
+      <span class="notion-tag ${uploadClass(item.uploadMedia)}">${esc(item.uploadMedia||'업로드')}</span>
+      <span class="history-name">${esc(item.title||'제목 없음')}${disabled?' · 연결 URL 없음':''}</span>
+      <span class="history-date">${esc(formatSubmittedAt(item.submittedAt))}</span>
+    </a>`}).join('')}
+function showUploadPending(event){event.preventDefault();alert('업로드 전 입니다');return false}
+function normalizeHistoryStatus(value){const text=String(value||'').trim();if(text.includes('완료'))return'완료';if(text.includes('진행'))return'진행 중';return text}
+function statusClass(value){if(value==='완료')return'done';if(value.includes('진행'))return'progress';return'request'}
+function uploadClass(value){const text=String(value||'');if(text.includes('본인'))return'personal';if(text.includes('지점'))return'branch';return'request'}
+function formatSubmittedAt(value){if(!value)return'';const date=new Date(value);if(Number.isNaN(date.getTime()))return String(value).replace(/-/g,'.');const pad=n=>String(n).padStart(2,'0');return `${date.getFullYear()}.${pad(date.getMonth()+1)}.${pad(date.getDate())}.${pad(date.getHours())}:${pad(date.getMinutes())}`}
 
 function showFormView(){$('homeView').classList.remove('active');$('formView').classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
 function showHomeView(){$('formView').classList.remove('active');$('homeView').classList.add('active');loadCustomerHistory();window.scrollTo({top:0,behavior:'smooth'})}
 
 function populate(o){
   fillSelect('agency',[...(o.agencies||[])].sort((a,b)=>a.localeCompare(b,'ko')),'대리점 선택');
+  fillSelect('historyAgencyFilter',[...(o.agencies||[])].sort((a,b)=>a.localeCompare(b,'ko')),'전체 대리점');
   fillSelect('position',o.positions||[],'직책 선택');
   fillSelect('uploadMedia',o.uploadMediaOptions||[],'업로드 선택');
   fillSelect('vehicleModel',Object.keys(o.vehicles||{}),'모델 선택');
@@ -227,7 +307,7 @@ async function lookupSalesperson(){
   const name=$('salesName').value.trim();if(!name)return showError('영업담당 이름을 먼저 입력해주세요.');
   try{setStatus('영업담당 정보를 불러오는 중입니다.');const res=await apiGet({action:'findSalesperson',name});if(!res.ok)throw new Error(res.error||'영업담당 정보를 불러오지 못했습니다.');const matches=res.data||[];
     if(!matches.length){state.salespersonId='';document.querySelector('input[name="profileMode"][value="new"]').checked=true;syncProfileMode();setStatus('기존 기록이 없습니다. 새로 등록으로 진행할 수 있습니다.');return}
-    const p=matches[0];state.salespersonId=p.id;$('salesName').value=p.name||name;setValueIfExists('position',p.position);setValueIfExists('agency',p.agency);$('personalUrl').value=p.personalUrl||'';$('businessCardUrl').value=p.businessCardUrl||'';document.querySelector('input[name="profileMode"][value="existing"]').checked=true;syncProfileMode();setStatus('기존 영업담당 정보를 불러왔습니다.');
+    const p=matches[0];state.salespersonId=p.id;$('salesName').value=p.name||name;setValueIfExists('position',p.position);setValueIfExists('agency',p.agency);setValueIfExists('uploadMedia',p.uploadMedia);$('email').value=p.email||'';$('personalUrl').value=p.personalUrl||'';$('businessCardUrl').value=p.businessCardUrl||'';document.querySelector('input[name="profileMode"][value="existing"]').checked=true;syncProfileMode();setStatus('기존 영업담당 정보를 불러왔습니다.');
   }catch(error){showError(error)}
 }
 function setValueIfExists(id,value){if(value&&[...$(id).options].some(o=>o.value===value))$(id).value=value}
@@ -246,7 +326,7 @@ async function submitForm(event){
   event.preventDefault();if(!validateCurrentStep()||state.submitting)return;state.submitting=true;$('submitBtn').disabled=true;setStatus('사진을 준비하고 제출하는 중입니다.');
   try{const payload=await buildPayload();const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});const result=await res.json();if(!result.ok)throw new Error(result.error||'제출에 실패했습니다.');showResult(result.data);setStatus('');loadCustomerHistory()}catch(error){showError(error)}finally{state.submitting=false;$('submitBtn').disabled=false}
 }
-async function buildPayload(){const card=$('businessCardFile').files[0];return{salespersonId:state.salespersonId,salesName:$('salesName').value.trim(),position:$('position').value,agency:$('agency').value,personalUrl:$('personalUrl').value.trim(),businessCardUrl:$('businessCardUrl').value.trim(),businessCardFile:card?await fileToPayload(card):null,uploadMedia:$('uploadMedia').value,submissionDate:$('submissionDate').value,deliveryDate:$('deliveryDate').value,vehicleModel:$('vehicleModel').value,trim:$('trim').value,color:$('color').value,wheel:$('wheel').value,inspectionFiles:await Promise.all(state.inspectionFiles.map(item=>fileToPayload(item.file))),visitRoutes:checkedValues('visitRoutes'),customerHistory:$('customerHistory').value.trim(),satisfactionPoints:checkedValues('satisfactionPoints'),deliveryMood:$('deliveryMood').value.trim()}}
+async function buildPayload(){const card=$('businessCardFile').files[0];return{salespersonId:state.salespersonId,salesName:$('salesName').value.trim(),position:$('position').value,agency:$('agency').value,email:$('email').value.trim(),personalUrl:$('personalUrl').value.trim(),businessCardUrl:$('businessCardUrl').value.trim(),businessCardFile:card?await fileToPayload(card):null,uploadMedia:$('uploadMedia').value,submissionDate:$('submissionDate').value,deliveryDate:$('deliveryDate').value,vehicleModel:$('vehicleModel').value,trim:$('trim').value,color:$('color').value,wheel:$('wheel').value,inspectionFiles:await Promise.all(state.inspectionFiles.map(item=>fileToPayload(item.file))),visitRoutes:checkedValues('visitRoutes'),customerHistory:$('customerHistory').value.trim(),satisfactionPoints:checkedValues('satisfactionPoints'),deliveryMood:$('deliveryMood').value.trim()}}
 function checkedValues(name){return[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(input=>input.value)}
 function fileToPayload(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,mimeType:file.type||'application/octet-stream',data:reader.result});reader.onerror=()=>reject(new Error(`${file.name} 파일을 읽지 못했습니다.`));reader.readAsDataURL(file)})}
 function showResult(result){$('resultBox').innerHTML=`<b>${esc(result.message||'제출이 완료되었습니다.')}</b>${result.resultFolderUrl?`<p><a href="${esc(result.resultFolderUrl)}" target="_blank" rel="noopener">결과물 폴더 열기</a></p>`:''}<p>제목: ${esc(result.deliveryTitle||'')}</p><p><button type="button" class="primary" onclick="resetFormForNewSubmission()">추가 제출</button> <button type="button" class="secondary" onclick="showHomeView()">홈으로</button></p>`;$('resultBox').classList.add('active');$('submitBtn').disabled=true}
