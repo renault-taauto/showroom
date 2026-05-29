@@ -126,7 +126,7 @@
     <div class="status" id="progressText">1 / 5</div>
     <div class="bar"><span id="progressBar"></span></div>
 
-    <form id="briefForm">
+    <form id="briefForm" novalidate>
       <section class="step active">
         <h2>영업담당 정보</h2>
         <div class="grid">
@@ -142,7 +142,7 @@
             <div class="lookup"><input id="salesName" required autocomplete="name"><button class="secondary" type="button" id="lookupBtn">불러오기</button></div>
             <div class="hint">기존 담당자는 이름 입력 후 불러오기를 누르세요.</div>
           </div>
-          <div class="field"><label for="password">비밀번호 *</label><input id="password" type="password" minlength="4" maxlength="8" pattern="(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{4,8}" autocomplete="new-password" required><div class="hint">영문+숫자 조합 4~8자</div></div>
+          <div class="field"><label for="password">비밀번호 *</label><input id="password" type="password" minlength="4" maxlength="8" pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,8}" autocomplete="new-password" required><div class="hint">영문+숫자 조합 4~8자</div></div>
           <div class="field"><label for="agency">대리점 *</label><select id="agency" required><option value="">대리점 선택</option></select></div>
           <div class="field"><label for="email">알림 이메일</label><input id="email" type="email" autocomplete="email"></div>
           <div class="field"><label for="uploadMedia">업로드 *</label><select id="uploadMedia" required><option value="">업로드 선택</option></select></div>
@@ -212,7 +212,7 @@
 </main>
 
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycbwPxzS5O5eg_VZK3-t_Y1tj6lZGVXf0-f81eqoaqg8Nautgz53509-mf6YRziucjLMv/exec';
+const API_URL='https://script.google.com/macros/s/AKfycbwt2XhQHkpxGM1EwHtX7eCh3LduIDwo0bceFYSK8fVwoCMHIgrhaoPk35_U1w-aSqCF/exec';
 const state={step:0,total:5,options:null,salespersonId:'',salespersonAgency:'',submitting:false,inspectionFiles:[],historyItems:[],historyPage:1,historyFilters:{name:'',password:''},historyAuth:null};
 const HISTORY_CACHE_KEY='taautoCustomerHistory_v4';
 const HISTORY_PAGE_SIZE=10;
@@ -329,11 +329,14 @@ function removeInspectionFile(index){state.inspectionFiles.splice(index,1);rende
 function nextStep(){if(validateCurrentStep()&&state.step<state.total-1){state.step++;renderStep()}}
 function prevStep(){if(state.step>0){state.step--;renderStep()}}
 function renderStep(){document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===state.step));$('progressText').textContent=`${state.step+1} / ${state.total}`;$('progressBar').style.width=`${(state.step+1)/state.total*100}%`;$('prevBtn').style.display=state.step?'':'none';$('nextBtn').style.display=state.step===state.total-1?'none':'';$('submitBtn').style.display=state.step===state.total-1?'':'none';if(state.step===state.total-1)renderReview();scrollTo({top:0,behavior:'smooth'})}
-function validateCurrentStep(){clearError();const active=document.querySelector('.step.active');for(const field of active.querySelectorAll('[required]')){if(!field.value){field.focus();showError('필수 항목을 입력해주세요.');return false}}if(state.step===2&&state.inspectionFiles.length<6){showError('검수 진행 사진은 최소 6장 이상 선택해주세요.');return false}return true}
+function validateCurrentStep(){return validateStepElement(document.querySelector('.step.active'))}
+function validateStepElement(step){clearError();for(const field of step.querySelectorAll('[required]')){if(!field.value){field.focus();showError('필수 항목을 입력해주세요.');return false}if(field.id==='password'&&!isValidPassword(field.value)){field.focus();showError('비밀번호는 영문과 숫자를 모두 포함한 4~8자로 입력해주세요.');return false}if(field.type==='email'&&field.value&&!field.checkValidity()){field.focus();showError('이메일 형식을 확인해주세요.');return false}}if([...document.querySelectorAll('.step')].indexOf(step)===2&&state.inspectionFiles.length<6){showError('검수 진행 사진은 최소 6장 이상 선택해주세요.');return false}return true}
+function validateAllSteps(){const previous=state.step;const steps=[...document.querySelectorAll('.step')];for(let i=0;i<steps.length;i++){if(!validateStepElement(steps[i])){state.step=i;renderStep();return false}}state.step=previous;renderStep();return true}
+function isValidPassword(value){return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,8}$/.test(String(value||''))}
 function renderReview(){$('reviewBox').innerHTML=`<b>${esc($('salesName').value||'-')}</b> / ${esc($('agency').value||'-')}<br>${esc($('vehicleModel').value||'-')} ${esc($('trim').value||'')} ${esc($('color').value||'')}<br>업로드: ${esc($('uploadMedia').value||'-')}<br>사진: ${state.inspectionFiles.length}장`}
 
 async function submitForm(event){
-  event.preventDefault();if(!validateCurrentStep()||state.submitting)return;state.submitting=true;$('submitBtn').disabled=true;setStatus('사진을 준비하고 제출하는 중입니다.');
+  event.preventDefault();if(!validateAllSteps()||state.submitting)return;state.submitting=true;$('submitBtn').disabled=true;setStatus('사진을 준비하고 제출하는 중입니다.');
   try{const payload=await buildPayload();const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});const result=await res.json();if(!result.ok)throw new Error(result.error||'제출에 실패했습니다.');showResult(result.data);setStatus('');loadCustomerHistory()}catch(error){showError(error)}finally{state.submitting=false;$('submitBtn').disabled=false}
 }
 async function buildPayload(){const card=$('businessCardFile').files[0];return{salespersonId:state.salespersonId,salesName:$('salesName').value.trim(),password:$('password').value.trim(),agency:$('agency').value||state.salespersonAgency,email:$('email').value.trim(),personalUrl:$('personalUrl').value.trim(),businessCardUrl:$('businessCardUrl').value.trim(),businessCardFile:card?await fileToPayload(card):null,uploadMedia:$('uploadMedia').value,submissionDate:$('submissionDate').value,deliveryDate:$('deliveryDate').value,vehicleModel:$('vehicleModel').value,trim:$('trim').value,color:$('color').value,wheel:$('wheel').value,inspectionFiles:await Promise.all(state.inspectionFiles.map(item=>fileToPayload(item.file))),visitRoutes:checkedValues('visitRoutes'),customerHistory:$('customerHistory').value.trim(),satisfactionPoints:checkedValues('satisfactionPoints'),deliveryMood:$('deliveryMood').value.trim()}}
