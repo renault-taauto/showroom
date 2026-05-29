@@ -202,11 +202,11 @@
   </section>
   <footer class="site-footer">
     <p>* 본 사이트는 르노코리아 공식 법인 딜러사 티에이오토 소속 대리점의 영업담당분들을 위한 내부 지원 사이트입니다.</p>
-    <p>* 본 사이트의 콘텐츠, 양식, 이미지, 원고 및 제작 자료의 무단 복제, 배포, 수정을 금지합니다.</p>
-    <p>* 제출된 자료는 블로그 마케팅 콘텐츠 제작 및 내부 운영 목적에 한해 활용됩니다.</p>
-    <p>* 고객 개인정보 및 초상권 관련 자료는 반드시 사전 동의를 받은 경우에만 제출해 주세요.</p>
-    <p>* 고객 사진이 포함된 경우 콘텐츠 제작 과정에서 얼굴 등 식별 가능한 영역은 모자이크 처리됩니다.</p>
-    <p>* 부정확하거나 과장된 표현, 할인 조건 오인 가능성이 있는 내용은 제작 과정에서 수정 또는 제외될 수 있습니다.</p>
+    <p>본 사이트의 콘텐츠, 양식, 이미지, 원고 및 제작 자료의 무단 복제, 배포, 수정을 금지합니다.</p>
+    <p>제출된 자료는 블로그 마케팅 콘텐츠 제작 및 내부 운영 목적에 한해 활용됩니다.</p>
+    <p>고객 개인정보 및 초상권 관련 자료는 반드시 사전 동의를 받은 경우에만 제출해 주세요.</p>
+    <p>고객 사진이 포함된 경우 콘텐츠 제작 과정에서 얼굴 등 식별 가능한 영역은 모자이크 처리됩니다.</p>
+    <p>부정확하거나 과장된 표현, 할인 조건 오인 가능성이 있는 내용은 제작 과정에서 수정 또는 제외될 수 있습니다.</p>
     <p>© TA Auto. All rights reserved.</p>
   </footer>
 </main>
@@ -347,4 +347,7 @@ async function apiPost(payload){const res=await fetch(API_URL,{method:'POST',hea
 function setStatus(message){$('statusText').className='status';$('statusText').textContent=message||''}
 function showError(error){$('statusText').className='status error';$('statusText').textContent=error&&error.message?error.message:String(error)}
 function clearError(){if($('statusText').classList.contains('error'))setStatus('')}
-function esc(value){return String(value??'').replace(/
+function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+</script>
+</body>
+</html>
