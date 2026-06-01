@@ -222,8 +222,71 @@
   </main>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwsbIiga1OWw3eXdMLwqTtIuqcaKz3NO2ehephxYYpuvO1LzbP-_FnymNk8GSlXCu73/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRFizDvH1oMoCcAMey_li8zo_DyYOM0JeEGX5NMa1vIIZZShlcuVyQt8S-tGVSchMJ/exec';
     const SURVEY_MONTH = '26년 5월 시책';
+    const DEFAULT_REPS = [
+      { division: '2본부', branch: '서인천', salesName: '나유성', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '서인천', salesName: '노민경', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '서인천', salesName: '강민구', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '검단', salesName: '이용섭', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '계양', salesName: '홍대익', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '계양', salesName: '김정현', periodDetail: '5/8~10 1개, 5/15~17 1개', limit: 2 },
+      { division: '2본부', branch: '계양', salesName: '김나영', periodDetail: '5/8~10 1개, 5/15~17 1개', limit: 2 },
+      { division: '2본부', branch: '계양', salesName: '정지운', periodDetail: '5/8~10 2개', limit: 2 },
+      { division: '2본부', branch: '계양', salesName: '양종훈', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '금천', salesName: '심상성', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '금천', salesName: '김규석', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '금천', salesName: '이원복', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '운정', salesName: '권혁빈', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '운정', salesName: '김경민', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '운정', salesName: '김수연', periodDetail: '5/8~10 3개, 5/15~17 1개', limit: 4 },
+      { division: '2본부', branch: '운정', salesName: '김준우', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '운정', salesName: '이종환', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '운정', salesName: '조영철', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '평촌', salesName: '이창희', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '평촌', salesName: '유순옥', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '평촌', salesName: '조대성', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '평촌', salesName: '신형진', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '북수원', salesName: '한은주', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '북수원SF', salesName: '김현진', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '안산중앙', salesName: '김성규', periodDetail: '5/15~17 2개', limit: 2 },
+      { division: '1본부', branch: '안산중앙', salesName: '김만식', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '안산중앙', salesName: '김은미', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '안산중앙', salesName: '김수련', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '강릉', salesName: '조영민', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '강릉', salesName: '엄기룡', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '춘천', salesName: '김주일', periodDetail: '5/8~10 1개, 5/15~17 1개', limit: 2 },
+      { division: '1본부', branch: '춘천', salesName: '김선근', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '춘천', salesName: '김천서', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '춘천', salesName: '남궁경', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '춘천', salesName: '최종인', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '송파', salesName: '박성제', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '송파', salesName: '최선우', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '중랑', salesName: '최승혁', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '하남', salesName: '김혜원', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '하남', salesName: '이계우', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '하남', salesName: '안상연', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '1본부', branch: '강동', salesName: '한동욱', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '1본부', branch: '강동', salesName: '오홍진', periodDetail: '5/15~17 2개', limit: 2 },
+      { division: '2본부', branch: '의정부금오', salesName: '박상환', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '의정부금오', salesName: '선우영미', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '의정부금오', salesName: '장용일', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '의정부금오', salesName: '김장원', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '의정부금오', salesName: '이은희', periodDetail: '5/8~10 1개, 5/15~17 1개', limit: 2 },
+      { division: '2본부', branch: '노원', salesName: '조해형', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '구리', salesName: '구상모', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '구리', salesName: '안택근', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '은평', salesName: '최귀환', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '은평', salesName: '홍성윤', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '', branch: '화정', salesName: '정정희', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '', branch: '화정', salesName: '이영상', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '', branch: '화정', salesName: '마창영', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '북일산', salesName: '남윤환', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '북일산', salesName: '이호근', periodDetail: '5/8~10 1개, 5/15~17 1개', limit: 2 },
+      { division: '2본부', branch: '일산', salesName: '정중현', periodDetail: '5/8~10 1개', limit: 1 },
+      { division: '2본부', branch: '일산', salesName: '이한귀', periodDetail: '5/15~17 1개', limit: 1 },
+      { division: '2본부', branch: '일산', salesName: '채수봉', periodDetail: '5/15~17 1개', limit: 1 }
+    ];
 
     const state = {
       config: null,
@@ -280,12 +343,21 @@
       try {
         const data = await jsonp({ action: 'getConfig', month: SURVEY_MONTH });
         if (!data.ok) throw new Error(data.message || '설정을 불러오지 못했습니다.');
+        if (!data.reps || data.reps.length === 0) data.reps = DEFAULT_REPS;
         state.config = data;
         state.submitted = new Set(data.submittedSalesNames || []);
         els.checkButton.disabled = false;
         els.checkButton.textContent = '확인';
       } catch (err) {
-        els.lookupMessage.textContent = err.message;
+        state.config = {
+          ok: true,
+          defaultMonth: SURVEY_MONTH,
+          items: [{ name: '코스트코 회원권' }, { name: '오너스패키지' }],
+          reps: DEFAULT_REPS,
+          submittedSalesNames: []
+        };
+        state.submitted = new Set();
+        els.lookupMessage.textContent = '기본 대상자 목록으로 조회합니다.';
         els.checkButton.disabled = false;
         els.checkButton.textContent = '확인';
       }
