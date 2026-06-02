@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RK 지점 정보 등록</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #687385;
+      --line: #dfe4ea;
+      --primary: #1769aa;
+      --primary-dark: #0f4f82;
+      --danger: #b42318;
+      --ok: #047857;
+      --focus: rgba(23, 105, 170, .18);
+      font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+
+    .status {
+      min-height: 42px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+
+    .status[data-tone="ok"] {
+      color: var(--ok);
+      border-color: rgba(4, 120, 87, .35);
+      background: #ecfdf5;
+    }
+
+    .status[data-tone="error"] {
+      color: var(--danger);
+      border-color: rgba(180, 35, 24, .35);
+      background: #fff4f3;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #283443;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #cfd6df;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 3px solid var(--focus);
+      border-color: var(--primary);
+    }
+
+    input[type="file"] {
+      padding: 9px;
+    }
+
+    .employee {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .employee + .employee {
+      margin-top: 12px;
+    }
+
+    .employee-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .employee-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 0 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      color: var(--primary);
+      border-color: rgba(23, 105, 170, .35);
+      background: #eef6fc;
+    }
+
+    button.danger {
+      color: var(--danger);
+      border-color: rgba(180, 35, 24, .28);
+      background: #fff4f3;
+    }
+
+    button.primary {
+      color: #fff;
+      background: var(--primary);
+    }
+
+    button.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: progress;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: min(100% - 20px, 960px);
+        padding-top: 18px;
+      }
+
+      header,
+      .grid {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      section {
+        padding: 16px;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      button {
+        flex: 1 1 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>RK 지점 정보 등록</h1>
+      <div class="status" id="status">모든 항목은 필수입니다.</div>
+    </header>
+
+    <form id="branchForm">
+      <section>
+        <h2>지점 정보</h2>
+        <div class="grid">
+          <label>
+            지점명
+            <select id="branchName" name="branchName" required>
+              <option value="">지점을 선택하세요</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <h2>네이버 계정</h2>
+        <div class="grid">
+          <label>
+            네이버 아이디
+            <input id="naverId" name="naverId" autocomplete="off" required>
+          </label>
+          <label>
+            네이버 비밀번호
+            <input id="naverPassword" name="naverPassword" type="password" autocomplete="new-password" required>
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <div class="employee-head">
+          <h2>영업담당</h2>
+          <button class="secondary" type="button" id="addEmployee">담당자 추가</button>
+        </div>
+        <div id="employees"></div>
+      </section>
+
+      <div class="actions">
+        <button class="primary" type="submit" id="submitButton">저장하기</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwvBnFjCCvWECppXSNcMnX9cTYBmHsvkO7VbJk6Kf8nfF8uMSH9u3qn0YKksaLyRtfM/exec";
+    const BRANCHES = [
+      "금천",
+      "서인천",
+      "검단",
+      "계양",
+      "일산",
+      "북일산",
+      "은평",
+      "운정",
+      "의정부금오",
+      "노원",
+      "중랑",
+      "구리",
+      "안산중앙",
+      "평촌",
+      "북수원",
+      "수원스타필드",
+      "원주",
+      "강릉",
+      "춘천",
+      "송파대로",
+      "강동",
+      "하남미사"
+    ];
+
+    const form = document.querySelector("#branchForm");
+    const branchSelect = document.querySelector("#branchName");
+    const employees = document.querySelector("#employees");
+    const addEmployeeButton = document.querySelector("#addEmployee");
+    const submitButton = document.querySelector("#submitButton");
+    const statusBox = document.querySelector("#status");
+
+    let employeeCount = 0;
+
+    function setStatus(message, tone = "") {
+      statusBox.textContent = message;
+      statusBox.dataset.tone = tone;
+    }
+
+    function populateBranches() {
+      BRANCHES.forEach((branch) => {
+        const option = document.createElement("option");
+        option.value = branch;
+        option.textContent = branch;
+        branchSelect.appendChild(option);
+      });
+    }
+
+    function addEmployee() {
+      employeeCount += 1;
+      const id = `employee-${employeeCount}`;
+      const item = document.createElement("div");
+      item.className = "employee";
+      item.dataset.employee = "true";
+      item.innerHTML = `
+        <div class="employee-head">
+          <p class="employee-title">담당자 ${employeeCount}</p>
+          <button class="danger" type="button" data-remove>삭제</button>
+        </div>
+        <div class="grid">
+          <label>
+            이름
+            <input name="${id}-name" data-field="name" autocomplete="name" required>
+          </label>
+          <label>
+            직책
+            <input name="${id}-position" data-field="position" required>
+          </label>
+          <label>
+            RK 메일
+            <input name="${id}-email" data-field="email" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            사진
+            <input name="${id}-photo" data-field="photo" type="file" accept="image/*" required>
+          </label>
+        </div>
+      `;
+      item.querySelector("[data-remove]").addEventListener("click", () => {
+        if (employees.querySelectorAll("[data-employee]").length === 1) {
+          setStatus("영업담당은 최소 1명 이상 필요합니다.", "error");
+          return;
+        }
+        item.remove();
+        renumberEmployees();
+      });
+      employees.appendChild(item);
+      renumberEmployees();
+    }
+
+    function renumberEmployees() {
+      employees.querySelectorAll("[data-employee]").forEach((item, index) => {
+        item.querySelector(".employee-title").textContent = `담당자 ${index + 1}`;
+      });
+    }
+
+    function fileToPayload(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result);
+          const comma = result.indexOf(",");
+          resolve({
+            name: file.name,
+            type: file.type || "application/octet-stream",
+            data: comma >= 0 ? result.slice(comma + 1) : result
+          });
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function buildPayload() {
+      const branchName = document.querySelector("#branchName").value.trim();
+      const naverId = document.querySelector("#naverId").value.trim();
+      const naverPassword = document.querySelector("#naverPassword").value;
+      const employeeItems = Array.from(employees.querySelectorAll("[data-employee]"));
+
+      const employeePayloads = [];
+      for (const item of employeeItems) {
+        const name = item.querySelector('[data-field="name"]').value.trim();
+        const position = item.querySelector('[data-field="position"]').value.trim();
+        const email = item.querySelector('[data-field="email"]').value.trim();
+        const photoInput = item.querySelector('[data-field="photo"]');
+        const photoFile = photoInput.files[0];
+
+        employeePayloads.push({
+          name,
+          position,
+          email,
+          photo: await fileToPayload(photoFile)
+        });
+      }
+
+      return {
+        branchName,
+        naver: {
+          id: naverId,
+          password: naverPassword
+        },
+        employees: employeePayloads
+      };
+    }
+
+    function submitWithHiddenForm(payload) {
+      return new Promise((resolve, reject) => {
+        const frameName = `submit-frame-${Date.now()}`;
+        const iframe = document.createElement("iframe");
+        iframe.name = frameName;
+        iframe.style.display = "none";
+
+        const hiddenForm = document.createElement("form");
+        hiddenForm.method = "POST";
+        hiddenForm.action = WEB_APP_URL;
+        hiddenForm.target = frameName;
+        hiddenForm.style.display = "none";
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "payload";
+        input.value = JSON.stringify(payload);
+        hiddenForm.appendChild(input);
+
+        const cleanup = () => {
+          hiddenForm.remove();
+          iframe.remove();
+        };
+
+        iframe.addEventListener("load", () => {
+          cleanup();
+          resolve();
+        }, { once: true });
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(hiddenForm);
+
+        try {
+          hiddenForm.submit();
+        } catch (error) {
+          cleanup();
+          reject(error);
+        }
+      });
+    }
+
+    addEmployeeButton.addEventListener("click", addEmployee);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (WEB_APP_URL.includes("여기에_")) {
+        setStatus("HTML 파일에서 WEB_APP_URL 값을 Apps Script 웹앱 URL로 교체해주세요.", "error");
+        return;
+      }
+      if (!form.reportValidity()) return;
+
+      submitButton.disabled = true;
+      setStatus("저장 중입니다. 사진 용량에 따라 잠시 걸릴 수 있습니다.");
+
+      try {
+        const payload = await buildPayload();
+        await submitWithHiddenForm(payload);
+        form.reset();
+        employees.innerHTML = "";
+        employeeCount = 0;
+        addEmployee();
+        setStatus("저장 요청이 전송되었습니다.", "ok");
+      } catch (error) {
+        setStatus(`저장 중 오류가 발생했습니다: ${error.message || error}`, "error");
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    populateBranches();
+    addEmployee();
+  </script>
+</body>
+</html>
