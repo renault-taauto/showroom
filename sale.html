@@ -201,14 +201,7 @@
       </div>
 
       <div class="form-body">
-        <div class="item-grid">
-          <label for="costcoCount">코스트코 회원권</label>
-          <input id="costcoCount" type="number" min="0" step="1" value="0" inputmode="numeric">
-        </div>
-        <div class="item-grid">
-          <label for="ownersCount">오너스패키지</label>
-          <input id="ownersCount" type="number" min="0" step="1" value="0" inputmode="numeric">
-        </div>
+        <div id="itemFields"></div>
         <div class="total">
           <span>선택 합계</span>
           <span><span id="totalText">0</span> / <span id="limitTotalText">0</span>개</span>
@@ -222,7 +215,7 @@
   </main>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxmPObC8ucI-weusv5bcjgmAHzbY6gM9YpLKPdFzQpAh0SmJsXKyCjttGIkN4o93ZtPng/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOcika01B-DmzTBHKGzRK2EWMTKSjaurNkN9s3smwqkSt3RmO791YDLtQekV9GvGgaAA/exec';
     const state = {
       config: null,
       selectedRep: null
@@ -237,8 +230,7 @@
       branchText: document.getElementById('branchText'),
       periodText: document.getElementById('periodText'),
       limitText: document.getElementById('limitText'),
-      costcoCount: document.getElementById('costcoCount'),
-      ownersCount: document.getElementById('ownersCount'),
+      itemFields: document.getElementById('itemFields'),
       totalText: document.getElementById('totalText'),
       limitTotalText: document.getElementById('limitTotalText'),
       submitButton: document.getElementById('submitButton'),
@@ -277,6 +269,7 @@
       try {
         const data = await jsonp({ action: 'getConfig' });
         if (!data.ok) throw new Error(data.message || '설정을 불러오지 못했습니다.');
+        if (!data.items || data.items.length === 0) throw new Error('현황 탭에서 기프트 품목을 찾지 못했습니다.');
         state.config = data;
         els.checkButton.disabled = false;
         els.checkButton.textContent = '확인';
@@ -338,8 +331,7 @@
       els.periodText.textContent = rep.periodDetail || '-';
       els.limitText.textContent = rep.limit + '개';
       els.limitTotalText.textContent = rep.limit;
-      els.costcoCount.value = '0';
-      els.ownersCount.value = '0';
+      renderItemFields();
       els.submitButton.disabled = false;
       els.submitButton.textContent = '제출';
       els.surveyPanel.style.display = 'block';
@@ -351,6 +343,35 @@
       els.surveyPanel.style.display = 'none';
     }
 
+    function renderItemFields() {
+      els.itemFields.innerHTML = '';
+      const items = state.config.items || [];
+      items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'item-grid';
+
+        const label = document.createElement('label');
+        label.textContent = item.name;
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '0';
+        input.step = '1';
+        input.value = '0';
+        input.inputMode = 'numeric';
+        input.dataset.itemName = item.name;
+        input.addEventListener('input', () => updateTotal(input));
+
+        row.appendChild(label);
+        row.appendChild(input);
+        els.itemFields.appendChild(row);
+      });
+    }
+
+    function getItemInputs() {
+      return Array.from(els.itemFields.querySelectorAll('input[data-item-name]'));
+    }
+
     function getCount(input) {
       const value = Number(input.value || 0);
       if (!Number.isInteger(value) || value < 0) return 0;
@@ -359,16 +380,13 @@
 
     function updateTotal(changedInput) {
       const limit = state.selectedRep ? Number(state.selectedRep.limit) : 0;
-      let costco = getCount(els.costcoCount);
-      let owners = getCount(els.ownersCount);
-      let total = costco + owners;
+      const inputs = getItemInputs();
+      let total = inputs.reduce((sum, input) => sum + getCount(input), 0);
 
       if (total > limit && changedInput) {
-        const other = changedInput === els.costcoCount ? owners : costco;
+        const other = inputs.reduce((sum, input) => input === changedInput ? sum : sum + getCount(input), 0);
         changedInput.value = Math.max(0, limit - other);
-        costco = getCount(els.costcoCount);
-        owners = getCount(els.ownersCount);
-        total = costco + owners;
+        total = inputs.reduce((sum, input) => sum + getCount(input), 0);
       }
 
       els.totalText.textContent = total;
@@ -379,9 +397,8 @@
       clearMessages();
       if (!state.selectedRep) return;
 
-      const costco = getCount(els.costcoCount);
-      const owners = getCount(els.ownersCount);
-      const total = costco + owners;
+      const inputs = getItemInputs();
+      const total = inputs.reduce((sum, input) => sum + getCount(input), 0);
 
       if (total <= 0) {
         els.submitMessage.textContent = '최소 1개 이상 입력해주세요.';
@@ -392,13 +409,15 @@
         return;
       }
 
+      const selections = {};
+      inputs.forEach((input) => {
+        selections[input.dataset.itemName] = getCount(input);
+      });
+
       const payload = {
         month: state.config.defaultMonth,
         salesName: state.selectedRep.salesName,
-        selections: {
-          '코스트코 회원권': costco,
-          '오너스패키지': owners
-        }
+        selections: selections
       };
 
       els.submitButton.disabled = true;
@@ -412,8 +431,7 @@
         if (!data.ok) throw new Error(data.message || '제출에 실패했습니다.');
 
         els.salesName.disabled = true;
-        els.costcoCount.disabled = true;
-        els.ownersCount.disabled = true;
+        getItemInputs().forEach((input) => input.disabled = true);
         els.submitButton.textContent = '제출 완료';
         els.submitMessage.className = 'message done';
         els.submitMessage.textContent = '제출되었습니다.';
@@ -435,8 +453,6 @@
     els.salesName.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') handleLookup();
     });
-    els.costcoCount.addEventListener('input', () => updateTotal(els.costcoCount));
-    els.ownersCount.addEventListener('input', () => updateTotal(els.ownersCount));
     els.submitButton.addEventListener('click', submitSurvey);
 
     loadConfig();
