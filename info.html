@@ -353,7 +353,7 @@
             <input name="${id}-email" data-field="email" type="email" autocomplete="email" required>
           </label>
           <label>
-            사진
+            증명 사진
             <input name="${id}-photo" data-field="photo" type="file" accept="image/*" required>
           </label>
         </div>
@@ -454,7 +454,7 @@
       if (!form.reportValidity()) return;
 
       submitButton.disabled = true;
-      setStatus("저장 중입니다. 사진 용량에 따라 잠시 걸릴 수 있습니다.");
+      setStatus("저장 중입니다.");
 
       try {
         const payload = await buildPayload();
