@@ -227,6 +227,14 @@
       button {
         flex: 1 1 150px;
       }
+      .heading-note {
+  display: inline-block;
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
     }
   </style>
 </head>
@@ -251,7 +259,10 @@
       </section>
 
       <section>
-        <h2>네이버 계정</h2>
+       <h2>
+  네이버 계정
+  <span class="heading-note">(개인계정으로 사용중인 경우 대리점 전용(단체아이디)로 가입 후 기입 부탁드립니다.)</span>
+</h2>
         <div class="grid">
           <label>
             네이버 아이디
@@ -279,7 +290,7 @@
   </main>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQxpoTEP3yke-e1ixjxO9iWj_EtbR2DACWPWBp-HmRqB_6TfnvKxb5tHO_1oVKDI_Q/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxZ0Z-ExnXKOvQCKvi1M6xGVKg6lAAYfva_1I431wEcFUw--kxniLT_QKpP-FGfpqfg/exec";
     const BRANCHES = [
       "금천",
       "서인천",
