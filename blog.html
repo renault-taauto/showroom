@@ -342,7 +342,7 @@
         showStatus(state.authMode==='login'?'로그인 중입니다.':'가입 처리 중입니다.');
         const res=await apiGet(payload);
         if(!res.ok)throw new Error(res.error||'요청에 실패했습니다.');
-        const data=res.data||{};
+        const data=res.data||res;
         if(state.authMode==='login'&&data.loggedIn!==true)throw new Error(data.error||'로그인에 실패했습니다.');
         if(state.authMode==='register'&&data.registered!==true)throw new Error(data.error||'가입에 실패했습니다.');
         const user={name:data.name||payload.name,agency:data.agency||payload.agency,notionPageId:data.notionPageId||'',profile:data.profile||{},profileComplete:!!data.profileComplete,loggedAt:new Date().toISOString()};
