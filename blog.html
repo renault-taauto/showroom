@@ -161,8 +161,9 @@
             <input id="personalUrl" type="url" placeholder="시승신청 또는 개인 연결 URL">
           </div>
           <div class="field">
-            <label for="businessCardUrl">본인명함 이미지 URL</label>
-            <input id="businessCardUrl" type="url" placeholder="Google Drive 또는 이미지 URL">
+            <label for="businessCardFile">본인 명함 이미지</label>
+            <input id="businessCardFile" type="file" accept="image/*">
+            <div id="businessCardCurrent" class="hint"></div>
           </div>
         </div>
         <div id="profileStatus" class="status"></div>
@@ -242,7 +243,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyrOxAtFhLtHGZp8TXBbEe6NNM-ug2Vwv8MCqaHn9f82uz6a3FyzaUD2NeJKMWd5Gp4/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxSjlIY_u-8y-y_OhF3PbhL4iiagvPkwcFwxI_l1znn02Kl2kOvi9crk_OO8XF2FItj/exec';
     const SESSION_KEY = 'salesMemberSession_v1';
 
     const state = {
@@ -442,7 +443,8 @@
       });
       $('blogUrl').value = profile.blogUrl || '';
       $('personalUrl').value = profile.personalUrl || '';
-      $('businessCardUrl').value = profile.businessCardUrl || '';
+      $('businessCardFile').value = '';
+      $('businessCardCurrent').textContent = profile.businessCardUrl ? '기존 명함 이미지가 등록되어 있습니다.' : '';
       syncProfileFields();
       showProfileStatus('');
     }
@@ -471,16 +473,27 @@
         uploadBlog: getUploadBlogMode(),
         blogUrl: $('blogUrl').value.trim(),
         personalUrl: $('personalUrl').value.trim(),
-        businessCardUrl: $('businessCardUrl').value.trim(),
+        businessCardUrl: state.user.profile && state.user.profile.businessCardUrl ? state.user.profile.businessCardUrl : '',
       };
 
       if (!payload.uploadBlog) {
         showProfileStatus('업로드 블로그를 선택해주세요.', 'error');
         return;
       }
+      if (payload.uploadBlog === '본인 블로그' && !payload.blogUrl) {
+        showProfileStatus('블로그 URL을 입력해주세요.', 'error');
+        return;
+      }
+      if (payload.uploadBlog === '지점 블로그' && !payload.personalUrl) {
+        showProfileStatus('본인 URL을 입력해주세요.', 'error');
+        return;
+      }
 
       await withLoading(async () => {
         showProfileStatus('내 정보를 저장하는 중입니다.');
+        if (payload.uploadBlog === '지점 블로그') {
+          payload.businessCardUrl = await ensureBusinessCardUploaded_();
+        }
         const res = await apiGet(payload);
         if (!res.ok) throw new Error(res.error || '내 정보 저장에 실패했습니다.');
         const data = res.data || {};
@@ -494,6 +507,36 @@
         }
         enterHome();
       }, showProfileStatus);
+    }
+
+    async function ensureBusinessCardUploaded_() {
+      const file = $('businessCardFile').files[0];
+      const existingUrl = state.user.profile && state.user.profile.businessCardUrl;
+
+      if (!file && existingUrl) return existingUrl;
+      if (!file) throw new Error('본인 명함 이미지를 선택해주세요.');
+
+      showProfileStatus('명함 이미지를 업로드하는 중입니다.');
+      const fileData = await fileToDataUrl(file);
+      const res = await apiPost({
+        action: 'uploadBusinessCard',
+        notionPageId: state.user.notionPageId,
+        fileName: file.name,
+        fileData,
+      });
+
+      if (!res.ok) throw new Error(res.error || '명함 이미지 업로드에 실패했습니다.');
+      if (!res.data || !res.data.url) throw new Error('명함 이미지 URL을 받지 못했습니다.');
+      return res.data.url;
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('명함 이미지 파일을 읽지 못했습니다.'));
+        reader.readAsDataURL(file);
+      });
     }
 
     function showProfileStatus(message, type) {
