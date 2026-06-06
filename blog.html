@@ -182,7 +182,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx8oZjVur89eCmOfCyCReu0klpZo0v0dPIIIowSUxJkoBMfg5PCaEugRJGdQyc6DEvA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyrOxAtFhLtHGZp8TXBbEe6NNM-ug2Vwv8MCqaHn9f82uz6a3FyzaUD2NeJKMWd5Gp4/exec';
     const SESSION_KEY = 'salesMemberSession_v1';
 
     const state = {
@@ -280,10 +280,14 @@
 
       await withLoading(async () => {
         showStatus(state.authMode === 'login' ? '로그인 중입니다.' : '가입 처리 중입니다.');
-        const res = await apiPost(payload);
+        const res = await apiGet(payload);
         if (!res.ok) throw new Error(res.error || '요청에 실패했습니다.');
 
         const data = res.data || {};
+        if (data.ok === false) {
+          throw new Error(data.error || '요청에 실패했습니다.');
+        }
+
         const user = {
           name: data.name || payload.name,
           agency: data.agency || payload.agency,
@@ -293,11 +297,13 @@
 
         saveSession(user);
         state.user = user;
-        showHome();
+        showStatus(state.authMode === 'login' ? '로그인되었습니다.' : '가입되었습니다.', 'ok');
+        window.setTimeout(showHome, 80);
       });
     }
 
     function showHome() {
+      if (!state.user) return;
       $('authScreen').classList.remove('active');
       $('homeScreen').classList.add('active');
       $('homeName').textContent = `${state.user.name}님`;
@@ -305,6 +311,7 @@
       $('drawerUser').textContent = `${state.user.name} / ${state.user.agency}`;
       closeDrawer();
       clearStatus();
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
     function logout() {
