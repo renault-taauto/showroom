@@ -68,9 +68,9 @@
     .drawer{position:absolute;right:0;top:0;width:min(320px,86vw);height:100%;background:#fff;padding:calc(env(safe-area-inset-top) + 18px) 16px 18px;box-shadow:-18px 0 48px rgba(15,23,42,.2)}
     .drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:18px}
     .drawer-close{width:38px;height:38px;border-radius:13px;background:#f2f4f7;color:#111827;font-size:22px}
-    .menu-list{display:grid;gap:0;border-top:1px solid #eaecf0}
-    .menu-list button{width:100%;min-height:48px;border-radius:0;background:transparent;color:#101828;text-align:left;padding:14px 0;border-bottom:1px solid #eaecf0;font-weight:800}
-    .logout{margin-top:14px!important;color:#c01048!important;border-bottom:0!important}
+    .menu-list{display:grid;gap:2px}
+    .menu-list button{width:100%;min-height:38px;border-radius:0;background:transparent;color:#101828;text-align:left;padding:8px 0;border:0;font-weight:400}
+    .logout{margin-top:12px!important;color:#c01048!important}
     .page-head{display:flex;align-items:center;gap:10px;margin:0 -18px 18px;padding:14px 18px 10px;background:#fff}
     .back-btn{width:38px;height:38px;border-radius:999px;background:#f2f4f7;color:#111827;font-size:20px;font-weight:900}
     .page{display:grid;gap:16px;padding-top:8px}
@@ -183,7 +183,7 @@
       </header>
 
       <div class="home">
-        <button class="banner" type="button" onclick="openComingSoon('시책 참여 신청')">
+        <button class="banner" type="button" onclick="enterPage('campaignScreen')">
           <strong>6월 블로그 시책</strong>
           <span>배너 클릭 후 참여 신청 폼으로 연결됩니다.</span>
         </button>
@@ -201,7 +201,7 @@
         </section>
 
         <section class="section">
-          <button class="primary" type="button" onclick="openComingSoon('블로그 원고 제작 요청')">블로그 원고 제작 요청</button>
+          <button class="primary" type="button" onclick="enterPage('blogRequestScreen')">블로그 원고 제작 요청</button>
         </section>
 
         <section class="section">
@@ -211,6 +211,109 @@
           <div class="empty">아직 표시할 완료 원고가 없습니다.</div>
         </section>
       </div>
+    </section>
+
+    <section id="blogRequestScreen" class="screen">
+      <header class="page-head">
+        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
+        <div>
+          <h2>블로그 원고 제작 요청</h2>
+          <p>원고 요청 내용을 입력합니다.</p>
+        </div>
+      </header>
+      <form class="form page" onsubmit="submitPendingFeature(event,'블로그 원고 제작 요청')">
+        <div class="field">
+          <label>제목 또는 주제</label>
+          <input id="blogRequestTitle" required>
+        </div>
+        <div class="field">
+          <label>요청 내용</label>
+          <textarea id="blogRequestMemo" rows="6" required></textarea>
+        </div>
+        <button class="primary" type="submit">요청하기</button>
+      </form>
+    </section>
+
+    <section id="campaignScreen" class="screen">
+      <header class="page-head">
+        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
+        <div>
+          <h2>시책 참여 신청</h2>
+          <p>참여할 업로드 방식을 선택합니다.</p>
+        </div>
+      </header>
+      <form class="form page" onsubmit="submitPendingFeature(event,'시책 참여 신청')">
+        <div class="field">
+          <label>업로드 방식</label>
+          <div class="radio-row">
+            <label class="radio-card">
+              <input type="radio" name="campaignUploadBlog" value="본인 블로그" required>
+              <span>본인 블로그</span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="campaignUploadBlog" value="지점 블로그" required>
+              <span>지점 블로그</span>
+            </label>
+          </div>
+        </div>
+        <button class="primary" type="submit">참여 신청</button>
+      </form>
+    </section>
+
+    <section id="draftListScreen" class="screen">
+      <header class="page-head">
+        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
+        <div>
+          <h2>나의 원고 리스트</h2>
+          <p>본인 원고만 표시됩니다.</p>
+        </div>
+      </header>
+      <div class="page">
+        <div class="empty">연결할 데이터 위치가 필요합니다.</div>
+      </div>
+    </section>
+
+    <section id="uploadedContentScreen" class="screen">
+      <header class="page-head">
+        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
+        <div>
+          <h2>업로드 콘텐츠</h2>
+          <p>업로드된 콘텐츠를 확인합니다.</p>
+        </div>
+      </header>
+      <div class="page">
+        <div class="empty">연결할 데이터 위치가 필요합니다.</div>
+      </div>
+    </section>
+
+    <section id="scoreScreen" class="screen">
+      <header class="page-head">
+        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
+        <div>
+          <h2>시책 점수 확인</h2>
+          <p>본인 점수만 표시됩니다.</p>
+        </div>
+      </header>
+      <div class="page">
+        <div class="empty">점수를 읽을 시트/셀 기준이 필요합니다.</div>
+      </div>
+    </section>
+
+    <section id="skinRequestScreen" class="screen">
+      <header class="page-head">
+        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
+        <div>
+          <h2>블로그 스킨제작 요청</h2>
+          <p>스킨 제작 요청 내용을 입력합니다.</p>
+        </div>
+      </header>
+      <form class="form page" onsubmit="submitPendingFeature(event,'블로그 스킨제작 요청')">
+        <div class="field">
+          <label>요청 내용</label>
+          <textarea id="skinRequestMemo" rows="6" required></textarea>
+        </div>
+        <button class="primary" type="submit">요청하기</button>
+      </form>
     </section>
   </main>
 
@@ -225,10 +328,10 @@
       </div>
       <div class="menu-list">
         <button type="button" onclick="enterProfile(false)">내 정보</button>
-        <button type="button" onclick="openComingSoon('나의 원고 리스트')">나의 원고 리스트</button>
-        <button type="button" onclick="openComingSoon('업로드 콘텐츠')">업로드 콘텐츠</button>
-        <button type="button" onclick="openComingSoon('시책 점수 확인')">시책 점수 확인</button>
-        <button type="button" onclick="openComingSoon('블로그 스킨제작 요청')">블로그 스킨제작 요청</button>
+        <button type="button" onclick="enterPage('draftListScreen')">나의 원고 리스트</button>
+        <button type="button" onclick="enterPage('uploadedContentScreen')">업로드 콘텐츠</button>
+        <button type="button" onclick="enterPage('scoreScreen')">시책 점수 확인</button>
+        <button type="button" onclick="enterPage('skinRequestScreen')">블로그 스킨제작 요청</button>
         <button class="logout" type="button" onclick="logout()">로그아웃</button>
       </div>
     </aside>
@@ -429,10 +532,38 @@
     }
 
     function hideScreens() {
-      ['authScreen', 'profileScreen', 'homeScreen'].forEach(id => {
+      [
+        'authScreen',
+        'profileScreen',
+        'homeScreen',
+        'blogRequestScreen',
+        'campaignScreen',
+        'draftListScreen',
+        'uploadedContentScreen',
+        'scoreScreen',
+        'skinRequestScreen',
+      ].forEach(id => {
         $(id).classList.remove('active');
         $(id).style.display = 'none';
       });
+    }
+
+    function enterPage(screenId) {
+      if (!state.user) return;
+      if (state.profileRequired && state.user.profileComplete === false) {
+        enterProfile(true);
+        return;
+      }
+      hideScreens();
+      $(screenId).classList.add('active');
+      $(screenId).style.display = 'block';
+      closeDrawer();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    function submitPendingFeature(event, title) {
+      event.preventDefault();
+      openComingSoon(title);
     }
 
     function fillProfileForm(profile) {
@@ -551,7 +682,9 @@
       $('authScreen').classList.add('active');
       $('homeScreen').style.display = 'none';
       $('profileScreen').style.display = 'none';
+      hideScreens();
       $('authScreen').style.display = 'flex';
+      $('authScreen').classList.add('active');
       closeDrawer();
       $('password').value = '';
       showStatus('로그아웃되었습니다.', 'ok');
