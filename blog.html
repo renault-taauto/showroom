@@ -29,6 +29,11 @@
     input,select{width:100%;min-height:50px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;padding:12px 14px;color:#101828;font-size:16px;outline:none}
     select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#667085 50%),linear-gradient(135deg,#667085 50%,transparent 50%);background-position:calc(100% - 20px) 22px,calc(100% - 14px) 22px;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:38px}
     input:focus,select:focus{border-color:#111827;box-shadow:0 0 0 3px rgba(17,24,39,.08)}
+    .radio-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .radio-card{position:relative}
+    .radio-card input{position:absolute;opacity:0;pointer-events:none}
+    .radio-card span{display:flex;align-items:center;justify-content:center;min-height:48px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;color:#344054;font-weight:800}
+    .radio-card input:checked+span{border-color:#111827;background:#111827;color:#fff}
     .hint{font-size:12px;color:#98a2b3}
     .primary,.secondary,.ghost{width:100%;min-height:50px;border-radius:14px;font-weight:900}
     .primary{background:#111827;color:#fff}
@@ -63,9 +68,14 @@
     .drawer{position:absolute;right:0;top:0;width:min(320px,86vw);height:100%;background:#fff;padding:calc(env(safe-area-inset-top) + 18px) 16px 18px;box-shadow:-18px 0 48px rgba(15,23,42,.2)}
     .drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:18px}
     .drawer-close{width:38px;height:38px;border-radius:13px;background:#f2f4f7;color:#111827;font-size:22px}
-    .menu-list{display:grid;gap:8px}
-    .menu-list button{width:100%;min-height:48px;border-radius:14px;background:#f9fafb;color:#101828;text-align:left;padding:12px 14px;font-weight:800}
-    .logout{margin-top:14px;background:#fff1f3!important;color:#c01048!important}
+    .menu-list{display:grid;gap:0;border-top:1px solid #eaecf0}
+    .menu-list button{width:100%;min-height:48px;border-radius:0;background:transparent;color:#101828;text-align:left;padding:14px 0;border-bottom:1px solid #eaecf0;font-weight:800}
+    .logout{margin-top:14px!important;color:#c01048!important;border-bottom:0!important}
+    .page-head{display:flex;align-items:center;gap:10px;margin:0 -18px 18px;padding:14px 18px 10px;background:#fff}
+    .back-btn{width:38px;height:38px;border-radius:999px;background:#f2f4f7;color:#111827;font-size:20px;font-weight:900}
+    .page{display:grid;gap:16px;padding-top:8px}
+    .conditional{display:none}
+    .conditional.active{display:grid}
     .modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;background:rgba(15,23,42,.38)}
     .modal.active{display:flex}
     .modal-panel{width:100%;max-width:480px;margin:0 auto;border-radius:22px 22px 0 0;background:#fff;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);display:grid;gap:12px}
@@ -108,6 +118,56 @@
           <button id="checkBtn" class="secondary" type="button" onclick="checkMember()">가입 가능 확인</button>
         </form>
       </div>
+    </section>
+
+    <section id="profileScreen" class="screen">
+      <header class="page-head">
+        <button id="profileBackBtn" class="back-btn" type="button" onclick="enterHome()">‹</button>
+        <div>
+          <h2>내 정보 등록</h2>
+          <p id="profileSubtitle">노션 영업담당 정보가 비어 있어 먼저 등록이 필요합니다.</p>
+        </div>
+      </header>
+
+      <form id="profileForm" class="form page">
+        <div class="field">
+          <label>이름</label>
+          <input id="profileName" disabled>
+        </div>
+        <div class="field">
+          <label>소속 대리점</label>
+          <input id="profileAgency" disabled>
+        </div>
+        <div class="field">
+          <label>업로드 블로그</label>
+          <div class="radio-row">
+            <label class="radio-card">
+              <input type="radio" name="uploadBlog" value="본인 블로그" onchange="syncProfileFields()">
+              <span>본인 블로그</span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="uploadBlog" value="지점 블로그" onchange="syncProfileFields()">
+              <span>지점 블로그</span>
+            </label>
+          </div>
+        </div>
+        <div id="personalBlogFields" class="field conditional">
+          <label for="blogUrl">블로그 URL</label>
+          <input id="blogUrl" type="url" placeholder="https://blog.naver.com/...">
+        </div>
+        <div id="branchBlogFields" class="conditional">
+          <div class="field">
+            <label for="personalUrl">본인 URL</label>
+            <input id="personalUrl" type="url" placeholder="시승신청 또는 개인 연결 URL">
+          </div>
+          <div class="field">
+            <label for="businessCardUrl">본인명함 이미지 URL</label>
+            <input id="businessCardUrl" type="url" placeholder="Google Drive 또는 이미지 URL">
+          </div>
+        </div>
+        <div id="profileStatus" class="status"></div>
+        <button class="primary" type="submit">저장하고 시작하기</button>
+      </form>
     </section>
 
     <section id="homeScreen" class="screen">
@@ -163,7 +223,7 @@
         <button class="drawer-close" type="button" aria-label="닫기" onclick="closeDrawer()">×</button>
       </div>
       <div class="menu-list">
-        <button type="button" onclick="openComingSoon('내 정보')">내 정보</button>
+        <button type="button" onclick="enterProfile(false)">내 정보</button>
         <button type="button" onclick="openComingSoon('나의 원고 리스트')">나의 원고 리스트</button>
         <button type="button" onclick="openComingSoon('업로드 콘텐츠')">업로드 콘텐츠</button>
         <button type="button" onclick="openComingSoon('시책 점수 확인')">시책 점수 확인</button>
@@ -182,13 +242,14 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzYIDXKYp1H73HNPLKfC4U_WLrl0tnZxtxMmX_nSujrHi18QO0P4M0-vGOynINfD4lt/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyrOxAtFhLtHGZp8TXBbEe6NNM-ug2Vwv8MCqaHn9f82uz6a3FyzaUD2NeJKMWd5Gp4/exec';
     const SESSION_KEY = 'salesMemberSession_v1';
 
     const state = {
       authMode: 'login',
       loading: false,
       user: null,
+      profileRequired: false,
     };
 
     const $ = id => document.getElementById(id);
@@ -203,6 +264,7 @@
       }
 
       $('authForm').addEventListener('submit', handleAuthSubmit);
+      $('profileForm').addEventListener('submit', handleProfileSubmit);
       loadAgencies();
     }
 
@@ -221,9 +283,22 @@
           select.value = state.user.agency;
         }
       } catch (error) {
-        select.innerHTML = '<option value="">대리점 목록을 불러오지 못했습니다</option>';
-        showStatus(error.message || String(error), 'error');
+        replaceAgencySelectWithInput();
+        showStatus(`${error.message || String(error)}\n대리점은 직접 입력으로 진행할 수 있습니다.`, 'error');
       }
+    }
+
+    function replaceAgencySelectWithInput() {
+      const current = $('agency');
+      if (!current || current.tagName === 'INPUT') return;
+
+      const input = document.createElement('input');
+      input.id = 'agency';
+      input.name = 'agency';
+      input.autocomplete = 'organization';
+      input.placeholder = '소속 대리점 직접 입력';
+      input.required = true;
+      current.replaceWith(input);
     }
 
     function setAuthMode(mode) {
@@ -287,25 +362,58 @@
         if (data.ok === false) {
           throw new Error(data.error || '요청에 실패했습니다.');
         }
+        if (state.authMode === 'login' && data.loggedIn !== true) {
+          throw new Error(data.error || '로그인 성공 응답을 받지 못했습니다.');
+        }
+        if (state.authMode === 'register' && data.registered !== true) {
+          throw new Error(data.error || '가입 성공 응답을 받지 못했습니다.');
+        }
 
         const user = {
           name: data.name || payload.name,
           agency: data.agency || payload.agency,
           notionPageId: data.notionPageId || '',
+          profile: data.profile || {},
+          profileComplete: !!data.profileComplete,
           loggedAt: new Date().toISOString(),
         };
 
         saveSession(user);
         state.user = user;
-        showStatus(state.authMode === 'login' ? '로그인되었습니다.' : '가입되었습니다.', 'ok');
-        window.setTimeout(showHome, 80);
+        if (!user.profileComplete) {
+          enterProfile(true);
+        } else {
+          enterHome();
+        }
       });
     }
 
-    function showHome() {
+    function enterProfile(required) {
       if (!state.user) return;
-      $('authScreen').classList.remove('active');
-      $('homeScreen').classList.add('active');
+      state.profileRequired = !!required;
+      hideScreens();
+      $('profileScreen').classList.add('active');
+      $('profileScreen').style.display = 'block';
+      $('profileBackBtn').style.display = required ? 'none' : 'block';
+      $('profileSubtitle').textContent = required
+        ? '노션 영업담당 정보가 비어 있어 먼저 등록이 필요합니다.'
+        : '노션 영업담당 정보를 수정합니다.';
+      fillProfileForm(state.user.profile || {});
+      closeDrawer();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    function enterHome() {
+      if (!state.user) return;
+      if (state.profileRequired && state.user.profileComplete === false) {
+        enterProfile(true);
+        return;
+      }
+      hideScreens();
+      const authScreen = $('authScreen');
+      const homeScreen = $('homeScreen');
+      homeScreen.classList.add('active');
+      homeScreen.style.display = 'block';
       $('homeName').textContent = `${state.user.name}님`;
       $('homeAgency').textContent = state.user.agency;
       $('drawerUser').textContent = `${state.user.name} / ${state.user.agency}`;
@@ -314,11 +422,93 @@
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
+    function showHome() {
+      if (state.user && state.user.profileComplete === false) enterProfile(true);
+      else enterHome();
+    }
+
+    function hideScreens() {
+      ['authScreen', 'profileScreen', 'homeScreen'].forEach(id => {
+        $(id).classList.remove('active');
+        $(id).style.display = 'none';
+      });
+    }
+
+    function fillProfileForm(profile) {
+      $('profileName').value = state.user.name || '';
+      $('profileAgency').value = state.user.agency || '';
+      document.querySelectorAll('input[name="uploadBlog"]').forEach(input => {
+        input.checked = input.value === (profile.uploadBlog || '');
+      });
+      $('blogUrl').value = profile.blogUrl || '';
+      $('personalUrl').value = profile.personalUrl || '';
+      $('businessCardUrl').value = profile.businessCardUrl || '';
+      syncProfileFields();
+      showProfileStatus('');
+    }
+
+    function syncProfileFields() {
+      const mode = getUploadBlogMode();
+      $('personalBlogFields').classList.toggle('active', mode === '본인 블로그');
+      $('branchBlogFields').classList.toggle('active', mode === '지점 블로그');
+    }
+
+    function getUploadBlogMode() {
+      const checked = document.querySelector('input[name="uploadBlog"]:checked');
+      return checked ? checked.value : '';
+    }
+
+    async function handleProfileSubmit(event) {
+      event.preventDefault();
+      if (!state.user || !state.user.notionPageId) {
+        showProfileStatus('노션페이지 ID가 없습니다. 다시 로그인해주세요.', 'error');
+        return;
+      }
+
+      const payload = {
+        action: 'saveProfile',
+        notionPageId: state.user.notionPageId,
+        uploadBlog: getUploadBlogMode(),
+        blogUrl: $('blogUrl').value.trim(),
+        personalUrl: $('personalUrl').value.trim(),
+        businessCardUrl: $('businessCardUrl').value.trim(),
+      };
+
+      if (!payload.uploadBlog) {
+        showProfileStatus('업로드 블로그를 선택해주세요.', 'error');
+        return;
+      }
+
+      await withLoading(async () => {
+        showProfileStatus('내 정보를 저장하는 중입니다.');
+        const res = await apiGet(payload);
+        if (!res.ok) throw new Error(res.error || '내 정보 저장에 실패했습니다.');
+        const data = res.data || {};
+        state.user.profile = data.profile || {};
+        state.user.profileComplete = !!data.complete;
+        state.profileRequired = !state.user.profileComplete;
+        saveSession(state.user);
+        if (!state.user.profileComplete) {
+          showProfileStatus('필수 정보를 모두 입력해주세요.', 'error');
+          return;
+        }
+        enterHome();
+      }, showProfileStatus);
+    }
+
+    function showProfileStatus(message, type) {
+      $('profileStatus').className = `status ${type || ''}`;
+      $('profileStatus').textContent = message || '';
+    }
+
     function logout() {
       localStorage.removeItem(SESSION_KEY);
       state.user = null;
       $('homeScreen').classList.remove('active');
       $('authScreen').classList.add('active');
+      $('homeScreen').style.display = 'none';
+      $('profileScreen').style.display = 'none';
+      $('authScreen').style.display = 'flex';
       closeDrawer();
       $('password').value = '';
       showStatus('로그아웃되었습니다.', 'ok');
@@ -351,7 +541,7 @@
       if (event.target === $('modal')) closeModal();
     }
 
-    async function withLoading(task) {
+    async function withLoading(task, statusFn) {
       if (state.loading) return;
       state.loading = true;
       setButtonsDisabled(true);
@@ -359,7 +549,7 @@
       try {
         await task();
       } catch (error) {
-        showStatus(error.message || String(error), 'error');
+        (statusFn || showStatus)(error.message || String(error), 'error');
       } finally {
         state.loading = false;
         setButtonsDisabled(false);
@@ -379,31 +569,40 @@
 
         Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
         url.searchParams.set('callback', callback);
+        url.searchParams.set('_', Date.now());
 
         const script = document.createElement('script');
+        script.async = true;
+        script.referrerPolicy = 'no-referrer';
+        script.crossOrigin = 'anonymous';
+        let settled = false;
         const timer = setTimeout(() => {
           cleanup();
-          reject(new Error('API 응답 시간이 초과되었습니다.'));
-        }, 20000);
+          reject(new Error('API 응답 시간이 초과되었습니다. 모바일 네트워크를 확인한 뒤 다시 시도해주세요.'));
+        }, 45000);
 
         window[callback] = data => {
+          if (settled) return;
+          settled = true;
           cleanup();
           resolve(data);
         };
 
         script.onerror = () => {
+          if (settled) return;
+          settled = true;
           cleanup();
-          reject(new Error('API 요청에 실패했습니다.'));
+          reject(new Error('API를 불러오지 못했습니다. 배포 URL 또는 모바일 네트워크를 확인해주세요.'));
         };
 
         function cleanup() {
           clearTimeout(timer);
           delete window[callback];
-          script.remove();
+          if (script.parentNode) script.parentNode.removeChild(script);
         }
 
         script.src = url.toString();
-        document.body.appendChild(script);
+        (document.head || document.documentElement).appendChild(script);
       });
     }
 
