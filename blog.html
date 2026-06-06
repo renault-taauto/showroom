@@ -10,6 +10,7 @@
     body{background:#f5f6f8;color:#171923;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif;line-height:1.45}
     button,input,select,textarea{font:inherit}
     button{border:0;cursor:pointer}
+    textarea{width:100%;min-height:116px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;padding:12px 14px;color:#101828;font-size:16px;outline:none;resize:vertical}
     .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff}
     .screen{display:none;min-height:100vh;padding:env(safe-area-inset-top) 18px 28px}
     .screen.active{display:block}
@@ -21,28 +22,29 @@
     p{margin:0;color:#667085;font-size:14px}
     .panel{display:grid;gap:14px}
     .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px;border-radius:14px;background:#eef1f5}
-    .tab{min-height:42px;border-radius:11px;background:transparent;color:#667085;font-weight:800}
+    .tab{min-height:42px;border-radius:11px;background:transparent;color:#667085}
     .tab.active{background:#fff;color:#111827;box-shadow:0 4px 14px rgba(15,23,42,.08)}
     .form{display:grid;gap:12px}
     .field{display:grid;gap:7px}
-    label{font-size:13px;font-weight:800;color:#344054}
+    label,.label{font-size:13px;color:#344054}
     input,select{width:100%;min-height:50px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;padding:12px 14px;color:#101828;font-size:16px;outline:none}
     select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#667085 50%),linear-gradient(135deg,#667085 50%,transparent 50%);background-position:calc(100% - 20px) 22px,calc(100% - 14px) 22px;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:38px}
-    input:focus,select:focus{border-color:#111827;box-shadow:0 0 0 3px rgba(17,24,39,.08)}
-    .radio-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .radio-card{position:relative}
-    .radio-card input{position:absolute;opacity:0;pointer-events:none}
-    .radio-card span{display:flex;align-items:center;justify-content:center;min-height:48px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;color:#344054;font-weight:800}
-    .radio-card input:checked+span{border-color:#111827;background:#111827;color:#fff}
+    input:focus,select:focus,textarea:focus{border-color:#111827;box-shadow:0 0 0 3px rgba(17,24,39,.08)}
+    .radio-row,.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .radio-card,.chip{position:relative}
+    .radio-card input,.chip input{position:absolute;opacity:0;pointer-events:none}
+    .radio-card span,.chip span{display:flex;align-items:center;justify-content:center;min-height:48px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;color:#344054;text-align:center;padding:0 8px}
+    .radio-card input:checked+span,.chip input:checked+span{border-color:#111827;background:#111827;color:#fff}
+    .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .hint{font-size:12px;color:#98a2b3}
-    .primary,.secondary,.ghost{width:100%;min-height:50px;border-radius:14px;font-weight:900}
+    .primary,.secondary,.ghost{width:100%;min-height:50px;border-radius:14px}
     .primary{background:#111827;color:#fff}
     .secondary{background:#eef1f5;color:#111827}
     .ghost{background:transparent;color:#667085}
     button:disabled{opacity:.55;cursor:not-allowed}
     .status{min-height:20px;color:#667085;font-size:13px;white-space:pre-wrap}
-    .status.error{color:#d92d20;font-weight:800}
-    .status.ok{color:#067647;font-weight:800}
+    .status.error{color:#d92d20}
+    .status.ok{color:#067647}
     .topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 -18px;padding:14px 18px 10px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px)}
     .hello{display:grid;gap:2px}
     .hello strong{font-size:18px}
@@ -51,35 +53,46 @@
     .menu-icon:before{transform:translateY(-6px)}
     .menu-icon:after{transform:translateY(4px)}
     .home{display:grid;gap:18px;padding-top:8px}
-    .banner{min-height:132px;border-radius:18px;background:linear-gradient(135deg,#111827,#475467);color:#fff;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+    .banner{min-height:132px;border-radius:18px;background:linear-gradient(135deg,#111827,#475467);color:#fff;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;text-align:left}
     .banner strong{font-size:20px}
+    .banner span{font-size:14px;color:#eaecf0}
     .section{display:grid;gap:10px}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .section-head h2{font-size:16px}
     .list{display:grid;gap:8px}
     .item{min-height:54px;border:1px solid #eaecf0;border-radius:14px;padding:12px;background:#fff}
-    .item-title{font-weight:800;font-size:14px}
+    .item-title{font-size:14px}
     .item-meta{margin-top:2px;color:#98a2b3;font-size:12px}
     .empty{padding:14px;border-radius:14px;background:#f9fafb;color:#98a2b3;font-size:13px;text-align:center}
-    .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .quick button{min-height:68px;border-radius:16px;background:#f2f4f7;color:#101828;font-weight:900;text-align:left;padding:14px}
     .drawer-backdrop{position:fixed;inset:0;z-index:50;display:none;background:rgba(15,23,42,.38)}
     .drawer-backdrop.active{display:block}
-    .drawer{position:absolute;right:0;top:0;width:min(320px,86vw);height:100%;background:#fff;padding:calc(env(safe-area-inset-top) + 18px) 16px 18px;box-shadow:-18px 0 48px rgba(15,23,42,.2)}
+    .drawer{position:absolute;right:0;top:0;width:min(320px,86vw);height:100%;background:#fff;padding:calc(env(safe-area-inset-top) + 18px) 18px 18px;box-shadow:-18px 0 48px rgba(15,23,42,.2)}
     .drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:18px}
     .drawer-close{width:38px;height:38px;border-radius:13px;background:#f2f4f7;color:#111827;font-size:22px}
     .menu-list{display:grid;gap:2px}
-    .menu-list button{width:100%;min-height:38px;border-radius:0;background:transparent;color:#101828;text-align:left;padding:8px 0;border:0;font-weight:400}
-    .logout{margin-top:12px!important;color:#c01048!important}
+    .menu-list button{width:100%;min-height:38px;border-radius:0;background:transparent;color:#101828;text-align:left;padding:8px 0;border:0}
+    .menu-list .logout{margin-top:12px;color:#c01048}
     .page-head{display:flex;align-items:center;gap:10px;margin:0 -18px 18px;padding:14px 18px 10px;background:#fff}
-    .back-btn{width:38px;height:38px;border-radius:999px;background:#f2f4f7;color:#111827;font-size:20px;font-weight:900}
+    .back-btn{width:38px;height:38px;border-radius:999px;background:#f2f4f7;color:#111827;font-size:20px}
     .page{display:grid;gap:16px;padding-top:8px}
     .conditional{display:none}
     .conditional.active{display:grid}
+    .progress{display:grid;gap:8px}
+    .bar{height:7px;border-radius:999px;background:#eef1f5;overflow:hidden}
+    .bar span{display:block;height:100%;width:20%;background:#111827;transition:width .2s}
+    .step{display:none;gap:12px}
+    .step.active{display:grid}
+    .actions{display:grid;gap:10px;margin-top:4px}
+    .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .btns.single{grid-template-columns:1fr}
+    .file-list{display:grid;gap:6px}
+    .file-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #eaecf0;border-radius:12px;padding:8px 10px;font-size:13px}
+    .file-item button{width:auto;min-height:32px;border-radius:10px;background:#f2f4f7;color:#667085;padding:0 10px}
+    .result{display:none;border-radius:14px;background:#f9fafb;padding:14px;color:#344054;font-size:14px}
+    .result.active{display:block}
     .modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;background:rgba(15,23,42,.38)}
     .modal.active{display:flex}
     .modal-panel{width:100%;max-width:480px;margin:0 auto;border-radius:22px 22px 0 0;background:#fff;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);display:grid;gap:12px}
-    .modal-panel .secondary{margin-top:2px}
   </style>
 </head>
 <body>
@@ -90,29 +103,15 @@
         <h1>영업담당 포털</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
       </div>
-
       <div class="panel">
         <div class="tabs" aria-label="로그인 방식">
           <button id="loginTab" class="tab active" type="button" onclick="setAuthMode('login')">로그인</button>
           <button id="registerTab" class="tab" type="button" onclick="setAuthMode('register')">최초 가입</button>
         </div>
-
         <form id="authForm" class="form">
-          <div class="field">
-            <label for="name">이름</label>
-            <input id="name" autocomplete="name" required>
-          </div>
-          <div class="field">
-            <label for="agency">소속 대리점</label>
-            <select id="agency" required>
-              <option value="">대리점 선택</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="password">비밀번호</label>
-            <input id="password" type="password" autocomplete="current-password" required>
-            <div id="passwordHint" class="hint">영문과 숫자를 포함한 4~8자</div>
-          </div>
+          <div class="field"><label for="name">이름</label><input id="name" autocomplete="name" required></div>
+          <div class="field"><label for="agency">소속 대리점</label><select id="agency" required><option value="">대리점 선택</option></select></div>
+          <div class="field"><label for="password">비밀번호</label><input id="password" type="password" autocomplete="current-password" required><div id="passwordHint" class="hint">가입 때 만든 비밀번호를 입력하세요.</div></div>
           <div id="status" class="status"></div>
           <button id="submitBtn" class="primary" type="submit">로그인</button>
           <button id="checkBtn" class="secondary" type="button" onclick="checkMember()">가입 가능 확인</button>
@@ -123,48 +122,22 @@
     <section id="profileScreen" class="screen">
       <header class="page-head">
         <button id="profileBackBtn" class="back-btn" type="button" onclick="enterHome()">‹</button>
-        <div>
-          <h2>내 정보 등록</h2>
-          <p id="profileSubtitle">노션 영업담당 정보가 비어 있어 먼저 등록이 필요합니다.</p>
-        </div>
+        <div><h2>내 정보 등록</h2><p id="profileSubtitle">노션 영업담당 정보가 비어 있어 먼저 등록이 필요합니다.</p></div>
       </header>
-
       <form id="profileForm" class="form page">
+        <div class="field"><label>이름</label><input id="profileName" disabled></div>
+        <div class="field"><label>소속 대리점</label><input id="profileAgency" disabled></div>
         <div class="field">
-          <label>이름</label>
-          <input id="profileName" disabled>
-        </div>
-        <div class="field">
-          <label>소속 대리점</label>
-          <input id="profileAgency" disabled>
-        </div>
-        <div class="field">
-          <label>업로드 블로그</label>
+          <label>본인 블로그 또는 지점 블로그</label>
           <div class="radio-row">
-            <label class="radio-card">
-              <input type="radio" name="uploadBlog" value="본인 블로그" onchange="syncProfileFields()">
-              <span>본인 블로그</span>
-            </label>
-            <label class="radio-card">
-              <input type="radio" name="uploadBlog" value="지점 블로그" onchange="syncProfileFields()">
-              <span>지점 블로그</span>
-            </label>
+            <label class="radio-card"><input type="radio" name="uploadBlog" value="본인 블로그" onchange="syncProfileFields()"><span>본인 블로그</span></label>
+            <label class="radio-card"><input type="radio" name="uploadBlog" value="지점 블로그" onchange="syncProfileFields()"><span>지점 블로그</span></label>
           </div>
         </div>
-        <div id="personalBlogFields" class="field conditional">
-          <label for="blogUrl">블로그 URL</label>
-          <input id="blogUrl" type="url" placeholder="https://blog.naver.com/...">
-        </div>
+        <div id="personalBlogFields" class="field conditional"><label for="blogUrl">블로그 URL</label><input id="blogUrl" type="url" placeholder="https://blog.naver.com/..."></div>
         <div id="branchBlogFields" class="conditional">
-          <div class="field">
-            <label for="personalUrl">본인 URL</label>
-            <input id="personalUrl" type="url" placeholder="시승신청 또는 개인 연결 URL">
-          </div>
-          <div class="field">
-            <label for="businessCardFile">본인 명함 이미지</label>
-            <input id="businessCardFile" type="file" accept="image/*">
-            <div id="businessCardCurrent" class="hint"></div>
-          </div>
+          <div class="field"><label for="personalUrl">본인 URL</label><input id="personalUrl" type="url" placeholder="시승신청 URL"></div>
+          <div class="field"><label for="businessCardFile">본인 명함 이미지</label><input id="businessCardFile" type="file" accept="image/*"><div id="businessCardCurrent" class="hint"></div></div>
         </div>
         <div id="profileStatus" class="status"></div>
         <button class="primary" type="submit">저장하고 시작하기</button>
@@ -173,657 +146,454 @@
 
     <section id="homeScreen" class="screen">
       <header class="topbar">
-        <div class="hello">
-          <strong id="homeName">안녕하세요</strong>
-          <p id="homeAgency"></p>
-        </div>
-        <button class="menu-btn" type="button" aria-label="메뉴 열기" onclick="openDrawer()">
-          <span class="menu-icon"></span>
-        </button>
+        <div class="hello"><strong id="homeName">안녕하세요</strong><p id="homeAgency"></p></div>
+        <button class="menu-btn" type="button" aria-label="메뉴 열기" onclick="openDrawer()"><span class="menu-icon"></span></button>
       </header>
-
       <div class="home">
-        <button class="banner" type="button" onclick="enterPage('campaignScreen')">
-          <strong>6월 블로그 시책</strong>
-          <span>배너 클릭 후 참여 신청 폼으로 연결됩니다.</span>
+        <button class="banner" type="button" onclick="enterCampaign()">
+          <strong>시책 배너</strong>
+          <span>배너 클릭 시 참여 신청 폼으로 이동합니다.</span>
         </button>
-
         <section class="section">
-          <div class="section-head">
-            <h2>공지사항</h2>
-          </div>
-          <div class="list">
-            <div class="item">
-              <div class="item-title">모바일 포털 준비 중</div>
-              <div class="item-meta">공지 API 연결 전 임시 표시입니다.</div>
-            </div>
-          </div>
+          <div class="section-head"><h2>공지사항</h2></div>
+          <div class="list" id="noticeList"><div class="empty">공지사항을 불러오는 중입니다.</div></div>
         </section>
-
         <section class="section">
-          <button class="primary" type="button" onclick="enterPage('blogRequestScreen')">블로그 원고 제작 요청</button>
+          <button class="primary" type="button" onclick="showFormView()">블로그 원고 제작 요청</button>
         </section>
-
         <section class="section">
-          <div class="section-head">
-            <h2>완료된 원고</h2>
-          </div>
-          <div class="empty">아직 표시할 완료 원고가 없습니다.</div>
+          <div class="section-head"><h2>완료된 원고 리스트</h2></div>
+          <div id="completedList" class="list"><div class="empty">완료된 원고를 불러오는 중입니다.</div></div>
         </section>
       </div>
     </section>
 
-    <section id="blogRequestScreen" class="screen">
+    <section id="formScreen" class="screen">
       <header class="page-head">
         <button class="back-btn" type="button" onclick="enterHome()">‹</button>
-        <div>
-          <h2>블로그 원고 제작 요청</h2>
-          <p>원고 요청 내용을 입력합니다.</p>
-        </div>
+        <div><h2>블로그 포스팅 자료 제출</h2><p>출고 후기 제작에 필요한 정보와 사진을 제출합니다.</p></div>
       </header>
-      <form class="form page" onsubmit="submitPendingFeature(event,'블로그 원고 제작 요청')">
-        <div class="field">
-          <label>제목 또는 주제</label>
-          <input id="blogRequestTitle" required>
-        </div>
-        <div class="field">
-          <label>요청 내용</label>
-          <textarea id="blogRequestMemo" rows="6" required></textarea>
-        </div>
-        <button class="primary" type="submit">요청하기</button>
-      </form>
-    </section>
-
-    <section id="campaignScreen" class="screen">
-      <header class="page-head">
-        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
-        <div>
-          <h2>시책 참여 신청</h2>
-          <p>참여할 업로드 방식을 선택합니다.</p>
-        </div>
-      </header>
-      <form class="form page" onsubmit="submitPendingFeature(event,'시책 참여 신청')">
-        <div class="field">
-          <label>업로드 방식</label>
-          <div class="radio-row">
-            <label class="radio-card">
-              <input type="radio" name="campaignUploadBlog" value="본인 블로그" required>
-              <span>본인 블로그</span>
-            </label>
-            <label class="radio-card">
-              <input type="radio" name="campaignUploadBlog" value="지점 블로그" required>
-              <span>지점 블로그</span>
-            </label>
+      <div class="progress">
+        <div id="progressText" class="status">1 / 5</div>
+        <div class="bar"><span id="progressBar"></span></div>
+      </div>
+      <form id="briefForm" class="page" novalidate>
+        <section class="step active">
+          <h2>영업담당 정보</h2>
+          <div class="field"><label for="salesName">영업담당 이름</label><input id="salesName" required disabled></div>
+          <div class="field"><label for="requestAgency">대리점</label><input id="requestAgency" required disabled></div>
+          <div class="field"><label for="uploadMedia">업로드</label><select id="uploadMedia" required><option value="">업로드 선택</option></select></div>
+          <input id="submissionDate" type="hidden">
+          <div class="field" id="requestBlogUrlField"><label for="requestBlogUrl">블로그 URL</label><input id="requestBlogUrl" type="url" inputmode="url"></div>
+          <div class="field"><label for="requestPersonalUrl">본인 URL</label><input id="requestPersonalUrl" type="url" inputmode="url"></div>
+          <div class="field"><label for="requestBusinessCardFile">본인명함</label><input id="requestBusinessCardFile" type="file" accept="image/*"><input id="requestBusinessCardUrl" type="hidden"></div>
+        </section>
+        <section class="step">
+          <h2>차량 정보</h2>
+          <div class="field"><label for="deliveryDate">출고 날짜</label><input id="deliveryDate" type="date" required></div>
+          <div class="field"><label for="vehicleModel">모델</label><select id="vehicleModel" required><option value="">모델 선택</option></select></div>
+          <div class="field"><label for="trim">트림</label><select id="trim" required><option value="">트림 선택</option></select></div>
+          <div class="field"><label for="color">색상</label><select id="color" required><option value="">색상 선택</option></select></div>
+          <div class="field"><label for="wheel">휠</label><select id="wheel"><option value="">휠 선택</option></select></div>
+        </section>
+        <section class="step">
+          <h2>사진</h2>
+          <div class="field">
+            <label for="inspectionFiles" id="inspectionFilesLabel">검수 진행 사진</label>
+            <input id="inspectionFiles" type="file" accept="image/*" multiple>
+            <div id="inspectionFilesHint" class="hint">지점 블로그 선택 시 최소 6장 이상 업로드해주세요.</div>
+            <div id="fileCount" class="hint">선택된 사진이 없습니다.</div>
+            <div id="fileList" class="file-list"></div>
+          </div>
+        </section>
+        <section class="step">
+          <h2>고객 히스토리</h2>
+          <div class="field"><div class="label">방문 경로</div><div class="chips" id="visitRoutes"></div></div>
+          <div class="field"><label for="customerHistory">고객과의 히스토리</label><textarea id="customerHistory" placeholder="고객님과의 상담/구매 히스토리를 입력하세요."></textarea></div>
+          <div class="field"><div class="label">만족포인트</div><div class="chips" id="satisfactionPoints"></div></div>
+          <div class="field"><label for="deliveryMood">차량 인도 분위기</label><textarea id="deliveryMood" placeholder="예시) 색상 만족도가 높았음, 첫차라 설렘 등"></textarea></div>
+        </section>
+        <section class="step">
+          <h2>제출 확인</h2>
+          <div id="reviewBox" class="result active"></div>
+          <div id="resultBox" class="result"></div>
+        </section>
+        <div class="actions">
+          <div id="formStatus" class="status"></div>
+          <div id="formBtns" class="btns">
+            <button class="ghost" type="button" id="prevBtn">이전</button>
+            <button class="primary" type="button" id="nextBtn">다음</button>
+            <button class="primary" type="submit" id="requestSubmitBtn" style="display:none">제출</button>
           </div>
         </div>
-        <button class="primary" type="submit">참여 신청</button>
       </form>
     </section>
 
-    <section id="draftListScreen" class="screen">
-      <header class="page-head">
-        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
-        <div>
-          <h2>나의 원고 리스트</h2>
-          <p>본인 원고만 표시됩니다.</p>
-        </div>
-      </header>
-      <div class="page">
-        <div class="empty">연결할 데이터 위치가 필요합니다.</div>
-      </div>
-    </section>
-
-    <section id="uploadedContentScreen" class="screen">
-      <header class="page-head">
-        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
-        <div>
-          <h2>업로드 콘텐츠</h2>
-          <p>업로드된 콘텐츠를 확인합니다.</p>
-        </div>
-      </header>
-      <div class="page">
-        <div class="empty">연결할 데이터 위치가 필요합니다.</div>
-      </div>
-    </section>
-
-    <section id="scoreScreen" class="screen">
-      <header class="page-head">
-        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
-        <div>
-          <h2>시책 점수 확인</h2>
-          <p>본인 점수만 표시됩니다.</p>
-        </div>
-      </header>
-      <div class="page">
-        <div class="empty">점수를 읽을 시트/셀 기준이 필요합니다.</div>
-      </div>
-    </section>
-
-    <section id="skinRequestScreen" class="screen">
-      <header class="page-head">
-        <button class="back-btn" type="button" onclick="enterHome()">‹</button>
-        <div>
-          <h2>블로그 스킨제작 요청</h2>
-          <p>스킨 제작 요청 내용을 입력합니다.</p>
-        </div>
-      </header>
-      <form class="form page" onsubmit="submitPendingFeature(event,'블로그 스킨제작 요청')">
-        <div class="field">
-          <label>요청 내용</label>
-          <textarea id="skinRequestMemo" rows="6" required></textarea>
-        </div>
-        <button class="primary" type="submit">요청하기</button>
-      </form>
+    <section id="simpleScreen" class="screen">
+      <header class="page-head"><button class="back-btn" type="button" onclick="enterHome()">‹</button><div><h2 id="simpleTitle"></h2><p id="simpleDesc"></p></div></header>
+      <div class="page" id="simpleContent"></div>
     </section>
   </main>
 
   <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawerOnBackdrop(event)">
     <aside class="drawer" aria-label="메뉴">
       <div class="drawer-head">
-        <div>
-          <h2>메뉴</h2>
-          <p id="drawerUser"></p>
-        </div>
+        <div><h2>메뉴</h2><p id="drawerUser"></p></div>
         <button class="drawer-close" type="button" aria-label="닫기" onclick="closeDrawer()">×</button>
       </div>
       <div class="menu-list">
         <button type="button" onclick="enterProfile(false)">내 정보</button>
-        <button type="button" onclick="enterPage('draftListScreen')">나의 원고 리스트</button>
-        <button type="button" onclick="enterPage('uploadedContentScreen')">업로드 콘텐츠</button>
-        <button type="button" onclick="enterPage('scoreScreen')">시책 점수 확인</button>
-        <button type="button" onclick="enterPage('skinRequestScreen')">블로그 스킨제작 요청</button>
+        <button type="button" onclick="showMyDrafts()">나의 원고 리스트</button>
+        <button type="button" onclick="showUploadedContent()">업로드 콘텐츠</button>
+        <button type="button" onclick="showScores()">시책 점수 확인</button>
+        <button type="button" onclick="showSkinRequest()">블로그 스킨제작 요청</button>
         <button class="logout" type="button" onclick="logout()">로그아웃</button>
       </div>
     </aside>
   </div>
 
   <div id="modal" class="modal" onclick="closeModalOnBackdrop(event)">
-    <div class="modal-panel">
-      <h2 id="modalTitle">준비 중</h2>
-      <p id="modalText">이 기능은 다음 단계에서 연결합니다.</p>
-      <button class="secondary" type="button" onclick="closeModal()">확인</button>
-    </div>
+    <div class="modal-panel"><h2 id="modalTitle">확인</h2><p id="modalText"></p><button class="secondary" type="button" onclick="closeModal()">확인</button></div>
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycby5ASjkqa-tm1U7waJLyzawgRCCgkSuFR6BRjvCWr-8jN6IZAODFfBk5EyzhTaFiquy/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwgvJ_NaTZUTVaN1W2mG-7-OXfc105ZlQR0s87lvAYjzGXhnqoRxOr20wGPvHao0N7K/exec';
     const SESSION_KEY = 'salesMemberSession_v1';
-
-    const state = {
-      authMode: 'login',
-      loading: false,
-      user: null,
-      profileRequired: false,
+    const FALLBACK_VEHICLES = {
+      '필랑트 하이브리드 E-Tech': {trims:['테크노','아이코닉','에스프리 알핀','esprit Alpine 1955'],colors:['새틴 유니버스 화이트','새틴 포레스트 블랙','클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['20" 다크 틴티드 투톤 시케인 알로이 휠','20" 투톤 베가 알로이 휠','19" 투톤 알파 알로이 휠']},
+      '그랑 콜레오스 하이브리드 E-tech': {trims:['테크노','아이코닉','에스프리 알핀','에스카파드'],colors:['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'],wheels:['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠']},
+      '그랑 콜레오스 가솔린 2.0 터보': {trims:['테크노','아이코닉','에스프리 알핀','아이코닉 4WD','에스카파드','에스카파드 4WD'],colors:['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'],wheels:['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠']},
+      '아르카나 1.6 GTe': {trims:['아이코닉'],colors:['클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['17" 다크 그레이 휠']},
+      '아르카나 하이브리드 E-tech': {trims:['아이코닉'],colors:['클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['17" 다크 그레이 휠']}
     };
 
+    const state = {authMode:'login',loading:false,user:null,profileRequired:false,options:null,step:0,total:5,inspectionFiles:[]};
     const $ = id => document.getElementById(id);
 
     init();
 
-    function init() {
-      const saved = readSession();
-      if (saved && saved.name && saved.agency) {
-        state.user = saved;
-        showHome();
-      }
-
-      $('authForm').addEventListener('submit', handleAuthSubmit);
-      $('profileForm').addEventListener('submit', handleProfileSubmit);
+    function init(){
+      const saved=readSession();
+      if(saved&&saved.name&&saved.agency){state.user=saved;showHome()}
+      $('authForm').addEventListener('submit',handleAuthSubmit);
+      $('profileForm').addEventListener('submit',handleProfileSubmit);
+      $('briefForm').addEventListener('submit',submitForm);
+      $('prevBtn').onclick=prevStep;
+      $('nextBtn').onclick=nextStep;
+      $('uploadMedia').onchange=syncUploadMediaRules;
+      $('vehicleModel').onchange=refreshVehicleChildren;
+      $('trim').onchange=refreshWheels;
+      $('inspectionFiles').onchange=addInspectionFiles;
       loadAgencies();
+      loadBriefOptions();
     }
 
-    async function loadAgencies() {
-      const select = $('agency');
+    async function loadAgencies(){
+      try{
+        const res=await apiGet({action:'agencies'});
+        if(!res.ok)throw new Error(res.error||'대리점 목록을 불러오지 못했습니다.');
+        fillSelect('agency',Array.isArray(res.data)?res.data:[],'대리점 선택');
+      }catch(error){showStatus(error.message||String(error),'error')}
+    }
 
-      try {
-        const res = await apiGet({ action: 'agencies' });
-        if (!res.ok) throw new Error(res.error || '대리점 목록을 불러오지 못했습니다.');
-
-        const agencies = Array.isArray(res.data) ? res.data : [];
-        select.innerHTML = '<option value="">대리점 선택</option>' +
-          agencies.map(agency => `<option value="${esc(agency)}">${esc(agency)}</option>`).join('');
-
-        if (state.user && state.user.agency) {
-          select.value = state.user.agency;
-        }
-      } catch (error) {
-        replaceAgencySelectWithInput();
-        showStatus(`${error.message || String(error)}\n대리점은 직접 입력으로 진행할 수 있습니다.`, 'error');
+    async function loadBriefOptions(){
+      try{
+        const res=await apiGet({action:'options'});
+        if(!res.ok)throw new Error(res.error||'옵션을 불러오지 못했습니다.');
+        state.options=res.data||{};
+      }catch(error){
+        state.options={vehicles:FALLBACK_VEHICLES,uploadMediaOptions:['본인 블로그','지점 블로그'],visitRoutes:[],satisfactionPoints:[]};
       }
+      fillSelect('uploadMedia',state.options.uploadMediaOptions&&state.options.uploadMediaOptions.length?state.options.uploadMediaOptions:['본인 블로그','지점 블로그'],'업로드 선택');
+      fillSelect('vehicleModel',Object.keys(state.options.vehicles||FALLBACK_VEHICLES),'모델 선택');
+      renderChecks('visitRoutes','visitRoutes',state.options.visitRoutes||[]);
+      renderChecks('satisfactionPoints','satisfactionPoints',state.options.satisfactionPoints||[]);
+      refreshVehicleChildren();
+      syncUploadMediaRules();
     }
 
-    function replaceAgencySelectWithInput() {
-      const current = $('agency');
-      if (!current || current.tagName === 'INPUT') return;
-
-      const input = document.createElement('input');
-      input.id = 'agency';
-      input.name = 'agency';
-      input.autocomplete = 'organization';
-      input.placeholder = '소속 대리점 직접 입력';
-      input.required = true;
-      current.replaceWith(input);
-    }
-
-    function setAuthMode(mode) {
-      state.authMode = mode;
-      $('loginTab').classList.toggle('active', mode === 'login');
-      $('registerTab').classList.toggle('active', mode === 'register');
-      $('submitBtn').textContent = mode === 'login' ? '로그인' : '비밀번호 생성';
-      $('password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
-      $('passwordHint').textContent = mode === 'login'
-        ? '가입 때 만든 비밀번호를 입력하세요.'
-        : '영문과 숫자를 포함한 4~8자';
+    function setAuthMode(mode){
+      state.authMode=mode;
+      $('loginTab').classList.toggle('active',mode==='login');
+      $('registerTab').classList.toggle('active',mode==='register');
+      $('submitBtn').textContent=mode==='login'?'로그인':'비밀번호 생성';
+      $('password').autocomplete=mode==='login'?'current-password':'new-password';
+      $('passwordHint').textContent=mode==='login'?'가입 때 만든 비밀번호를 입력하세요.':'영문과 숫자를 포함한 4~8자';
       clearStatus();
     }
 
-    async function checkMember() {
-      const name = $('name').value.trim();
-      const agency = $('agency').value.trim();
-
-      if (!name || !agency) {
-        showStatus('이름과 소속 대리점을 먼저 입력해주세요.', 'error');
-        return;
-      }
-
-      await withLoading(async () => {
+    async function checkMember(){
+      const name=$('name').value.trim(),agency=$('agency').value.trim();
+      if(!name||!agency){showStatus('이름과 소속 대리점을 먼저 입력해주세요.','error');return}
+      await withLoading(async()=>{
         showStatus('가입 가능 여부를 확인하는 중입니다.');
-        const res = await apiGet({ action: 'checkMember', name, agency });
-        if (!res.ok) throw new Error(res.error || '확인에 실패했습니다.');
-
-        if (!res.data.exists) {
-          showStatus(res.data.message || '등록 가능한 영업담당이 아닙니다.', 'error');
-          return;
-        }
-
-        showStatus(res.data.registered
-          ? '이미 가입된 영업담당입니다. 로그인해주세요.'
-          : '가입 가능합니다. 비밀번호를 생성해주세요.', 'ok');
+        const res=await apiGet({action:'checkMember',name,agency});
+        if(!res.ok)throw new Error(res.error||'확인에 실패했습니다.');
+        if(!res.data.exists){showStatus(res.data.message||'등록 가능한 영업담당이 아닙니다.','error');return}
+        showStatus(res.data.registered?'이미 가입된 영업담당입니다. 로그인해주세요.':'가입 가능합니다. 비밀번호를 생성해주세요.','ok');
       });
     }
 
-    async function handleAuthSubmit(event) {
+    async function handleAuthSubmit(event){
       event.preventDefault();
+      const payload={action:state.authMode==='login'?'login':'register',name:$('name').value.trim(),agency:$('agency').value.trim(),password:$('password').value.trim()};
+      if(!payload.name||!payload.agency||!payload.password){showStatus('모든 항목을 입력해주세요.','error');return}
+      await withLoading(async()=>{
+        showStatus(state.authMode==='login'?'로그인 중입니다.':'가입 처리 중입니다.');
+        const res=await apiGet(payload);
+        if(!res.ok)throw new Error(res.error||'요청에 실패했습니다.');
+        const data=res.data||{};
+        if(state.authMode==='login'&&data.loggedIn!==true)throw new Error(data.error||'로그인에 실패했습니다.');
+        if(state.authMode==='register'&&data.registered!==true)throw new Error(data.error||'가입에 실패했습니다.');
+        const user={name:data.name||payload.name,agency:data.agency||payload.agency,notionPageId:data.notionPageId||'',profile:data.profile||{},profileComplete:!!data.profileComplete,loggedAt:new Date().toISOString()};
+        saveSession(user);state.user=user;
+        if(!user.profileComplete)enterProfile(true);else enterHome();
+      });
+    }
 
-      const payload = {
-        action: state.authMode === 'login' ? 'login' : 'register',
-        name: $('name').value.trim(),
-        agency: $('agency').value.trim(),
-        password: $('password').value.trim(),
+    function enterProfile(required){
+      if(!state.user)return;
+      state.profileRequired=!!required;
+      hideScreens();$('profileScreen').classList.add('active');
+      $('profileBackBtn').style.display=required?'none':'block';
+      $('profileSubtitle').textContent=required?'노션 영업담당 정보가 비어 있어 먼저 등록이 필요합니다.':'내 정보를 수정합니다.';
+      fillProfileForm(state.user.profile||{});
+      closeDrawer();scrollTop();
+    }
+
+    function enterHome(){
+      if(!state.user)return;
+      if(state.profileRequired&&state.user.profileComplete===false){enterProfile(true);return}
+      hideScreens();$('homeScreen').classList.add('active');
+      $('homeName').textContent=`${state.user.name}님`;
+      $('homeAgency').textContent=state.user.agency;
+      $('drawerUser').textContent=`${state.user.name} / ${state.user.agency}`;
+      closeDrawer();clearStatus();scrollTop();
+      refreshHomeData();
+    }
+
+    function showHome(){if(state.user&&state.user.profileComplete===false)enterProfile(true);else enterHome()}
+    function hideScreens(){['authScreen','profileScreen','homeScreen','formScreen','simpleScreen'].forEach(id=>$(id).classList.remove('active'))}
+
+    function showFormView(){
+      if(!canUseMain())return;
+      hideScreens();$('formScreen').classList.add('active');closeDrawer();scrollTop();
+      prepareRequestForm();renderStep();
+    }
+
+    function prepareRequestForm(){
+      const profile=state.user.profile||{};
+      $('salesName').value=state.user.name||'';
+      $('requestAgency').value=state.user.agency||'';
+      $('requestBlogUrl').value=profile.blogUrl||'';
+      $('requestPersonalUrl').value=profile.personalUrl||'';
+      $('requestBusinessCardUrl').value=profile.businessCardUrl||'';
+      $('requestBusinessCardFile').value='';
+      const today=new Date().toISOString().slice(0,10);
+      $('submissionDate').value=today;
+      if(!$('deliveryDate').value)$('deliveryDate').value=today;
+      if(profile.uploadBlog&&[...$('uploadMedia').options].some(o=>o.value===profile.uploadBlog))$('uploadMedia').value=profile.uploadBlog;
+      state.step=0;state.inspectionFiles=[];renderFileList();syncUploadMediaRules();refreshVehicleChildren();clearFormStatus();
+      $('resultBox').classList.remove('active');$('resultBox').innerHTML='';$('requestSubmitBtn').disabled=false;
+    }
+
+    function nextStep(){
+      const step=$$('.step')[state.step];
+      if(!validateStepElement(step))return;
+      if(state.step<state.total-1){state.step++;if(state.step===state.total-1)renderReview();renderStep()}
+    }
+    function prevStep(){if(state.step>0){state.step--;renderStep()}}
+    function renderStep(){
+      $$('.step').forEach((el,i)=>el.classList.toggle('active',i===state.step));
+      $('progressText').textContent=`${state.step+1} / ${state.total}`;
+      $('progressBar').style.width=`${((state.step+1)/state.total)*100}%`;
+      $('prevBtn').style.display=state.step===0?'none':'block';
+      $('nextBtn').style.display=state.step===state.total-1?'none':'block';
+      $('requestSubmitBtn').style.display=state.step===state.total-1?'block':'none';
+      $('formBtns').classList.toggle('single',state.step===0);
+    }
+
+    function validateStepElement(step){
+      clearFormStatus();
+      for(const field of step.querySelectorAll('[required]')){
+        if(!field.value){field.focus();showFormStatus('필수 항목을 입력해주세요.','error');return false}
+        if((field.type==='email'||field.type==='url')&&field.value&&!field.checkValidity()){field.focus();showFormStatus('URL 형식을 확인해주세요.','error');return false}
+      }
+      if(state.step===0){
+        if(isPersonalBlogSelected()&&!$('requestBlogUrl').value.trim()){showFormStatus('본인 블로그 선택 시 블로그 URL을 입력해주세요.','error');return false}
+        if(isBranchBlogSelected()&&!$('requestPersonalUrl').value.trim()){showFormStatus('지점 블로그 선택 시 본인 URL을 입력해주세요.','error');return false}
+        if(isBranchBlogSelected()&&!$('requestBusinessCardUrl').value.trim()&&!$('requestBusinessCardFile').files[0]){showFormStatus('지점 블로그 선택 시 본인 명함 이미지를 등록해주세요.','error');return false}
+      }
+      if(state.step===2&&isBranchBlogSelected()&&state.inspectionFiles.length<6){showFormStatus('지점 블로그 선택 시 검수 진행 사진은 최소 6장 이상 선택해주세요.','error');return false}
+      return true;
+    }
+
+    async function submitForm(event){
+      event.preventDefault();
+      if(!validateStepElement($$('.step')[state.step]))return;
+      $('requestSubmitBtn').disabled=true;
+      try{
+        showFormStatus('제출 중입니다. 사진이 많으면 시간이 걸릴 수 있습니다.');
+        const payload=await buildPayload();
+        const res=await apiPost(payload);
+        if(!res.ok)throw new Error(res.error||'제출에 실패했습니다.');
+        showResult(res.data||{});
+        refreshHomeData();
+      }catch(error){showFormStatus(error.message||String(error),'error');$('requestSubmitBtn').disabled=false}
+    }
+
+    async function buildPayload(){
+      const card=$('requestBusinessCardFile').files[0];
+      return {
+        action:'submitBlogBrief',
+        salespersonId:state.user.notionPageId,
+        notionPageId:state.user.notionPageId,
+        salesName:state.user.name,
+        agency:state.user.agency,
+        blogUrl:$('requestBlogUrl').value.trim(),
+        personalUrl:$('requestPersonalUrl').value.trim(),
+        businessCardUrl:$('requestBusinessCardUrl').value.trim(),
+        businessCardFile:card?await fileToPayload(card):null,
+        uploadMedia:$('uploadMedia').value,
+        submissionDate:$('submissionDate').value,
+        deliveryDate:$('deliveryDate').value,
+        vehicleModel:$('vehicleModel').value,
+        trim:$('trim').value,
+        color:$('color').value,
+        wheel:$('wheel').value,
+        inspectionFiles:await Promise.all(state.inspectionFiles.map(item=>fileToPayload(item.file))),
+        visitRoutes:checkedValues('visitRoutes'),
+        customerHistory:$('customerHistory').value.trim(),
+        satisfactionPoints:checkedValues('satisfactionPoints'),
+        deliveryMood:$('deliveryMood').value.trim()
       };
-
-      if (!payload.name || !payload.agency || !payload.password) {
-        showStatus('모든 항목을 입력해주세요.', 'error');
-        return;
-      }
-
-      await withLoading(async () => {
-        showStatus(state.authMode === 'login' ? '로그인 중입니다.' : '가입 처리 중입니다.');
-        const res = await apiGet(payload);
-        if (!res.ok) throw new Error(res.error || '요청에 실패했습니다.');
-
-        const data = res.data || {};
-        if (data.ok === false) {
-          throw new Error(data.error || '요청에 실패했습니다.');
-        }
-        if (state.authMode === 'login' && data.loggedIn !== true) {
-          throw new Error(data.error || '로그인 성공 응답을 받지 못했습니다.');
-        }
-        if (state.authMode === 'register' && data.registered !== true) {
-          throw new Error(data.error || '가입 성공 응답을 받지 못했습니다.');
-        }
-
-        const user = {
-          name: data.name || payload.name,
-          agency: data.agency || payload.agency,
-          notionPageId: data.notionPageId || '',
-          profile: data.profile || {},
-          profileComplete: !!data.profileComplete,
-          loggedAt: new Date().toISOString(),
-        };
-
-        saveSession(user);
-        state.user = user;
-        if (!user.profileComplete) {
-          enterProfile(true);
-        } else {
-          enterHome();
-        }
-      });
     }
 
-    function enterProfile(required) {
-      if (!state.user) return;
-      state.profileRequired = !!required;
-      hideScreens();
-      $('profileScreen').classList.add('active');
-      $('profileScreen').style.display = 'block';
-      $('profileBackBtn').style.display = required ? 'none' : 'block';
-      $('profileSubtitle').textContent = required
-        ? '노션 영업담당 정보가 비어 있어 먼저 등록이 필요합니다.'
-        : '노션 영업담당 정보를 수정합니다.';
-      fillProfileForm(state.user.profile || {});
-      closeDrawer();
-      window.scrollTo({ top: 0, behavior: 'auto' });
+    function showResult(result){
+      $('resultBox').innerHTML=`<div>${esc(result.message||'제출이 완료되었습니다.')}</div>${result.resultFolderUrl?`<p><a href="${esc(result.resultFolderUrl)}" target="_blank" rel="noopener">결과물 폴더 열기</a></p>`:''}${result.deliveryTitle?`<p>제목: ${esc(result.deliveryTitle)}</p>`:''}`;
+      $('resultBox').classList.add('active');
+      showFormStatus('', '');
     }
 
-    function enterHome() {
-      if (!state.user) return;
-      if (state.profileRequired && state.user.profileComplete === false) {
-        enterProfile(true);
-        return;
-      }
-      hideScreens();
-      const authScreen = $('authScreen');
-      const homeScreen = $('homeScreen');
-      homeScreen.classList.add('active');
-      homeScreen.style.display = 'block';
-      $('homeName').textContent = `${state.user.name}님`;
-      $('homeAgency').textContent = state.user.agency;
-      $('drawerUser').textContent = `${state.user.name} / ${state.user.agency}`;
-      closeDrawer();
-      clearStatus();
-      window.scrollTo({ top: 0, behavior: 'auto' });
+    function fillProfileForm(profile){
+      $('profileName').value=state.user.name||'';$('profileAgency').value=state.user.agency||'';
+      document.querySelectorAll('input[name="uploadBlog"]').forEach(input=>{input.checked=input.value===(profile.uploadBlog||'')});
+      $('blogUrl').value=profile.blogUrl||'';$('personalUrl').value=profile.personalUrl||'';$('businessCardFile').value='';
+      $('businessCardCurrent').textContent=profile.businessCardUrl?'기존 명함 이미지가 등록되어 있습니다.':'';
+      syncProfileFields();showProfileStatus('');
     }
-
-    function showHome() {
-      if (state.user && state.user.profileComplete === false) enterProfile(true);
-      else enterHome();
+    function syncProfileFields(){
+      const mode=getUploadBlogMode();
+      $('personalBlogFields').classList.toggle('active',mode==='본인 블로그');
+      $('branchBlogFields').classList.toggle('active',mode==='지점 블로그');
     }
+    function getUploadBlogMode(){const checked=document.querySelector('input[name="uploadBlog"]:checked');return checked?checked.value:''}
 
-    function hideScreens() {
-      [
-        'authScreen',
-        'profileScreen',
-        'homeScreen',
-        'blogRequestScreen',
-        'campaignScreen',
-        'draftListScreen',
-        'uploadedContentScreen',
-        'scoreScreen',
-        'skinRequestScreen',
-      ].forEach(id => {
-        $(id).classList.remove('active');
-        $(id).style.display = 'none';
-      });
-    }
-
-    function enterPage(screenId) {
-      if (!state.user) return;
-      if (state.profileRequired && state.user.profileComplete === false) {
-        enterProfile(true);
-        return;
-      }
-      hideScreens();
-      $(screenId).classList.add('active');
-      $(screenId).style.display = 'block';
-      closeDrawer();
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
-
-    function submitPendingFeature(event, title) {
+    async function handleProfileSubmit(event){
       event.preventDefault();
-      openComingSoon(title);
-    }
-
-    function fillProfileForm(profile) {
-      $('profileName').value = state.user.name || '';
-      $('profileAgency').value = state.user.agency || '';
-      document.querySelectorAll('input[name="uploadBlog"]').forEach(input => {
-        input.checked = input.value === (profile.uploadBlog || '');
-      });
-      $('blogUrl').value = profile.blogUrl || '';
-      $('personalUrl').value = profile.personalUrl || '';
-      $('businessCardFile').value = '';
-      $('businessCardCurrent').textContent = profile.businessCardUrl ? '기존 명함 이미지가 등록되어 있습니다.' : '';
-      syncProfileFields();
-      showProfileStatus('');
-    }
-
-    function syncProfileFields() {
-      const mode = getUploadBlogMode();
-      $('personalBlogFields').classList.toggle('active', mode === '본인 블로그');
-      $('branchBlogFields').classList.toggle('active', mode === '지점 블로그');
-    }
-
-    function getUploadBlogMode() {
-      const checked = document.querySelector('input[name="uploadBlog"]:checked');
-      return checked ? checked.value : '';
-    }
-
-    async function handleProfileSubmit(event) {
-      event.preventDefault();
-      if (!state.user || !state.user.notionPageId) {
-        showProfileStatus('노션페이지 ID가 없습니다. 다시 로그인해주세요.', 'error');
-        return;
-      }
-
-      const payload = {
-        action: 'saveProfile',
-        notionPageId: state.user.notionPageId,
-        uploadBlog: getUploadBlogMode(),
-        blogUrl: $('blogUrl').value.trim(),
-        personalUrl: $('personalUrl').value.trim(),
-        businessCardUrl: state.user.profile && state.user.profile.businessCardUrl ? state.user.profile.businessCardUrl : '',
-      };
-
-      if (!payload.uploadBlog) {
-        showProfileStatus('업로드 블로그를 선택해주세요.', 'error');
-        return;
-      }
-      if (payload.uploadBlog === '본인 블로그' && !payload.blogUrl) {
-        showProfileStatus('블로그 URL을 입력해주세요.', 'error');
-        return;
-      }
-      if (payload.uploadBlog === '지점 블로그' && !payload.personalUrl) {
-        showProfileStatus('본인 URL을 입력해주세요.', 'error');
-        return;
-      }
-
-      await withLoading(async () => {
+      if(!state.user||!state.user.notionPageId){showProfileStatus('노션페이지 ID가 없습니다. 다시 로그인해주세요.','error');return}
+      const payload={action:'saveProfile',notionPageId:state.user.notionPageId,uploadBlog:getUploadBlogMode(),blogUrl:$('blogUrl').value.trim(),personalUrl:$('personalUrl').value.trim(),businessCardUrl:state.user.profile&&state.user.profile.businessCardUrl?state.user.profile.businessCardUrl:''};
+      if(!payload.uploadBlog){showProfileStatus('본인 블로그 또는 지점 블로그를 선택해주세요.','error');return}
+      if(payload.uploadBlog==='본인 블로그'&&!payload.blogUrl){showProfileStatus('블로그 URL을 입력해주세요.','error');return}
+      if(payload.uploadBlog==='지점 블로그'&&!payload.personalUrl){showProfileStatus('본인 URL을 입력해주세요.','error');return}
+      await withLoading(async()=>{
         showProfileStatus('내 정보를 저장하는 중입니다.');
-        if (payload.uploadBlog === '지점 블로그') {
-          payload.businessCardUrl = await ensureBusinessCardUploaded_();
-        }
-        const res = await apiGet(payload);
-        if (!res.ok) throw new Error(res.error || '내 정보 저장에 실패했습니다.');
-        const data = res.data || {};
-        state.user.profile = data.profile || {};
-        state.user.profileComplete = !!data.complete;
-        state.profileRequired = !state.user.profileComplete;
-        saveSession(state.user);
-        if (!state.user.profileComplete) {
-          showProfileStatus('필수 정보를 모두 입력해주세요.', 'error');
-          return;
-        }
+        if(payload.uploadBlog==='지점 블로그')payload.businessCardUrl=await ensureBusinessCardUploaded_();
+        const res=await apiGet(payload);
+        if(!res.ok)throw new Error(res.error||'내 정보 저장에 실패했습니다.');
+        const data=res.data||{};state.user.profile=data.profile||{};state.user.profileComplete=!!data.complete;state.profileRequired=!state.user.profileComplete;saveSession(state.user);
+        if(!state.user.profileComplete){showProfileStatus('필수 정보를 모두 입력해주세요.','error');return}
         enterHome();
-      }, showProfileStatus);
+      },showProfileStatus);
     }
 
-    async function ensureBusinessCardUploaded_() {
-      const file = $('businessCardFile').files[0];
-      const existingUrl = state.user.profile && state.user.profile.businessCardUrl;
-
-      if (!file && existingUrl) return existingUrl;
-      if (!file) throw new Error('본인 명함 이미지를 선택해주세요.');
-
+    async function ensureBusinessCardUploaded_(){
+      const file=$('businessCardFile').files[0],existingUrl=state.user.profile&&state.user.profile.businessCardUrl;
+      if(!file&&existingUrl)return existingUrl;
+      if(!file)throw new Error('본인 명함 이미지를 선택해주세요.');
       showProfileStatus('명함 이미지를 업로드하는 중입니다.');
-      const fileData = await fileToDataUrl(file);
-      const res = await apiPost({
-        action: 'uploadBusinessCard',
-        notionPageId: state.user.notionPageId,
-        fileName: file.name,
-        fileData,
-      });
-
-      if (!res.ok) throw new Error(res.error || '명함 이미지 업로드에 실패했습니다.');
-      if (!res.data || !res.data.url) throw new Error('명함 이미지 URL을 받지 못했습니다.');
+      const fileData=await fileToDataUrl(file);
+      const res=await apiPost({action:'uploadBusinessCard',notionPageId:state.user.notionPageId,fileName:file.name,fileData});
+      if(!res.ok)throw new Error(res.error||'명함 이미지 업로드에 실패했습니다.');
+      if(!res.data||!res.data.url)throw new Error('명함 이미지 URL을 받지 못했습니다.');
       return res.data.url;
     }
 
-    function fileToDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error('명함 이미지 파일을 읽지 못했습니다.'));
-        reader.readAsDataURL(file);
-      });
+    async function refreshHomeData(){loadNotices();loadCompletedList()}
+    async function loadNotices(){
+      try{
+        const res=await apiGet({action:'notices',limit:5});
+        const items=res.ok&&Array.isArray(res.data)?res.data:[];
+        $('noticeList').innerHTML=items.length?items.map(item=>`<div class="item"><div class="item-title">${esc(item.title||'공지')}</div><div class="item-meta">${esc(item.date||'')}</div></div>`).join(''):'<div class="empty">등록된 공지사항이 없습니다.</div>';
+      }catch(error){$('noticeList').innerHTML='<div class="empty">공지사항을 불러오지 못했습니다.</div>'}
     }
-
-    function showProfileStatus(message, type) {
-      $('profileStatus').className = `status ${type || ''}`;
-      $('profileStatus').textContent = message || '';
+    async function loadCompletedList(){
+      try{
+        const res=await apiGet({action:'customerHistory',salespersonId:state.user.notionPageId,limit:20});
+        const items=(res.ok&&Array.isArray(res.data)?res.data:[]).filter(item=>String(item.status||'').includes('완료'));
+        $('completedList').innerHTML=items.length?items.map(renderHistoryItem).join(''):'<div class="empty">아직 표시할 완료 원고가 없습니다.</div>';
+      }catch(error){$('completedList').innerHTML='<div class="empty">완료 원고를 불러오지 못했습니다.</div>'}
     }
+    function renderHistoryItem(item){return `<div class="item"><div class="item-title">${esc(item.title||'-')}</div><div class="item-meta">${esc(item.status||'')} ${item.uploadMedia?'/ '+esc(item.uploadMedia):''}</div></div>`}
 
-    function logout() {
-      localStorage.removeItem(SESSION_KEY);
-      state.user = null;
-      $('homeScreen').classList.remove('active');
-      $('authScreen').classList.add('active');
-      $('homeScreen').style.display = 'none';
-      $('profileScreen').style.display = 'none';
-      hideScreens();
-      $('authScreen').style.display = 'flex';
-      $('authScreen').classList.add('active');
-      closeDrawer();
-      $('password').value = '';
-      showStatus('로그아웃되었습니다.', 'ok');
+    function showMyDrafts(){showListPage('나의 원고 리스트','본인 원고만 표시합니다.')}
+    function showUploadedContent(){showListPage('업로드 콘텐츠','업로드된 콘텐츠를 표시합니다.')}
+    function showScores(){showSimple('시책 점수 확인','시책 점수는 연결된 시트의 점수 위치가 확정되면 연결합니다.','<div class="empty">점수 셀 위치가 필요합니다.</div>')}
+    function showSkinRequest(){showSimple('블로그 스킨제작 요청','스킨 제작 요청 양식입니다.','<div class="empty">저장할 DB/시트 구조가 확정되면 제출 기능을 연결합니다.</div>')}
+    async function showListPage(title,desc){
+      showSimple(title,desc,'<div class="empty">불러오는 중입니다.</div>');
+      try{
+        const res=await apiGet({action:'customerHistory',salespersonId:state.user.notionPageId,limit:50});
+        const items=res.ok&&Array.isArray(res.data)?res.data:[];
+        $('simpleContent').innerHTML=items.length?items.map(renderHistoryItem).join(''):'<div class="empty">표시할 원고가 없습니다.</div>';
+      }catch(error){$('simpleContent').innerHTML='<div class="empty">목록을 불러오지 못했습니다.</div>'}
     }
+    function enterCampaign(){showSimple('시책 참여 신청','본인 블로그 또는 지점 블로그로 참여 신청합니다.',`<div class="field"><label>업로드 방식</label><div class="radio-row"><label class="radio-card"><input type="radio" name="campaignMode" value="본인 블로그"><span>본인 블로그</span></label><label class="radio-card"><input type="radio" name="campaignMode" value="지점 블로그"><span>지점 블로그</span></label></div></div><button class="primary" type="button" onclick="openModal('안내','시책 참여 신청 저장 위치가 확정되면 연결합니다.')">참여 신청</button>`)}
+    function showSimple(title,desc,html){if(!canUseMain())return;hideScreens();$('simpleScreen').classList.add('active');$('simpleTitle').textContent=title;$('simpleDesc').textContent=desc;$('simpleContent').innerHTML=html;closeDrawer();scrollTop()}
 
-    function openDrawer() {
-      $('drawerBackdrop').classList.add('active');
+    function canUseMain(){if(!state.user)return false;if(state.profileRequired&&state.user.profileComplete===false){enterProfile(true);return false}return true}
+    function isPersonalBlogSelected(){return String($('uploadMedia').value||'').includes('본인')}
+    function isBranchBlogSelected(){return String($('uploadMedia').value||'').includes('지점')}
+    function syncUploadMediaRules(){
+      const branch=isBranchBlogSelected();
+      $('inspectionFilesLabel').textContent=branch?'검수 진행 사진':'검수 진행 사진';
+      $('inspectionFilesHint').textContent=branch?'지점 블로그 선택 시 최소 6장 이상 업로드해주세요.':'본인 블로그 선택 시 사진 없이 제출할 수 있습니다.';
     }
+    function refreshVehicleChildren(){const vehicle=(state.options&&state.options.vehicles&&state.options.vehicles[$('vehicleModel').value])||FALLBACK_VEHICLES[$('vehicleModel').value];fillSelect('trim',vehicle?vehicle.trims:[],'트림 선택');fillSelect('color',vehicle?vehicle.colors:[],'색상 선택');refreshWheels()}
+    function refreshWheels(){const model=$('vehicleModel').value,trim=$('trim').value,vehicle=(state.options&&state.options.vehicles&&state.options.vehicles[model])||FALLBACK_VEHICLES[model];let wheels=vehicle?vehicle.wheels:[];if(model.includes('그랑 콜레오스')&&(trim==='에스카파드'||trim==='에스카파드 4WD'))wheels=['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠'];fillSelect('wheel',wheels,'휠 선택')}
+    function addInspectionFiles(){[...$('inspectionFiles').files].forEach(file=>{const key=`${file.name}_${file.size}_${file.lastModified}`;if(!state.inspectionFiles.some(item=>item.key===key))state.inspectionFiles.push({key,file})});$('inspectionFiles').value='';renderFileList()}
+    function renderFileList(){$('fileCount').textContent=state.inspectionFiles.length?`${state.inspectionFiles.length}장 선택됨`:'선택된 사진이 없습니다.';$('fileList').innerHTML=state.inspectionFiles.map((item,index)=>`<div class="file-item"><span>${index+1}. ${esc(item.file.name)}</span><button type="button" onclick="removeInspectionFile(${index})">삭제</button></div>`).join('')}
+    function removeInspectionFile(index){state.inspectionFiles.splice(index,1);renderFileList()}
+    function renderReview(){$('reviewBox').innerHTML=`<div>${esc(state.user.name)} / ${esc(state.user.agency)}</div><div>${esc($('vehicleModel').value||'-')} ${esc($('trim').value||'')} ${esc($('color').value||'')}</div><div>업로드: ${esc($('uploadMedia').value||'-')}</div><div>사진: ${state.inspectionFiles.length}장</div>`}
+    function renderChecks(targetId,name,items){$(targetId).innerHTML=(items||[]).map(item=>`<label class="chip"><input type="checkbox" name="${name}" value="${esc(item)}"><span>${esc(item)}</span></label>`).join('')||'<div class="hint">선택 옵션이 없습니다.</div>'}
+    function checkedValues(name){return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(input=>input.value)}
+    function fillSelect(id,items,placeholder){const select=$(id);select.innerHTML=`<option value="">${esc(placeholder)}</option>`+(items||[]).map(item=>`<option value="${esc(item)}">${esc(item)}</option>`).join('')}
 
-    function closeDrawer() {
-      $('drawerBackdrop').classList.remove('active');
-    }
+    function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('파일을 읽지 못했습니다.'));reader.readAsDataURL(file)})}
+    async function fileToPayload(file){const data=await fileToDataUrl(file);return {name:file.name,mimeType:file.type||'application/octet-stream',data}}
+    async function apiGet(params){return jsonp(API_URL,params)}
+    async function apiPost(payload){const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});return res.json()}
+    function jsonp(url,params){return new Promise((resolve,reject)=>{const callback=`cb_${Date.now()}_${Math.random().toString(36).slice(2)}`;const script=document.createElement('script');const query=new URLSearchParams({...params,callback});window[callback]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(new Error('API를 불러오지 못했습니다.'))};script.src=`${url}?${query.toString()}`;document.body.appendChild(script);function cleanup(){delete window[callback];script.remove()}})}
 
-    function closeDrawerOnBackdrop(event) {
-      if (event.target === $('drawerBackdrop')) closeDrawer();
-    }
-
-    function openComingSoon(title) {
-      closeDrawer();
-      $('modalTitle').textContent = title;
-      $('modalText').textContent = '이 기능은 다음 단계에서 API를 연결하면 바로 사용할 수 있게 열어둘 예정입니다.';
-      $('modal').classList.add('active');
-    }
-
-    function closeModal() {
-      $('modal').classList.remove('active');
-    }
-
-    function closeModalOnBackdrop(event) {
-      if (event.target === $('modal')) closeModal();
-    }
-
-    async function withLoading(task, statusFn) {
-      if (state.loading) return;
-      state.loading = true;
-      setButtonsDisabled(true);
-
-      try {
-        await task();
-      } catch (error) {
-        (statusFn || showStatus)(error.message || String(error), 'error');
-      } finally {
-        state.loading = false;
-        setButtonsDisabled(false);
-      }
-    }
-
-    function setButtonsDisabled(disabled) {
-      document.querySelectorAll('button').forEach(button => {
-        if (!button.classList.contains('drawer-close')) button.disabled = disabled;
-      });
-    }
-
-    function apiGet(params) {
-      return new Promise((resolve, reject) => {
-        const callback = `jsonp_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-        const url = new URL(API_URL);
-
-        Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
-        url.searchParams.set('callback', callback);
-        url.searchParams.set('_', Date.now());
-
-        const script = document.createElement('script');
-        script.async = true;
-        script.referrerPolicy = 'no-referrer';
-        script.crossOrigin = 'anonymous';
-        let settled = false;
-        const timer = setTimeout(() => {
-          cleanup();
-          reject(new Error('API 응답 시간이 초과되었습니다. 모바일 네트워크를 확인한 뒤 다시 시도해주세요.'));
-        }, 45000);
-
-        window[callback] = data => {
-          if (settled) return;
-          settled = true;
-          cleanup();
-          resolve(data);
-        };
-
-        script.onerror = () => {
-          if (settled) return;
-          settled = true;
-          cleanup();
-          reject(new Error('API를 불러오지 못했습니다. 배포 URL 또는 모바일 네트워크를 확인해주세요.'));
-        };
-
-        function cleanup() {
-          clearTimeout(timer);
-          delete window[callback];
-          if (script.parentNode) script.parentNode.removeChild(script);
-        }
-
-        script.src = url.toString();
-        (document.head || document.documentElement).appendChild(script);
-      });
-    }
-
-    async function apiPost(payload) {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      return response.json();
-    }
-
-    function showStatus(message, type) {
-      $('status').className = `status ${type || ''}`;
-      $('status').textContent = message || '';
-    }
-
-    function clearStatus() {
-      showStatus('');
-    }
-
-    function saveSession(user) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    }
-
-    function readSession() {
-      try {
-        return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-      } catch (error) {
-        return null;
-      }
-    }
-
-    function esc(value) {
-      return String(value ?? '').replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;',
-      }[char]));
-    }
+    async function withLoading(fn,statusFn){if(state.loading)return;state.loading=true;setButtonsDisabled(true);try{await fn()}catch(error){(statusFn||showStatus)(error.message||String(error),'error')}finally{state.loading=false;setButtonsDisabled(false)}}
+    function setButtonsDisabled(disabled){document.querySelectorAll('button').forEach(button=>button.disabled=disabled)}
+    function showStatus(message,type){$('status').className=`status ${type||''}`;$('status').textContent=message||''}
+    function clearStatus(){showStatus('')}
+    function showProfileStatus(message,type){$('profileStatus').className=`status ${type||''}`;$('profileStatus').textContent=message||''}
+    function showFormStatus(message,type){$('formStatus').className=`status ${type||''}`;$('formStatus').textContent=message||''}
+    function clearFormStatus(){showFormStatus('')}
+    function openDrawer(){$('drawerBackdrop').classList.add('active')}
+    function closeDrawer(){$('drawerBackdrop').classList.remove('active')}
+    function closeDrawerOnBackdrop(event){if(event.target===$('drawerBackdrop'))closeDrawer()}
+    function openModal(title,text){$('modalTitle').textContent=title;$('modalText').textContent=text;$('modal').classList.add('active')}
+    function closeModal(){$('modal').classList.remove('active')}
+    function closeModalOnBackdrop(event){if(event.target===$('modal'))closeModal()}
+    function logout(){localStorage.removeItem(SESSION_KEY);state.user=null;state.profileRequired=false;hideScreens();$('authScreen').classList.add('active');closeDrawer()}
+    function saveSession(user){localStorage.setItem(SESSION_KEY,JSON.stringify(user))}
+    function readSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(error){return null}}
+    function esc(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+    function $$(selector){return [...document.querySelectorAll(selector)]}
+    function scrollTop(){window.scrollTo({top:0,behavior:'auto'})}
   </script>
 </body>
 </html>
