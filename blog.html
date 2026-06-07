@@ -190,7 +190,10 @@
 
     <div id="campaignPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>시책 참여 신청</h2></div>
-      <div class="card form">
+      <div id="campaignDone" class="card" style="display:none">
+        <div class="status ok">이번 시책 참여 신청이 완료되었습니다.</div>
+      </div>
+      <div id="campaignForm" class="card form">
         <div class="field"><label>참여 블로그</label><select id="campaignUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
         <div class="field"><label>메모</label><textarea id="campaignMemo" placeholder="필요한 메모가 있으면 입력하세요."></textarea></div>
         <div id="campaignStatus" class="status"></div>
@@ -201,6 +204,11 @@
     <div id="postsPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>나의 원고 리스트</h2></div>
       <div id="myPostList" class="list"></div>
+    </div>
+
+    <div id="uploadContentsPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>업로드 콘텐츠</h2></div>
+      <div id="uploadContentsList" class="list"></div>
     </div>
 
     <div id="placeholderPage" class="page">
@@ -217,7 +225,7 @@
   <div class="drawer-menu">
     <button type="button" onclick="openPageFromDrawer('profilePage')">내 정보</button>
     <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
-    <button type="button" onclick="openPlaceholder('업로드 콘텐츠')">업로드 콘텐츠</button>
+    <button type="button" onclick="openPageFromDrawer('uploadContentsPage')">업로드 콘텐츠</button>
     <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
     <button type="button" onclick="openPlaceholder('블로그 스킨제작 요청')">블로그 스킨제작 요청</button>
     <button type="button" onclick="logout()">로그아웃</button>
@@ -244,6 +252,8 @@
   const NOTICE_CACHE_KEY = 'salesNoticeCache_v1';
   const COMPLETED_POSTS_CACHE_KEY = 'salesCompletedPostsCache_v1';
   const MY_POSTS_CACHE_KEY = 'salesMyPostsCache_v1';
+  const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
+  const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
 
   const FALLBACK_OPTIONS = {
     vehicles: {
@@ -580,9 +590,18 @@
       });
       setPageStatus('campaignStatus', result.message || '시책 참여 신청이 접수되었습니다.', 'ok');
       $('campaignMemo').value = '';
+      // 완료 상태 저장
+      localStorage.setItem(CAMPAIGN_DONE_KEY, '1');
+      showCampaignDone();
     } catch (e) {
       setPageStatus('campaignStatus', e.message || String(e), 'error');
     }
+  }
+
+  function showCampaignDone() {
+    const isDone = localStorage.getItem(CAMPAIGN_DONE_KEY) === '1';
+    $('campaignDone').style.display = isDone ? 'grid' : 'none';
+    $('campaignForm').style.display = isDone ? 'none' : 'grid';
   }
 
   // ─────────────────────────────
@@ -635,6 +654,9 @@
   function readMyPostsCache() { try { return JSON.parse(localStorage.getItem(MY_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
   function renderCachedMyPosts() { const cached = readMyPostsCache(); if (cached && cached.length) renderMyPosts(cached); }
 
+  function saveUploadContentsCache(posts) { try { localStorage.setItem(UPLOAD_CONTENTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
+  function readUploadContentsCache() { try { return JSON.parse(localStorage.getItem(UPLOAD_CONTENTS_CACHE_KEY) || '[]'); } catch { return []; } }
+
   // ─────────────────────────────
   // 원고 리스트
   // ─────────────────────────────
@@ -644,14 +666,21 @@
     box.innerHTML = posts.map(p => {
       const isDone = p.status === '완료';
       const statusClass = isDone ? 'list-meta done' : 'list-meta';
-      return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div class="${statusClass}">${esc(p.status || '')}</div></div>`;
+      const link = isDone && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+      return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between"><div class="${statusClass}">${esc(p.status || '')}</div>${link}</div></div>`;
     }).join('');
   }
 
   function renderMyPosts(posts) {
     const box = $('myPostList');
     if (!posts || !posts.length) return box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
-    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">구글독스 열기</a>` : '<div class="list-meta">링크 없음</div>'}</div>`).join('');
+    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '<div class="list-meta">링크 없음</div>'}</div>`).join('');
+  }
+
+  function renderUploadContents(posts) {
+    const box = $('uploadContentsList');
+    if (!posts || !posts.length) return box.innerHTML = '<div class="empty">업로드된 콘텐츠가 없습니다.</div>';
+    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">콘텐츠 보기</a>` : ''}</div>`).join('');
   }
 
   // ─────────────────────────────
@@ -729,10 +758,13 @@
   function openPage(pageId) {
     document.querySelectorAll('#homeScreen .page').forEach(p => p.classList.remove('active'));
     $(pageId).classList.add('active');
+
+    if (pageId === 'campaignPage') {
+      showCampaignDone();
+    }
+
     if (pageId === 'postsPage') {
-      // 캐시 먼저 렌더링
       renderCachedMyPosts();
-      // 새 데이터 로드
       gasAction('getMyPosts', { name: state.user.name, agency: state.user.agency })
         .then(posts => {
           const list = Array.isArray(posts) ? posts : [];
@@ -740,10 +772,26 @@
           saveMyPostsCache(list);
         })
         .catch(e => {
-          // 캐시가 있으면 그대로 유지, 없으면 에러 표시
           if (!readMyPostsCache().length) renderMyPosts([{ title: '목록을 불러오지 못했습니다', status: e.message }]);
         });
     }
+
+    if (pageId === 'uploadContentsPage') {
+      // 캐시 먼저
+      const cached = readUploadContentsCache();
+      if (cached.length) renderUploadContents(cached);
+      // 새 데이터 로드
+      gasAction('getUploadContents', { name: state.user.name, agency: state.user.agency })
+        .then(posts => {
+          const list = Array.isArray(posts) ? posts : [];
+          renderUploadContents(list);
+          saveUploadContentsCache(list);
+        })
+        .catch(e => {
+          if (!cached.length) renderUploadContents([]);
+        });
+    }
+
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
