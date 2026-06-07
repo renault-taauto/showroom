@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>영업담당 포털</title>
   <style>
     *{box-sizing:border-box}
@@ -258,8 +261,9 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxeedsZD2w6uhfLaYiu_yy2unZ18MKUPWymlEJVAxDkb2_knMoRXkzma2I7a4zviW0_/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbw_9V5vW7RH87ooYoEiyz-__zVaPsJtXjvyr2KhfTA18b2cOrZE3btrpFhoFv4vZWTd/exec';
     const SESSION_KEY = 'salesMemberSession_v1';
+    const EXPECTED_API_VERSION = '2026-06-07-login-repair-1';
     const FALLBACK_VEHICLES = {
       '필랑트 하이브리드 E-Tech': {trims:['테크노','아이코닉','에스프리 알핀','esprit Alpine 1955'],colors:['새틴 유니버스 화이트','새틴 포레스트 블랙','클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['20" 다크 틴티드 투톤 시케인 알로이 휠','20" 투톤 베가 알로이 휠','19" 투톤 알파 알로이 휠']},
       '그랑 콜레오스 하이브리드 E-tech': {trims:['테크노','아이코닉','에스프리 알핀','에스카파드'],colors:['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'],wheels:['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠']},
@@ -268,7 +272,7 @@
       '아르카나 하이브리드 E-tech': {trims:['아이코닉'],colors:['클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['17" 다크 그레이 휠']}
     };
 
-    const state = {authMode:'login',loading:false,user:null,profileRequired:false,options:null,step:0,total:5,inspectionFiles:[]};
+    const state = {authMode:'login',loading:false,user:null,profileRequired:false,options:null,step:0,total:5,inspectionFiles:[],apiVersion:''};
     const $ = id => document.getElementById(id);
 
     init();
@@ -293,9 +297,13 @@
     async function loadApiStatus(){
       try{
         const res=await apiGet({action:'version'});
+        state.apiVersion=res.version||'';
         $('apiStatus').textContent=res.version?`API 연결됨: ${res.version}`:'API 연결됨';
+        $('apiStatus').className=res.version===EXPECTED_API_VERSION?'hint':'hint status error';
       }catch(error){
-        $('apiStatus').textContent='API 연결 실패';
+        state.apiVersion='';
+        $('apiStatus').className='hint status error';
+        $('apiStatus').textContent=`API 연결 실패: ${error.message||String(error)}`;
       }
     }
 
@@ -350,6 +358,10 @@
       const payload={action:state.authMode==='login'?'login':'register',name:$('name').value.trim(),agency:$('agency').value.trim(),password:$('password').value.trim()};
       if(!payload.name||!payload.agency||!payload.password){showStatus('모든 항목을 입력해주세요.','error');return}
       await withLoading(async()=>{
+        await loadApiStatus();
+        if(state.apiVersion&&state.apiVersion!==EXPECTED_API_VERSION){
+          throw new Error(`Apps Script 배포가 예전 버전입니다.\n현재: ${state.apiVersion}\n필요: ${EXPECTED_API_VERSION}`);
+        }
         showStatus(state.authMode==='login'?'로그인 중입니다.':'가입 처리 중입니다.');
         const res=await apiGet(payload);
         if(!res.ok)throw new Error(res.error||'요청에 실패했습니다.');
@@ -584,7 +596,7 @@
     async function fileToPayload(file){const data=await fileToDataUrl(file);return {name:file.name,mimeType:file.type||'application/octet-stream',data}}
     async function apiGet(params){return jsonp(API_URL,params)}
     async function apiPost(payload){const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});return res.json()}
-    function jsonp(url,params){return new Promise((resolve,reject)=>{const callback=`cb_${Date.now()}_${Math.random().toString(36).slice(2)}`;const script=document.createElement('script');const query=new URLSearchParams({...params,callback});window[callback]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(new Error('API를 불러오지 못했습니다.'))};script.src=`${url}?${query.toString()}`;document.body.appendChild(script);function cleanup(){delete window[callback];script.remove()}})}
+    function jsonp(url,params){return new Promise((resolve,reject)=>{const callback=`cb_${Date.now()}_${Math.random().toString(36).slice(2)}`;const script=document.createElement('script');const query=new URLSearchParams({...params,callback,_:Date.now()});let timer=setTimeout(()=>{cleanup();reject(new Error('API 응답 시간이 초과되었습니다. 모바일 네트워크 또는 Apps Script 배포 상태를 확인해주세요.'))},12000);window[callback]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(new Error('API를 불러오지 못했습니다.'))};script.src=`${url}?${query.toString()}`;document.body.appendChild(script);function cleanup(){clearTimeout(timer);delete window[callback];script.remove()}})}
 
     async function withLoading(fn,statusFn){if(state.loading)return;state.loading=true;setButtonsDisabled(true);try{await fn()}catch(error){(statusFn||showStatus)(error.message||String(error),'error')}finally{state.loading=false;setButtonsDisabled(false)}}
     function setButtonsDisabled(disabled){document.querySelectorAll('button').forEach(button=>button.disabled=disabled)}
