@@ -18,7 +18,7 @@
         <div class="mark">B</div>
         <h1>영업담당 로그인</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
-        <p class="hint">빌드: 2026-06-07-profile-notice-1</p>
+        <p class="hint">빌드: 2026-06-07-profile-notice-2</p>
         <p id="apiStatus" class="status">Supabase 연결 확인 중입니다.</p>
       </div>
       <div class="panel">
@@ -182,16 +182,18 @@
         if (state.mode === 'login' && data.loggedIn !== true) throw new Error('로그인 응답이 올바르지 않습니다.');
         if (state.mode === 'register' && data.registered !== true) throw new Error('가입 응답이 올바르지 않습니다.');
 
-        let notionPageId = data.notionPageId || '';
+        const notionPageId = data.notionPageId || '';
         let successMessage = state.mode === 'register' ? '가입에 성공했습니다' : '로그인되었습니다.';
-        if (state.mode === 'register' || !notionPageId) {
-          showStatus('노션과 구글시트를 확인하는 중입니다.');
-          const syncData = await completeSignup({ name: data.name || values.name, agency: data.agency || values.agency, password: values.password, notionPageId });
-          notionPageId = syncData.notionPageId || notionPageId;
-        }
         state.user = { name: data.name || values.name, agency: data.agency || values.agency, notionPageId, message: successMessage, loggedAt: new Date().toISOString() };
         saveSession(state.user);
         showHome();
+        runPostLoginSync({
+          shouldSync: state.mode === 'register' || !notionPageId,
+          name: data.name || values.name,
+          agency: data.agency || values.agency,
+          password: values.password,
+          notionPageId,
+        });
       });
     }
 
@@ -215,6 +217,27 @@
     async function completeSignup(payload) {
       const data = await gasAction('completeSignup', payload);
       return data || {};
+    }
+
+    function runPostLoginSync(payload) {
+      if (!payload || !payload.shouldSync) return;
+
+      completeSignup({
+        name: payload.name,
+        agency: payload.agency,
+        password: payload.password,
+        notionPageId: payload.notionPageId,
+      })
+        .then(syncData => {
+          if (syncData && syncData.notionPageId) {
+            state.user.notionPageId = syncData.notionPageId;
+            saveSession(state.user);
+          }
+          return loadAppHome();
+        })
+        .catch(error => {
+          console.warn('post login sync failed', error);
+        });
     }
 
     async function gasAction(action, body) {
