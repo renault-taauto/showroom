@@ -55,6 +55,7 @@
     .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none}
     .list-title{font-size:14px;color:#111827}
     .list-meta{font-size:12px;color:#667085}
+    .list-meta.done{color:#d92d20;font-weight:600}
     .notice-content{font-size:14px;color:#475467;line-height:1.55;white-space:pre-wrap}
     .notice-image{width:100%;border-radius:12px;display:block}
     .notice-section{display:grid;gap:4px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:12px}
@@ -67,7 +68,7 @@
     .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;color:#111827}
     .drawer-dim{position:fixed;inset:0;background:rgba(17,24,39,.42);display:none;z-index:20}
     .drawer-dim.active{display:block}
-    .drawer{position:fixed;top:0;right:0;width:min(320px,86vw);height:100vh;background:#fff;z-index:21;transform:translateX(100%);transition:.2s ease;padding:calc(env(safe-area-inset-top)+20px) 18px 24px;display:flex;flex-direction:column;gap:14px}
+    .drawer{position:fixed;top:0;right:0;width:min(320px,86vw);height:100vh;background:#fff;z-index:21;transform:translateX(100%);transition:.2s ease;padding:calc(env(safe-area-inset-top) + 20px) 18px 24px;display:flex;flex-direction:column;gap:14px}
     .drawer.active{transform:translateX(0)}
     .drawer-head{display:flex;justify-content:space-between;align-items:center}
     .drawer-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
@@ -241,6 +242,8 @@
   const STORAGE_BUCKET = 'inspection-photos';
   const SESSION_KEY = 'salesLoginSession_v3';
   const NOTICE_CACHE_KEY = 'salesNoticeCache_v1';
+  const COMPLETED_POSTS_CACHE_KEY = 'salesCompletedPostsCache_v1';
+  const MY_POSTS_CACHE_KEY = 'salesMyPostsCache_v1';
 
   const FALLBACK_OPTIONS = {
     vehicles: {
@@ -398,7 +401,10 @@
     $('homeTitle').textContent = state.user.name + '님';
     $('homeSubtitle').textContent = state.user.agency || '';
     openPage('mainPage');
+    // 캐시 먼저 렌더링
     renderCachedNotices();
+    renderCachedCompletedPosts();
+    // 새 데이터 로드
     loadAppHome();
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
@@ -413,6 +419,7 @@
       renderNotices(state.appHome.notices || []);
       saveNoticeCache(state.appHome.notices || []);
       renderCompletedPosts(state.appHome.completedPosts || []);
+      saveCompletedPostsCache(state.appHome.completedPosts || []);
       if (state.appHome.profile && state.appHome.profile.needsProfile) {
         $('profileGuide').style.display = 'block';
         openPage('profilePage');
@@ -620,13 +627,25 @@
   function saveNoticeCache(notices) { try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(notices || [])); } catch {} }
   function readNoticeCache() { try { return JSON.parse(localStorage.getItem(NOTICE_CACHE_KEY) || '[]'); } catch { return []; } }
 
+  function saveCompletedPostsCache(posts) { try { localStorage.setItem(COMPLETED_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
+  function readCompletedPostsCache() { try { return JSON.parse(localStorage.getItem(COMPLETED_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
+  function renderCachedCompletedPosts() { const cached = readCompletedPostsCache(); if (cached && cached.length) renderCompletedPosts(cached); }
+
+  function saveMyPostsCache(posts) { try { localStorage.setItem(MY_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
+  function readMyPostsCache() { try { return JSON.parse(localStorage.getItem(MY_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
+  function renderCachedMyPosts() { const cached = readMyPostsCache(); if (cached && cached.length) renderMyPosts(cached); }
+
   // ─────────────────────────────
   // 원고 리스트
   // ─────────────────────────────
   function renderCompletedPosts(posts) {
     const box = $('completedPostList');
     if (!posts || !posts.length) return box.innerHTML = '<div class="empty">접수된 내역이 없습니다.</div>';
-    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div class="list-meta">${esc(p.status || '')}</div></div>`).join('');
+    box.innerHTML = posts.map(p => {
+      const isDone = p.status === '완료';
+      const statusClass = isDone ? 'list-meta done' : 'list-meta';
+      return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div class="${statusClass}">${esc(p.status || '')}</div></div>`;
+    }).join('');
   }
 
   function renderMyPosts(posts) {
@@ -711,9 +730,19 @@
     document.querySelectorAll('#homeScreen .page').forEach(p => p.classList.remove('active'));
     $(pageId).classList.add('active');
     if (pageId === 'postsPage') {
+      // 캐시 먼저 렌더링
+      renderCachedMyPosts();
+      // 새 데이터 로드
       gasAction('getMyPosts', { name: state.user.name, agency: state.user.agency })
-        .then(posts => renderMyPosts(Array.isArray(posts) ? posts : []))
-        .catch(e => renderMyPosts([{ title: '목록을 불러오지 못했습니다', status: e.message }]));
+        .then(posts => {
+          const list = Array.isArray(posts) ? posts : [];
+          renderMyPosts(list);
+          saveMyPostsCache(list);
+        })
+        .catch(e => {
+          // 캐시가 있으면 그대로 유지, 없으면 에러 표시
+          if (!readMyPostsCache().length) renderMyPosts([{ title: '목록을 불러오지 못했습니다', status: e.message }]);
+        });
     }
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
