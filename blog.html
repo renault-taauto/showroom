@@ -13,10 +13,10 @@
     button{border:0;cursor:pointer}
     a{color:inherit}
     .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff}
-    .screen{display:none;min-height:100vh;padding:calc(env(safe-area-inset-top)+22px) 18px 28px}
+    .screen{display:none;min-height:100vh}
     .screen.active{display:flex}
-    .auth{flex-direction:column;justify-content:center;gap:22px}
-    .home{flex-direction:column;gap:16px;background:#f6f7f9}
+    .auth{flex-direction:column;justify-content:center;gap:22px;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
+    .home{flex-direction:column;gap:16px;background:#f6f7f9;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
     .brand,.panel,.form,.page{display:grid;gap:14px}
     .mark{width:48px;height:48px;border-radius:14px;background:#111827;color:#fff;display:grid;place-items:center;font-size:21px;font-weight:700}
     h1{margin:0;font-size:26px}
