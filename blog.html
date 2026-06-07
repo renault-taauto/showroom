@@ -6,22 +6,23 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>영업담당 로그인</title>
+  <title>영업담당 앱</title>
   <style>
     *{box-sizing:border-box}
     html,body{width:100%;min-height:100%;margin:0}
     body{background:#f5f6f8;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
-    button,input,select{font:inherit}
+    button,input,select,textarea{font:inherit}
     button{border:0;cursor:pointer}
     .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff}
     .screen{display:none;min-height:100vh;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
     .screen.active{display:flex}
     .auth{flex-direction:column;justify-content:center;gap:22px}
-    .home{flex-direction:column;gap:18px}
+    .home{flex-direction:column;gap:16px;background:#f6f7f9}
     .brand{display:grid;gap:8px}
     .mark{width:48px;height:48px;border-radius:15px;background:#111827;color:#fff;display:grid;place-items:center;font-size:21px}
     h1{margin:0;font-size:26px;letter-spacing:0}
     h2{margin:0;font-size:20px}
+    h3{margin:0;font-size:15px}
     p{margin:0;color:#667085;font-size:14px;line-height:1.45}
     .panel{display:grid;gap:14px}
     .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px;border-radius:14px;background:#eef1f5}
@@ -30,9 +31,10 @@
     .form{display:grid;gap:12px}
     .field{display:grid;gap:7px}
     label{font-size:13px;color:#344054}
-    input,select{width:100%;min-height:52px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;padding:12px 14px;color:#101828;font-size:16px;outline:none}
+    input,select,textarea{width:100%;min-height:52px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;padding:12px 14px;color:#101828;font-size:16px;outline:none}
+    textarea{min-height:110px;resize:vertical}
     select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#667085 50%),linear-gradient(135deg,#667085 50%,transparent 50%);background-position:calc(100% - 20px) 23px,calc(100% - 14px) 23px;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:38px}
-    input:focus,select:focus{border-color:#111827;box-shadow:0 0 0 3px rgba(17,24,39,.08)}
+    input:focus,select:focus,textarea:focus{border-color:#111827;box-shadow:0 0 0 3px rgba(17,24,39,.08)}
     .primary,.secondary,.ghost{width:100%;min-height:52px;border-radius:14px}
     .primary{background:#111827;color:#fff}
     .secondary{background:#eef1f5;color:#111827}
@@ -43,7 +45,7 @@
     .status.ok{color:#067647}
     .status.warn{color:#b54708}
     .hint{font-size:12px;color:#98a2b3;line-height:1.4}
-    .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:10px}
+    .card{border:1px solid #eaecf0;border-radius:18px;padding:16px;display:grid;gap:10px;background:#fff}
     .row{display:flex;justify-content:space-between;gap:12px;font-size:14px}
     .row span:first-child{color:#667085}
     .sync-status{font-size:12px;padding:8px 12px;border-radius:10px;background:#f9fafb;border:1px solid #eaecf0;display:grid;gap:4px}
@@ -53,6 +55,46 @@
     .sync-dot.error{background:#d92d20}
     .sync-dot.loading{background:#f79009;animation:blink .8s ease-in-out infinite}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+    .app-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .user-title{display:grid;gap:3px}
+    .menu-btn{width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid #eaecf0;display:grid;place-items:center}
+    .menu-icon{width:20px;height:14px;display:grid;gap:4px}
+    .menu-icon span{display:block;height:2px;border-radius:99px;background:#111827}
+    .banner{overflow:hidden;border-radius:20px;background:#111827;color:#fff;min-height:132px;display:grid;align-content:end;padding:18px;border:0;text-align:left;width:100%}
+    .banner.has-img{padding:0;background:#fff}
+    .banner img{width:100%;display:block}
+    .banner-title{font-size:18px;font-weight:800}
+    .banner-desc{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .section-head h3{font-size:15px}
+    .small-btn{min-height:34px;padding:7px 10px;border-radius:10px;background:#eef1f5;color:#111827;font-size:12px;font-weight:700}
+    .notice-list,.post-list{display:grid;gap:8px}
+    .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px}
+    .list-title{font-size:14px;font-weight:800;color:#111827}
+    .list-meta{font-size:12px;color:#667085}
+    .empty{padding:18px;border-radius:14px;background:#fff;border:1px dashed #d0d5dd;color:#98a2b3;text-align:center;font-size:13px}
+    .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;font-weight:800;color:#111827}
+
+    .drawer-dim{position:fixed;inset:0;background:rgba(17,24,39,.42);display:none;z-index:20}
+    .drawer-dim.active{display:block}
+    .drawer{position:fixed;top:0;right:0;width:min(330px,86vw);height:100vh;background:#fff;z-index:21;transform:translateX(100%);transition:.2s ease;padding:calc(env(safe-area-inset-top) + 20px) 18px 24px;display:flex;flex-direction:column;gap:14px}
+    .drawer.active{transform:translateX(0)}
+    .drawer-head{display:flex;justify-content:space-between;align-items:center}
+    .drawer-close{width:38px;height:38px;border-radius:12px;background:#eef1f5;color:#111827}
+    .drawer-menu{display:grid;gap:8px}
+    .drawer-menu button{width:100%;min-height:48px;border-radius:14px;background:#f6f7f9;color:#111827;text-align:left;padding:0 14px;font-weight:800}
+
+    .page{display:none;flex-direction:column;gap:14px}
+    .page.active{display:flex}
+    .back-row{display:flex;align-items:center;gap:10px}
+    .back-btn{width:42px;height:42px;border-radius:14px;background:#fff;border:1px solid #eaecf0;color:#111827}
+    .modal-dim{position:fixed;inset:0;background:rgba(17,24,39,.42);display:none;z-index:30;padding:18px;align-items:center;justify-content:center}
+    .modal-dim.active{display:flex}
+    .modal{width:100%;max-width:440px;max-height:86vh;overflow:auto;background:#fff;border-radius:22px;padding:18px;display:grid;gap:14px}
+    .modal-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .modal-close{width:36px;height:36px;border-radius:12px;background:#eef1f5;color:#111827}
   </style>
 </head>
 <body>
@@ -62,7 +104,7 @@
         <div class="mark">B</div>
         <h1>영업담당 로그인</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
-        <p class="hint">빌드: 2026-06-07-sync-fix-1</p>
+        <p class="hint">빌드: 2026-06-07-app-after-login</p>
         <p id="apiStatus" class="status">연결 확인 중입니다.</p>
       </div>
 
@@ -96,40 +138,193 @@
     </section>
 
     <section id="homeScreen" class="screen home">
-      <div>
-        <h2 id="homeTitle">로그인 완료</h2>
-        <p id="homeSubtitle"></p>
+      <div id="mainPage" class="page active">
+        <div class="app-top">
+          <div class="user-title">
+            <h2 id="homeTitle">홈</h2>
+            <p id="homeSubtitle"></p>
+          </div>
+          <button class="menu-btn" type="button" onclick="openDrawer()" aria-label="메뉴 열기">
+            <span class="menu-icon"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+
+        <button id="mainBanner" class="banner" type="button" onclick="openCampaignModalFromMain()">
+          <div class="banner-title">진행 중인 시책</div>
+          <div class="banner-desc">참여 가능한 시책을 확인하세요.</div>
+        </button>
+
+        <div class="card">
+          <div class="section-head">
+            <h3>공지사항</h3>
+            <button class="small-btn" type="button" onclick="refreshHome()">새로고침</button>
+          </div>
+          <div id="noticeList" class="notice-list"></div>
+        </div>
+
+        <div class="quick-actions">
+          <button type="button" onclick="openPage('requestPage')">블로그 원고<br>제작 요청</button>
+          <button type="button" onclick="openPage('postsPage')">완료된 원고<br>리스트</button>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <h3>완료된 원고</h3>
+            <button class="small-btn" type="button" onclick="openPage('postsPage')">전체보기</button>
+          </div>
+          <div id="completedPostList" class="post-list"></div>
+        </div>
+
+        <div id="syncStatus" class="sync-status" style="display:none">
+          <div class="sync-row"><span id="sheetDot" class="sync-dot"></span><span id="sheetLabel">구글시트 동기화</span></div>
+          <div class="sync-row"><span id="notionDot" class="sync-dot"></span><span id="notionLabel">노션 페이지</span></div>
+        </div>
       </div>
-      <div class="card">
-        <div class="row"><span>이름</span><span id="homeName"></span></div>
-        <div class="row"><span>소속 대리점</span><span id="homeAgency"></span></div>
-        <div class="row"><span>노션 페이지</span><span id="homeNotion"></span></div>
+
+      <div id="profilePage" class="page">
+        <div class="back-row">
+          <button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button>
+          <h2>내 정보</h2>
+        </div>
+        <div class="card form">
+          <div class="field">
+            <label>이름</label>
+            <input id="profileName" disabled>
+          </div>
+          <div class="field">
+            <label>소속 대리점</label>
+            <input id="profileAgency" disabled>
+          </div>
+          <div class="field">
+            <label>업로드 블로그</label>
+            <select id="profileUploadBlog" onchange="toggleProfileFields()">
+              <option value="">선택</option>
+              <option value="본인 블로그">본인 블로그</option>
+              <option value="지점 블로그">지점 블로그</option>
+            </select>
+          </div>
+          <div id="blogUrlField" class="field">
+            <label>블로그 URL</label>
+            <input id="profileBlogUrl" placeholder="본인 블로그 URL">
+          </div>
+          <div id="testDriveUrlField" class="field">
+            <label>시승신청 URL</label>
+            <input id="profileTestDriveUrl" placeholder="본인 시승신청 URL">
+          </div>
+          <div class="field">
+            <label>명함 이미지 URL</label>
+            <input id="profileBusinessCardImage" placeholder="이미지 URL">
+          </div>
+          <div id="profileStatus" class="status"></div>
+          <button class="primary" type="button" onclick="saveMyInfo()">저장</button>
+        </div>
       </div>
-      <div id="syncStatus" class="sync-status" style="display:none">
-        <div class="sync-row"><span id="sheetDot" class="sync-dot"></span><span id="sheetLabel">구글시트 동기화</span></div>
-        <div class="sync-row"><span id="notionDot" class="sync-dot"></span><span id="notionLabel">노션 페이지</span></div>
+
+      <div id="requestPage" class="page">
+        <div class="back-row">
+          <button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button>
+          <h2>블로그 원고 제작 요청</h2>
+        </div>
+        <div class="card form">
+          <div class="field">
+            <label>업로드 블로그</label>
+            <select id="requestUploadBlog">
+              <option value="">선택</option>
+              <option value="본인 블로그">본인 블로그</option>
+              <option value="지점 블로그">지점 블로그</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>요청 주제</label>
+            <input id="requestTopic" placeholder="예: 6월 시책 블로그 원고">
+          </div>
+          <div class="field">
+            <label>요청 메모</label>
+            <textarea id="requestMemo" placeholder="필요한 내용이 있으면 입력하세요."></textarea>
+          </div>
+          <div id="requestStatus" class="status"></div>
+          <button class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
+        </div>
       </div>
-      <button class="secondary" type="button" onclick="logout()">로그아웃</button>
+
+      <div id="postsPage" class="page">
+        <div class="back-row">
+          <button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button>
+          <h2>나의 원고 리스트</h2>
+        </div>
+        <div id="myPostList" class="post-list"></div>
+      </div>
+
+      <div id="uploadPage" class="page">
+        <div class="back-row">
+          <button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button>
+          <h2>업로드 콘텐츠</h2>
+        </div>
+        <div class="empty">업로드 콘텐츠 기능은 다음 단계에서 연결하면 됩니다.</div>
+      </div>
+
+      <div id="skinPage" class="page">
+        <div class="back-row">
+          <button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button>
+          <h2>블로그 스킨제작 요청</h2>
+        </div>
+        <div class="empty">블로그 스킨제작 요청 기능은 다음 단계에서 연결하면 됩니다.</div>
+      </div>
     </section>
   </main>
 
-  <script>
+  <div id="drawerDim" class="drawer-dim" onclick="closeDrawer()"></div>
+  <aside id="drawer" class="drawer">
+    <div class="drawer-head">
+      <h2>메뉴</h2>
+      <button class="drawer-close" type="button" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="drawer-menu">
+      <button type="button" onclick="openPageFromDrawer('profilePage')">내 정보</button>
+      <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
+      <button type="button" onclick="openPageFromDrawer('uploadPage')">업로드 콘텐츠</button>
+      <button type="button" onclick="openPageFromDrawer('skinPage')">블로그 스킨제작 요청</button>
+      <button type="button" onclick="logout()">로그아웃</button>
+    </div>
+  </aside>
 
+  <div id="campaignModalDim" class="modal-dim">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="campaignModalTitle">시책 참여 신청</h2>
+          <p id="campaignModalDesc"></p>
+        </div>
+        <button class="modal-close" type="button" onclick="closeCampaignModal()">×</button>
+      </div>
+      <div class="field">
+        <label>업로드 블로그</label>
+        <select id="campaignUploadBlog">
+          <option value="">선택</option>
+          <option value="본인 블로그">본인 블로그</option>
+          <option value="지점 블로그">지점 블로그</option>
+        </select>
+      </div>
+      <div id="campaignStatus" class="status"></div>
+      <button class="primary" type="button" onclick="applyCampaign()">참여 신청</button>
+    </div>
+  </div>
+
+  <script>
     const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
 
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwGc6v2tVv2EkdEtw3EeK5jx_zg8qiIkr6guEfyYtav2B8j89Jvio4MsgwGMK9afg_p/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwopsX2JRnLOYTQdjjLbvt8PNrGhG0KgZ9EcNHIFTO1LqrHbT6cbLJnd0Z1xth8K0Bq/exec';
 
-    // GAS completeSignup 액션의 SYNC_SECRET (없으면 빈 문자열)
     const SYNC_SECRET = '';
-    // ─────────────────────────────────────────────
-
     const SESSION_KEY = 'salesLoginSession_v3';
 
     const state = {
       mode: 'login',
       loading: false,
       user: null,
+      appHome: null,
+      selectedCampaign: null,
     };
 
     const $ = id => document.getElementById(id);
@@ -223,7 +418,6 @@
         const isRegister = state.mode === 'register';
         showStatus(isRegister ? '가입 처리 중입니다.' : '로그인 중입니다.');
 
-        // 1단계: Supabase RPC
         const data = await rpc(
           isRegister ? 'register_sales_member' : 'login_sales_member',
           { p_name: values.name, p_agency: values.agency, p_password: values.password }
@@ -242,16 +436,12 @@
         saveSession(state.user);
         showHome();
 
-        // 2단계: 가입 시에만 GAS로 구글시트·노션 동기화 (비동기, 화면 전환 후 진행)
         if (isRegister) {
           syncWithGas(values.name, values.agency, values.password);
         }
       });
     }
 
-    // ─────────────────────────────────────────────
-    // GAS 동기화: 구글시트 업데이트 + 노션 페이지 생성
-    // ─────────────────────────────────────────────
     async function syncWithGas(name, agency, password) {
       if (!GAS_URL || GAS_URL.indexOf('YOUR_') !== -1) {
         setSyncStatus('sheet', 'error', 'GAS URL 미설정');
@@ -264,8 +454,6 @@
       setSyncStatus('notion', 'loading', '노션 페이지 생성 중...');
 
       try {
-        // GAS는 CORS 제한이 있어 no-cors로 호출, 응답을 읽을 수 없지만 요청은 전달됨
-        // 신뢰도를 높이려면 GAS 측에서 Access-Control-Allow-Origin 헤더를 추가해야 합니다
         const params = new URLSearchParams({
           action: 'completeSignup',
           name: name,
@@ -281,11 +469,9 @@
           setSyncStatus('sheet', 'ok', '구글시트 업데이트 완료');
           setSyncStatus('notion', 'ok', notionId ? '노션 페이지 생성 완료' : '노션 페이지 연결됨');
 
-          // notionPageId를 세션에 업데이트
           if (notionId && !state.user.notionPageId) {
             state.user.notionPageId = notionId;
             saveSession(state.user);
-            $('homeNotion').textContent = '연결됨';
           }
         } else {
           const errMsg = gasResponse && gasResponse.error ? gasResponse.error : '동기화 중 오류 발생';
@@ -293,10 +479,8 @@
           setSyncStatus('notion', 'error', errMsg);
         }
       } catch (err) {
-        // no-cors 모드에서는 응답을 읽지 못해도 요청은 전달됐을 수 있음
         const msg = err.message || String(err);
         if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-          // GAS CORS 이슈일 가능성 → no-cors fallback
           await fallbackNoCors(name, agency, password);
         } else {
           setSyncStatus('sheet', 'error', msg);
@@ -305,21 +489,6 @@
       }
     }
 
-    async function fetchGas(url) {
-      const res = await Promise.race([
-        fetch(url, { method: 'GET', redirect: 'follow' }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('GAS 요청 시간 초과')), 30000)),
-      ]);
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error('GAS 응답이 JSON이 아닙니다: ' + text.slice(0, 100));
-      }
-    }
-
-    // GAS가 CORS 헤더를 반환하지 않을 경우 no-cors 폴백
-    // no-cors에서는 응답을 읽을 수 없으므로 "전달됐을 가능성 있음"으로 표시
     async function fallbackNoCors(name, agency, password) {
       try {
         const params = new URLSearchParams({
@@ -330,8 +499,8 @@
           secret: SYNC_SECRET,
         });
         await fetch(GAS_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors', redirect: 'follow' });
-        setSyncStatus('sheet', 'ok', '동기화 요청 전송됨 (확인 불가)');
-        setSyncStatus('notion', 'ok', '동기화 요청 전송됨 (확인 불가)');
+        setSyncStatus('sheet', 'ok', '동기화 요청 전송됨');
+        setSyncStatus('notion', 'ok', '동기화 요청 전송됨');
       } catch (err2) {
         setSyncStatus('sheet', 'error', '네트워크 오류: ' + (err2.message || ''));
         setSyncStatus('notion', 'error', '네트워크 오류: ' + (err2.message || ''));
@@ -398,11 +567,262 @@
       $('authScreen').classList.remove('active');
       $('homeScreen').classList.add('active');
       $('homeTitle').textContent = `${state.user.name}님`;
-      $('homeSubtitle').textContent = state.user.message || '로그인되었습니다.';
-      $('homeName').textContent = state.user.name || '-';
-      $('homeAgency').textContent = state.user.agency || '-';
-      $('homeNotion').textContent = state.user.notionPageId ? '연결됨' : '없음';
+      $('homeSubtitle').textContent = state.user.agency || '로그인되었습니다.';
       $('syncStatus').style.display = 'none';
+      openPage('mainPage');
+      loadAppHome();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    async function loadAppHome() {
+      try {
+        const data = await gasAction('getAppHome', {
+          name: state.user.name,
+          agency: state.user.agency,
+        });
+
+        state.appHome = data || {};
+        renderProfile(data.profile || {});
+        renderCampaigns(data.campaigns || []);
+        renderNotices(data.notices || []);
+        renderCompletedPosts(data.completedPosts || []);
+        renderMyPosts(data.completedPosts || []);
+      } catch (err) {
+        renderNotices([]);
+        renderCompletedPosts([]);
+      }
+    }
+
+    async function refreshHome() {
+      await loadAppHome();
+    }
+
+    function renderProfile(profile) {
+      $('profileName').value = profile.name || state.user.name || '';
+      $('profileAgency').value = profile.agency || state.user.agency || '';
+      $('profileUploadBlog').value = profile.uploadBlog || '';
+      $('profileBlogUrl').value = profile.blogUrl || '';
+      $('profileTestDriveUrl').value = profile.testDriveUrl || '';
+      $('profileBusinessCardImage').value = profile.businessCardImage || '';
+      toggleProfileFields();
+
+      if (profile.uploadBlog) {
+        $('requestUploadBlog').value = profile.uploadBlog;
+        $('campaignUploadBlog').value = profile.uploadBlog;
+      }
+    }
+
+    function renderCampaigns(campaigns) {
+      const banner = $('mainBanner');
+      const first = campaigns && campaigns[0];
+
+      if (!first) {
+        state.selectedCampaign = null;
+        banner.className = 'banner';
+        banner.innerHTML = '<div class="banner-title">진행 중인 시책 없음</div><div class="banner-desc">새로운 시책이 등록되면 표시됩니다.</div>';
+        return;
+      }
+
+      state.selectedCampaign = first;
+
+      if (first.imageUrl) {
+        banner.className = 'banner has-img';
+        banner.innerHTML = `<img src="${esc(first.imageUrl)}" alt="${esc(first.title)}">`;
+      } else {
+        banner.className = 'banner';
+        banner.innerHTML = `<div class="banner-title">${esc(first.title)}</div><div class="banner-desc">${esc(first.description || '클릭해서 참여 신청')}</div>`;
+      }
+    }
+
+    function renderNotices(notices) {
+      const box = $('noticeList');
+      if (!notices || notices.length === 0) {
+        box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
+        return;
+      }
+      box.innerHTML = notices.map(item => `
+        <div class="list-item">
+          <div class="list-title">${item.pinned ? '고정 · ' : ''}${esc(item.title)}</div>
+          <div class="list-meta">${esc(item.date || '')}</div>
+          <p>${esc(item.content || '')}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderCompletedPosts(posts) {
+      const done = (posts || []).filter(item => item.status === '완료' || item.url);
+      const box = $('completedPostList');
+
+      if (done.length === 0) {
+        box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
+        return;
+      }
+
+      box.innerHTML = done.slice(0, 5).map(item => `
+        <div class="list-item">
+          <div class="list-title">${esc(item.topic || '제목 없음')}</div>
+          <div class="list-meta">${esc(item.date || '')} · ${esc(item.status || '')}</div>
+          ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">원고 열기</a>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderMyPosts(posts) {
+      const box = $('myPostList');
+      if (!posts || posts.length === 0) {
+        box.innerHTML = '<div class="empty">원고 요청 내역이 없습니다.</div>';
+        return;
+      }
+
+      box.innerHTML = posts.map(item => `
+        <div class="list-item">
+          <div class="list-title">${esc(item.topic || '제목 없음')}</div>
+          <div class="list-meta">${esc(item.date || '')} · ${esc(item.status || '')} · ${esc(item.uploadBlog || '')}</div>
+          ${item.memo ? `<p>${esc(item.memo)}</p>` : ''}
+          ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">원고 열기</a>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function saveMyInfo() {
+      $('profileStatus').className = 'status';
+      $('profileStatus').textContent = '저장 중입니다.';
+
+      try {
+        const data = await gasAction('saveMyInfo', {
+          name: state.user.name,
+          agency: state.user.agency,
+          uploadBlog: $('profileUploadBlog').value.trim(),
+          blogUrl: $('profileBlogUrl').value.trim(),
+          testDriveUrl: $('profileTestDriveUrl').value.trim(),
+          businessCardImage: $('profileBusinessCardImage').value.trim(),
+        });
+
+        $('profileStatus').className = 'status ok';
+        $('profileStatus').textContent = data.message || '저장되었습니다.';
+        await loadAppHome();
+      } catch (err) {
+        $('profileStatus').className = 'status error';
+        $('profileStatus').textContent = err.message || String(err);
+      }
+    }
+
+    async function requestBlogDraft() {
+      $('requestStatus').className = 'status';
+      $('requestStatus').textContent = '요청 중입니다.';
+
+      try {
+        const data = await gasAction('requestBlogDraft', {
+          name: state.user.name,
+          agency: state.user.agency,
+          uploadBlog: $('requestUploadBlog').value.trim(),
+          topic: $('requestTopic').value.trim(),
+          memo: $('requestMemo').value.trim(),
+        });
+
+        $('requestStatus').className = 'status ok';
+        $('requestStatus').textContent = data.message || '요청되었습니다.';
+        $('requestTopic').value = '';
+        $('requestMemo').value = '';
+        await loadAppHome();
+      } catch (err) {
+        $('requestStatus').className = 'status error';
+        $('requestStatus').textContent = err.message || String(err);
+      }
+    }
+
+    function openCampaignModalFromMain() {
+      if (!state.selectedCampaign) return;
+      $('campaignModalTitle').textContent = state.selectedCampaign.title || '시책 참여 신청';
+      $('campaignModalDesc').textContent = state.selectedCampaign.description || '';
+      $('campaignStatus').textContent = '';
+      $('campaignStatus').className = 'status';
+      $('campaignModalDim').classList.add('active');
+    }
+
+    function closeCampaignModal() {
+      $('campaignModalDim').classList.remove('active');
+    }
+
+    async function applyCampaign() {
+      if (!state.selectedCampaign) return;
+
+      $('campaignStatus').className = 'status';
+      $('campaignStatus').textContent = '신청 중입니다.';
+
+      try {
+        const data = await gasAction('applyCampaign', {
+          name: state.user.name,
+          agency: state.user.agency,
+          campaignId: state.selectedCampaign.id,
+          campaignTitle: state.selectedCampaign.title,
+          uploadBlog: $('campaignUploadBlog').value.trim(),
+        });
+
+        $('campaignStatus').className = 'status ok';
+        $('campaignStatus').textContent = data.message || '신청되었습니다.';
+      } catch (err) {
+        $('campaignStatus').className = 'status error';
+        $('campaignStatus').textContent = err.message || String(err);
+      }
+    }
+
+    async function gasAction(action, data) {
+      const params = new URLSearchParams({ action });
+      Object.keys(data || {}).forEach(key => params.set(key, data[key] || ''));
+
+      const res = await fetchGas(GAS_URL + '?' + params.toString());
+      if (!res || res.ok !== true) {
+        throw new Error((res && res.error) || 'GAS 요청 실패');
+      }
+      return res.data || {};
+    }
+
+    async function fetchGas(url) {
+      const res = await Promise.race([
+        fetch(url, { method: 'GET', redirect: 'follow' }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('GAS 요청 시간 초과')), 30000)),
+      ]);
+
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error('GAS 응답이 JSON이 아닙니다: ' + text.slice(0, 100));
+      }
+    }
+
+    function toggleProfileFields() {
+      const type = $('profileUploadBlog').value;
+      $('blogUrlField').style.display = type === '본인 블로그' ? 'grid' : 'none';
+      $('testDriveUrlField').style.display = type === '지점 블로그' ? 'grid' : 'none';
+    }
+
+    function openDrawer() {
+      $('drawerDim').classList.add('active');
+      $('drawer').classList.add('active');
+    }
+
+    function closeDrawer() {
+      $('drawerDim').classList.remove('active');
+      $('drawer').classList.remove('active');
+    }
+
+    function openPageFromDrawer(pageId) {
+      closeDrawer();
+      openPage(pageId);
+    }
+
+    function openPage(pageId) {
+      document.querySelectorAll('#homeScreen .page').forEach(page => page.classList.remove('active'));
+      $(pageId).classList.add('active');
+
+      if (pageId === 'postsPage') {
+        gasAction('getMyPosts', { name: state.user.name, agency: state.user.agency })
+          .then(posts => renderMyPosts(Array.isArray(posts) ? posts : []))
+          .catch(() => renderMyPosts([]));
+      }
+
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
@@ -411,6 +831,7 @@
       state.user = null;
       $('homeScreen').classList.remove('active');
       $('authScreen').classList.add('active');
+      closeDrawer();
       showStatus('');
     }
 
