@@ -42,9 +42,7 @@
     .status.error{color:#d92d20}
     .status.ok{color:#067647}
     .hint{font-size:12px;color:#98a2b3;line-height:1.4}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:6px}
-    .info{display:grid;gap:10px}
+    .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:10px}
     .row{display:flex;justify-content:space-between;gap:12px;font-size:14px}
     .row span:first-child{color:#667085}
   </style>
@@ -55,10 +53,9 @@
       <div class="brand">
         <div class="mark">B</div>
         <h1>영업담당 로그인</h1>
-        <p>영업담당 시트에 등록된 사람만 사용할 수 있습니다.</p>
-        <p class="hint">HTML 빌드: 2026-06-07-login-only-1</p>
-        <p id="apiStatus" class="status">API 확인 중입니다.</p>
-        <button class="ghost" type="button" onclick="openApiTest()">API 직접 확인</button>
+        <p>등록된 영업담당만 사용할 수 있습니다.</p>
+        <p class="hint">HTML 빌드: 2026-06-07-supabase-login-1</p>
+        <p id="apiStatus" class="status">Supabase 연결 확인 중입니다.</p>
       </div>
 
       <div class="panel">
@@ -91,13 +88,11 @@
     </section>
 
     <section id="homeScreen" class="screen home">
-      <div class="topbar">
-        <div>
-          <h2 id="homeTitle">로그인 완료</h2>
-          <p id="homeSubtitle"></p>
-        </div>
+      <div>
+        <h2 id="homeTitle">로그인 완료</h2>
+        <p id="homeSubtitle"></p>
       </div>
-      <div class="card info">
+      <div class="card">
         <div class="row"><span>이름</span><span id="homeName"></span></div>
         <div class="row"><span>소속 대리점</span><span id="homeAgency"></span></div>
         <div class="row"><span>노션 페이지</span><span id="homeNotion"></span></div>
@@ -107,14 +102,13 @@
   </main>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxJOlnA4b9l3bzZnZi2AtKm-S2-fYSoK8fCQx6Sbm8rlIixxU0Gbfv0_g2JRlKEvr-k/exec';
-    const EXPECTED_API_VERSION = '2026-06-07-mobile-login-only-1';
-    const SESSION_KEY = 'salesLoginSession_v1';
+    const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
+    const SESSION_KEY = 'salesLoginSession_v2';
 
     const state = {
       mode: 'login',
       loading: false,
-      apiVersion: '',
       user: null,
     };
 
@@ -133,35 +127,28 @@
     }
 
     async function boot() {
-      await loadVersion();
+      if (!isConfigured()) {
+        $('apiStatus').className = 'status error';
+        $('apiStatus').textContent = 'Supabase URL과 anon key를 먼저 입력해야 합니다.';
+        return;
+      }
       await loadAgencies();
+      $('apiStatus').className = 'status ok';
+      $('apiStatus').textContent = 'Supabase 연결 준비 완료';
     }
 
-    async function loadVersion() {
-      try {
-        const res = await api({ action: 'version' });
-        if (!res.ok) throw new Error(res.error || 'API 확인 실패');
-        state.apiVersion = res.version || '';
-        $('apiStatus').className = res.version === EXPECTED_API_VERSION ? 'status ok' : 'status error';
-        $('apiStatus').textContent = res.version === EXPECTED_API_VERSION
-          ? `API 연결됨: ${res.version}`
-          : `API 연결됨: ${res.version}\nApps Script 최신 배포 필요: ${EXPECTED_API_VERSION}`;
-      } catch (error) {
-        state.apiVersion = '';
-        $('apiStatus').className = 'status error';
-        $('apiStatus').textContent = error.message || String(error);
-      }
+    function isConfigured() {
+      return SUPABASE_URL.indexOf('YOUR_') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_') === -1;
     }
 
     async function loadAgencies() {
       try {
-        const res = await api({ action: 'agencies' });
-        if (!res.ok) throw new Error(res.error || '대리점 목록을 불러오지 못했습니다.');
-        const agencies = Array.isArray(res.data) ? res.data : [];
+        const agencies = await rpc('list_agencies', {});
         $('agency').innerHTML = '<option value="">대리점 선택</option>' +
-          agencies.map(agency => `<option value="${esc(agency)}">${esc(agency)}</option>`).join('');
+          (agencies || []).map(item => `<option value="${esc(item.agency)}">${esc(item.agency)}</option>`).join('');
       } catch (error) {
-        showStatus(error.message || String(error), 'error');
+        $('apiStatus').className = 'status error';
+        $('apiStatus').textContent = error.message || String(error);
       }
     }
 
@@ -178,21 +165,30 @@
     }
 
     async function checkMember() {
-      const base = getFormValues();
-      if (!base.name || !base.agency) {
+      const values = getFormValues();
+      if (!values.name || !values.agency) {
         showStatus('이름과 소속 대리점을 입력해주세요.', 'error');
         return;
       }
 
       await withLoading(async () => {
         showStatus('가입 가능 여부를 확인하는 중입니다.');
-        const res = await api({ action: 'checkMember', name: base.name, agency: base.agency });
-        if (!res.ok) throw new Error(res.error || '확인 실패');
-        if (!res.data.exists) {
-          showStatus(res.data.message || '등록된 영업담당이 아닙니다.', 'error');
+        const data = await rpc('check_sales_member', {
+          p_name: values.name,
+          p_agency: values.agency,
+        });
+
+        if (!data.exists) {
+          showStatus(data.message || '등록 가능한 영업담당이 아닙니다.', 'error');
           return;
         }
-        showStatus(res.data.registered ? '이미 가입되어 있습니다. 로그인해주세요.' : '가입 가능합니다. 비밀번호를 생성해주세요.', 'ok');
+
+        if (data.active === false) {
+          showStatus(data.message || '비활성 처리된 영업담당입니다.', 'error');
+          return;
+        }
+
+        showStatus(data.registered ? '이미 가입되어 있습니다. 로그인해주세요.' : '가입 가능합니다. 비밀번호를 생성해주세요.', 'ok');
       });
     }
 
@@ -206,14 +202,12 @@
 
       await withLoading(async () => {
         showStatus(state.mode === 'login' ? '로그인 중입니다.' : '가입 처리 중입니다.');
-        const res = await api({
-          action: state.mode === 'login' ? 'login' : 'register',
-          name: values.name,
-          agency: values.agency,
-          password: values.password,
+        const data = await rpc(state.mode === 'login' ? 'login_sales_member' : 'register_sales_member', {
+          p_name: values.name,
+          p_agency: values.agency,
+          p_password: values.password,
         });
-        if (!res.ok) throw new Error(res.error || '요청 실패');
-        const data = res.data || {};
+
         if (state.mode === 'login' && data.loggedIn !== true) throw new Error('로그인 응답이 올바르지 않습니다.');
         if (state.mode === 'register' && data.registered !== true) throw new Error('가입 응답이 올바르지 않습니다.');
 
@@ -236,6 +230,48 @@
       };
     }
 
+    async function rpc(name, body) {
+      const res = await fetchWithRetry(`${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/${name}`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body || {}),
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (error) {
+        throw new Error(`Supabase 응답이 JSON이 아닙니다.\n${text.slice(0, 160)}`);
+      }
+
+      if (!res.ok) {
+        throw new Error((data && (data.message || data.error_description || data.error)) || `Supabase 오류 (${res.status})`);
+      }
+
+      return data;
+    }
+
+    async function fetchWithRetry(url, options, retries = 2) {
+      let lastError;
+      for (let i = 0; i <= retries; i++) {
+        try {
+          return await Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('요청 시간이 초과되었습니다.')), 25000)),
+          ]);
+        } catch (error) {
+          lastError = error;
+          if (i < retries) await new Promise(resolve => setTimeout(resolve, 1200 * (i + 1)));
+        }
+      }
+      throw lastError;
+    }
+
     function showHome() {
       $('authScreen').classList.remove('active');
       $('homeScreen').classList.add('active');
@@ -255,44 +291,6 @@
       showStatus('');
     }
 
-    function api(params) {
-      return new Promise((resolve, reject) => {
-        const callback = `__mobileLoginCb_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        const query = new URLSearchParams();
-        Object.keys(params || {}).forEach(key => {
-          const value = params[key];
-          if (value !== undefined && value !== null) query.set(key, String(value));
-        });
-        query.set('callback', callback);
-        query.set('_', String(Date.now()));
-
-        const script = document.createElement('script');
-        const timer = setTimeout(() => {
-          cleanup();
-          reject(new Error('API 응답 시간이 초과되었습니다. 모바일 네트워크가 느리거나 Apps Script 배포가 응답하지 않습니다.'));
-        }, 30000);
-
-        window[callback] = data => {
-          cleanup();
-          resolve(data);
-        };
-
-        script.async = true;
-        script.onerror = () => {
-          cleanup();
-          reject(new Error('API 스크립트 로드에 실패했습니다. API 직접 확인 버튼으로 JSON이 열리는지 확인해주세요.'));
-        };
-        script.src = `${API_URL}?${query.toString()}`;
-        document.head.appendChild(script);
-
-        function cleanup() {
-          clearTimeout(timer);
-          delete window[callback];
-          if (script.parentNode) script.parentNode.removeChild(script);
-        }
-      });
-    }
-
     async function withLoading(fn) {
       if (state.loading) return;
       state.loading = true;
@@ -305,10 +303,6 @@
         state.loading = false;
         setButtonsDisabled(false);
       }
-    }
-
-    function openApiTest() {
-      window.open(`${API_URL}?action=version&_=${Date.now()}`, '_blank', 'noopener');
     }
 
     function setButtonsDisabled(disabled) {
