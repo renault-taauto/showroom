@@ -106,6 +106,7 @@
         <h1>영업담당 포털</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
         <p id="apiStatus" class="hint">API 연결 확인 중입니다.</p>
+        <button class="ghost" type="button" onclick="openApiTest()">API 직접 확인</button>
       </div>
       <div class="panel">
         <div class="tabs" aria-label="로그인 방식">
@@ -305,6 +306,10 @@
         $('apiStatus').className='hint status error';
         $('apiStatus').textContent=`API 연결 실패: ${error.message||String(error)}`;
       }
+    }
+
+    function openApiTest(){
+      window.open(`${API_URL}?action=version&_=${Date.now()}`,'_blank','noopener');
     }
 
     async function loadAgencies(){
@@ -616,7 +621,7 @@
         let settled=false;
         let timer=setTimeout(()=>{
           cleanup();
-          reject(new Error(`API 응답 시간이 초과되었습니다.\n호출 URL: ${url}\n모바일 브라우저에서 script.google.com 접근이 막혔거나 Apps Script 배포가 최신이 아닙니다.`));
+          reject(new Error(`API 응답 시간이 초과되었습니다.\nAPI 직접 확인 버튼을 눌러 JSON이 열리는지 확인해주세요.\nJSON이 안 열리면 Apps Script 웹앱 접근 권한 또는 모바일 브라우저 문제가 먼저입니다.`));
         },15000);
         window[callback]=data=>{
           settled=true;
@@ -628,7 +633,7 @@
         script.onerror=()=>{
           if(settled)return;
           cleanup();
-          reject(new Error(`API 스크립트를 불러오지 못했습니다.\n모바일에서 script.google.com 접속이 차단됐는지 확인해주세요.`));
+          reject(new Error(`API 스크립트를 불러오지 못했습니다.\nAPI 직접 확인 버튼을 눌렀을 때 JSON이 아니라 로그인/오류 화면이 뜨면 Apps Script 배포 권한을 확인해야 합니다.`));
         };
         script.src=`${url}?${query.toString()}`;
         document.head.appendChild(script);
