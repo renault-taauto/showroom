@@ -681,10 +681,9 @@
         const blob = await prepareImageBlob(file);
         const fileName = `${Date.now()}-${index + 1}.jpg`;
         const path = [
-          safeStoragePart(state.user.agency),
-          safeStoragePart(state.user.name),
+          'requests',
           safeStoragePart($('deliveryDate').value || 'no-date'),
-          fileName,
+          `${Date.now()}-${index + 1}-${Math.random().toString(36).slice(2, 8)}.jpg`,
         ].join('/');
         const url = await uploadBlobToStorage(path, blob);
         uploaded.push({ name: fileName, type: blob.type || 'image/jpeg', url: url });
@@ -752,8 +751,10 @@
     function safeStoragePart(value) {
       return String(value || 'item')
         .trim()
-        .replace(/[\\/:*?"<>|#%{}^~[\]`]+/g, '-')
+        .replace(/[^A-Za-z0-9._-]+/g, '-')
         .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
         .slice(0, 80) || 'item';
     }
 
