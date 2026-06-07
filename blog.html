@@ -104,6 +104,7 @@
   <script>
     const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUag_Erof3hO8zzn0vnDAmndE1CHnkgZTCjCMpyYH5SuYv8MCvIQ6NcBONE2jXoV2M/exec';
     const SESSION_KEY = 'salesLoginSession_v2';
 
     const state = {
@@ -211,10 +212,21 @@
         if (state.mode === 'login' && data.loggedIn !== true) throw new Error('로그인 응답이 올바르지 않습니다.');
         if (state.mode === 'register' && data.registered !== true) throw new Error('가입 응답이 올바르지 않습니다.');
 
+        let finalData = data;
+        let successMessage = '로그인되었습니다.';
+
+        if (state.mode === 'register') {
+          showStatus('가입 후 노션/구글시트 정보를 업데이트하는 중입니다.');
+          const completion = await completeSignup(values);
+          finalData = Object.assign({}, data, completion);
+          successMessage = '가입에 성공했습니다';
+        }
+
         state.user = {
-          name: data.name || values.name,
-          agency: data.agency || values.agency,
-          notionPageId: data.notionPageId || '',
+          name: finalData.name || values.name,
+          agency: finalData.agency || values.agency,
+          notionPageId: finalData.notionPageId || '',
+          message: successMessage,
           loggedAt: new Date().toISOString(),
         };
         saveSession(state.user);
@@ -256,6 +268,48 @@
       return data;
     }
 
+    function completeSignup(values) {
+      return new Promise((resolve, reject) => {
+        const callback = `__signupCompleteCb_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const query = new URLSearchParams({
+          action: 'completeSignup',
+          name: values.name,
+          agency: values.agency,
+          password: values.password,
+          callback,
+          _: String(Date.now()),
+        });
+
+        const script = document.createElement('script');
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error('노션/구글시트 가입 완료 처리 시간이 초과되었습니다.'));
+        }, 30000);
+
+        window[callback] = res => {
+          cleanup();
+          if (!res || !res.ok) {
+            reject(new Error((res && res.error) || '가입 완료 처리에 실패했습니다.'));
+            return;
+          }
+          resolve(res.data || {});
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('Apps Script 가입 완료 API를 불러오지 못했습니다.'));
+        };
+        script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
+        document.head.appendChild(script);
+
+        function cleanup() {
+          clearTimeout(timer);
+          delete window[callback];
+          if (script.parentNode) script.parentNode.removeChild(script);
+        }
+      });
+    }
+
     async function fetchWithRetry(url, options, retries = 2) {
       let lastError;
       for (let i = 0; i <= retries; i++) {
@@ -276,7 +330,7 @@
       $('authScreen').classList.remove('active');
       $('homeScreen').classList.add('active');
       $('homeTitle').textContent = `${state.user.name}님`;
-      $('homeSubtitle').textContent = '로그인되었습니다.';
+      $('homeSubtitle').textContent = state.user.message || '로그인되었습니다.';
       $('homeName').textContent = state.user.name || '-';
       $('homeAgency').textContent = state.user.agency || '-';
       $('homeNotion').textContent = state.user.notionPageId ? '연결됨' : '없음';
