@@ -102,6 +102,7 @@
         <div class="brand-mark">B</div>
         <h1>영업담당 포털</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
+        <p id="apiStatus" class="hint">API 연결 확인 중입니다.</p>
       </div>
       <div class="panel">
         <div class="tabs" aria-label="로그인 방식">
@@ -257,7 +258,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwgvJ_NaTZUTVaN1W2mG-7-OXfc105ZlQR0s87lvAYjzGXhnqoRxOr20wGPvHao0N7K/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxeedsZD2w6uhfLaYiu_yy2unZ18MKUPWymlEJVAxDkb2_knMoRXkzma2I7a4zviW0_/exec';
     const SESSION_KEY = 'salesMemberSession_v1';
     const FALLBACK_VEHICLES = {
       '필랑트 하이브리드 E-Tech': {trims:['테크노','아이코닉','에스프리 알핀','esprit Alpine 1955'],colors:['새틴 유니버스 화이트','새틴 포레스트 블랙','클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['20" 다크 틴티드 투톤 시케인 알로이 휠','20" 투톤 베가 알로이 휠','19" 투톤 알파 알로이 휠']},
@@ -286,6 +287,16 @@
       $('inspectionFiles').onchange=addInspectionFiles;
       loadAgencies();
       loadBriefOptions();
+      loadApiStatus();
+    }
+
+    async function loadApiStatus(){
+      try{
+        const res=await apiGet({action:'version'});
+        $('apiStatus').textContent=res.version?`API 연결됨: ${res.version}`:'API 연결됨';
+      }catch(error){
+        $('apiStatus').textContent='API 연결 실패';
+      }
     }
 
     async function loadAgencies(){
