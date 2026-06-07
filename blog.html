@@ -60,6 +60,9 @@
     .list-meta{font-size:12px;color:#667085}
     .notice-content{font-size:14px;color:#475467;line-height:1.55;white-space:pre-wrap}
     .notice-image{width:100%;border-radius:12px;display:block}
+    .notice-section{display:grid;gap:8px}
+    .notice-row{width:100%;background:transparent;padding:7px 0;text-align:left;color:#111827;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .notice-pin{color:#d92d20}
     .empty{padding:18px;border-radius:14px;background:#fff;border:1px dashed #d0d5dd;color:#98a2b3;text-align:center;font-size:13px}
     .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;color:#111827}
@@ -99,7 +102,7 @@
           <button id="registerTab" class="tab" type="button" onclick="setMode('register')">최초 가입</button>
         </div>
         <form id="authForm" class="form">
-          <div class="field"><label for="name">이름</label><input id="name" autocomplete="name" required></div>
+          <div class="field"><label for="name">이름</label><input id="name" autocomplete="name" required autofocus></div>
           <div class="field"><label for="agency">소속 대리점</label><select id="agency" required><option value="">대리점 선택</option></select></div>
           <div class="field"><label for="password">비밀번호</label><input id="password" type="password" autocomplete="current-password" required><div id="passwordHint" class="hint">가입 때 만든 비밀번호를 입력하세요.</div></div>
           <div id="status" class="status"></div>
@@ -116,9 +119,9 @@
           <button class="menu-btn" type="button" onclick="openDrawer()" aria-label="메뉴 열기"><span class="menu-icon"><span></span><span></span><span></span></span></button>
         </div>
         <button class="banner" type="button" onclick="openPage('campaignPage')"><div class="banner-title">진행 중인 시책</div><div class="banner-desc">참여할 블로그 유형을 선택하고 신청하세요.</div></button>
-        <div class="card"><div class="section-head"><h3>공지사항</h3><button class="small-btn" type="button" onclick="loadAppHome()">새로고침</button></div><div id="noticeList" class="list"></div></div>
+        <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div></div>
         <div class="quick-actions"><button type="button" onclick="openPage('requestPage')">블로그 원고<br>제작 요청</button><button type="button" onclick="openPage('postsPage')">완료된 원고<br>리스트</button></div>
-        <div class="card"><div class="section-head"><h3>완료된 원고 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">전체보기</button></div><div id="completedPostList" class="list"></div></div>
+        <div class="card"><div class="section-head"><h3>접수된 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button></div><div id="completedPostList" class="list"></div></div>
       </div>
 
       <div id="profilePage" class="page">
@@ -151,7 +154,7 @@
           <div class="field"><label>차량 인도 분위기</label><textarea id="deliveryMood" placeholder="출고 당일 분위기, 반응, 전달 포인트를 입력하세요."></textarea></div>
           <div class="field"><label>검수 사진</label><input id="inspectionFiles" type="file" accept="image/*" multiple><div id="inspectionFileName" class="file-name"></div></div>
           <div id="requestStatus" class="status"></div>
-          <button class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
+          <button id="requestSubmitBtn" class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
         </div>
       </div>
 
@@ -208,6 +211,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
     const GAS_FUNCTION_NAME = 'swift-function';
     const SESSION_KEY = 'salesLoginSession_v2';
+    const NOTICE_CACHE_KEY = 'salesNoticeCache_v1';
 
     const FALLBACK_OPTIONS = {
       vehicles: {
@@ -221,7 +225,7 @@
       satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
     };
 
-    const state = { mode: 'login', loading: false, user: null, appHome: null, options: FALLBACK_OPTIONS };
+    const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS };
     const $ = id => document.getElementById(id);
 
     init();
@@ -376,6 +380,7 @@
       $('homeTitle').textContent = `${state.user.name}님`;
       $('homeSubtitle').textContent = state.user.agency || state.user.message || '';
       openPage('mainPage');
+      renderCachedNotices();
       loadAppHome();
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
@@ -388,6 +393,7 @@
         setupRequestOptions(state.options);
         renderProfile(state.appHome.profile || {});
         renderNotices(state.appHome.notices || []);
+        saveNoticeCache(state.appHome.notices || []);
         renderCompletedPosts(state.appHome.completedPosts || []);
         if (state.appHome.profile && state.appHome.profile.needsProfile) {
           $('profileGuide').style.display = 'block';
@@ -414,9 +420,25 @@
       const box = $('noticeList');
       if (!notices || notices.length === 0) return box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
       box.innerHTML = notices.map((item, index) => {
-        const title = `${item.pinned ? '상단고정 · ' : ''}${esc(item.title)}`;
-        return `<button class="list-item" type="button" onclick="openNoticeModal(${index})"><div class="list-title">${title}</div><div class="list-meta">${esc(item.date || '')}</div></button>`;
+        const title = `${item.pinned ? '<span class="notice-pin">●</span> ' : ''}${esc(item.title)} - ${esc(item.date || '')}`;
+        return `<button class="notice-row" type="button" onclick="openNoticeModal(${index})">${title}</button>`;
       }).join('');
+    }
+
+    function renderCachedNotices() {
+      const cached = readNoticeCache();
+      if (!cached || !cached.length) return;
+      state.appHome = state.appHome || {};
+      state.appHome.notices = cached;
+      renderNotices(cached);
+    }
+
+    function saveNoticeCache(notices) {
+      try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(notices || [])); } catch {}
+    }
+
+    function readNoticeCache() {
+      try { return JSON.parse(localStorage.getItem(NOTICE_CACHE_KEY) || '[]'); } catch { return []; }
     }
 
     function openNoticeModal(index) {
@@ -448,14 +470,14 @@
 
     function renderCompletedPosts(posts) {
       const box = $('completedPostList');
-      if (!posts || posts.length === 0) return box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
-      box.innerHTML = posts.map(post => `<div class="list-item"><div class="list-title">${esc(post.title || '제목 없음')}</div><div class="list-meta">${esc(post.date || '')} · ${esc(post.status || '')}</div>${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener">원고 열기</a>` : ''}</div>`).join('');
+      if (!posts || posts.length === 0) return box.innerHTML = '<div class="empty">접수된 내역이 없습니다.</div>';
+      box.innerHTML = posts.map(post => `<div class="list-item"><div class="list-title">${esc(post.title || '제목 없음')} - ${esc(post.date || '')}</div><div class="list-meta">${esc(post.status || '')}</div></div>`).join('');
     }
 
     function renderMyPosts(posts) {
       const box = $('myPostList');
-      if (!posts || posts.length === 0) return box.innerHTML = '<div class="empty">원고 요청 내역이 없습니다.</div>';
-      box.innerHTML = posts.map(post => `<div class="list-item"><div class="list-title">${esc(post.title || '제목 없음')}</div><div class="list-meta">${esc(post.date || '')} · ${esc(post.status || '')} · ${esc(post.uploadBlog || '')}</div>${post.memo ? `<p>${esc(post.memo)}</p>` : ''}${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener">열기</a>` : ''}</div>`).join('');
+      if (!posts || posts.length === 0) return box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
+      box.innerHTML = posts.map(post => `<div class="list-item"><div class="list-title">${esc(post.title || '제목 없음')} - ${esc(post.date || '')}</div>${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener">구글독스 열기</a>` : '<div class="list-meta">구글독스 링크 없음</div>'}</div>`).join('');
     }
 
     async function saveMyInfo() {
@@ -485,8 +507,11 @@
     }
 
     async function requestBlogDraft() {
+      if (state.requestSubmitting) return;
+      state.requestSubmitting = true;
+      setRequestSubmitting(true);
       $('requestStatus').className = 'status';
-      $('requestStatus').textContent = '요청 중입니다.';
+      $('requestStatus').textContent = '정보를 제출 중입니다.';
       try {
         const files = await readFilesAsPayload($('inspectionFiles').files);
         const result = await gasAction('requestBlogDraft', {
@@ -511,7 +536,17 @@
       } catch (error) {
         $('requestStatus').className = 'status error';
         $('requestStatus').textContent = error.message || String(error);
+      } finally {
+        state.requestSubmitting = false;
+        setRequestSubmitting(false);
       }
+    }
+
+    function setRequestSubmitting(isSubmitting) {
+      const button = $('requestSubmitBtn');
+      if (!button) return;
+      button.disabled = isSubmitting;
+      button.textContent = isSubmitting ? '제출 중' : '요청하기';
     }
 
     async function submitCampaign() {
@@ -628,7 +663,12 @@
       try { await fn(); } catch (error) { showStatus(error.message || String(error), 'error'); } finally { state.loading = false; setButtonsDisabled(false); }
     }
 
-    function setButtonsDisabled(disabled){ document.querySelectorAll('button').forEach(button => { button.disabled = disabled; }); }
+    function setButtonsDisabled(disabled){
+      document.querySelectorAll('button').forEach(button => {
+        if (button.id !== 'requestSubmitBtn') button.disabled = disabled;
+      });
+      $('name').disabled = false;
+    }
     function showStatus(message, type){ $('status').className = `status ${type || ''}`; $('status').textContent = message || ''; }
     function saveSession(user){ localStorage.setItem(SESSION_KEY, JSON.stringify(user)); }
     function readSession(){ try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; } }
