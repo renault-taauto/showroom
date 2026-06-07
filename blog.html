@@ -41,10 +41,18 @@
     .status{min-height:20px;color:#667085;font-size:13px;white-space:pre-wrap;line-height:1.45}
     .status.error{color:#d92d20}
     .status.ok{color:#067647}
+    .status.warn{color:#b54708}
     .hint{font-size:12px;color:#98a2b3;line-height:1.4}
     .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:10px}
     .row{display:flex;justify-content:space-between;gap:12px;font-size:14px}
     .row span:first-child{color:#667085}
+    .sync-status{font-size:12px;padding:8px 12px;border-radius:10px;background:#f9fafb;border:1px solid #eaecf0;display:grid;gap:4px}
+    .sync-row{display:flex;align-items:center;gap:6px;color:#667085}
+    .sync-dot{width:7px;height:7px;border-radius:50%;background:#d0d5dd;flex-shrink:0}
+    .sync-dot.ok{background:#17b26a}
+    .sync-dot.error{background:#d92d20}
+    .sync-dot.loading{background:#f79009;animation:blink .8s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
   </style>
 </head>
 <body>
@@ -54,8 +62,8 @@
         <div class="mark">B</div>
         <h1>영업담당 로그인</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
-        <p class="hint">HTML 빌드: 2026-06-07-supabase-login-1</p>
-        <p id="apiStatus" class="status">Supabase 연결 확인 중입니다.</p>
+        <p class="hint">빌드: 2026-06-07-sync-fix-1</p>
+        <p id="apiStatus" class="status">연결 확인 중입니다.</p>
       </div>
 
       <div class="panel">
@@ -64,7 +72,7 @@
           <button id="registerTab" class="tab" type="button" onclick="setMode('register')">최초 가입</button>
         </div>
 
-        <form id="authForm" class="form">
+        <div class="form">
           <div class="field">
             <label for="name">이름</label>
             <input id="name" autocomplete="name" required>
@@ -81,9 +89,9 @@
             <div id="passwordHint" class="hint">가입 때 만든 비밀번호를 입력하세요.</div>
           </div>
           <div id="status" class="status"></div>
-          <button id="submitBtn" class="primary" type="submit">로그인</button>
+          <button id="submitBtn" class="primary" type="button" onclick="handleSubmit()">로그인</button>
           <button class="secondary" type="button" onclick="checkMember()">가입 가능 확인</button>
-        </form>
+        </div>
       </div>
     </section>
 
@@ -97,14 +105,26 @@
         <div class="row"><span>소속 대리점</span><span id="homeAgency"></span></div>
         <div class="row"><span>노션 페이지</span><span id="homeNotion"></span></div>
       </div>
+      <div id="syncStatus" class="sync-status" style="display:none">
+        <div class="sync-row"><span id="sheetDot" class="sync-dot"></span><span id="sheetLabel">구글시트 동기화</span></div>
+        <div class="sync-row"><span id="notionDot" class="sync-dot"></span><span id="notionLabel">노션 페이지</span></div>
+      </div>
       <button class="secondary" type="button" onclick="logout()">로그아웃</button>
     </section>
   </main>
 
   <script>
+
     const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
-    const SESSION_KEY = 'salesLoginSession_v2';
+
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw1hylOBMK47x2SmHyPJd--bytoGfY-8tKokUrkY4x3Vj8ag0GrFk5LLxYBHtBnv-xt/exec';
+
+    // GAS completeSignup 액션의 SYNC_SECRET (없으면 빈 문자열)
+    const SYNC_SECRET = '';
+    // ─────────────────────────────────────────────
+
+    const SESSION_KEY = 'salesLoginSession_v3';
 
     const state = {
       mode: 'login',
@@ -117,7 +137,6 @@
     init();
 
     function init() {
-      $('authForm').addEventListener('submit', handleSubmit);
       const saved = readSession();
       if (saved && saved.name && saved.agency) {
         state.user = saved;
@@ -133,8 +152,6 @@
         return;
       }
       await loadAgencies();
-      $('apiStatus').className = 'status ok';
-      $('apiStatus').textContent = 'Supabase 연결 준비 완료';
     }
 
     function isConfigured() {
@@ -146,6 +163,8 @@
         const agencies = await rpc('list_agencies', {});
         $('agency').innerHTML = '<option value="">대리점 선택</option>' +
           (agencies || []).map(item => `<option value="${esc(item.agency)}">${esc(item.agency)}</option>`).join('');
+        $('apiStatus').className = 'status ok';
+        $('apiStatus').textContent = '연결 준비 완료';
       } catch (error) {
         $('apiStatus').className = 'status error';
         $('apiStatus').textContent = error.message || String(error);
@@ -182,18 +201,18 @@
           showStatus(data.message || '등록 가능한 영업담당이 아닙니다.', 'error');
           return;
         }
-
         if (data.active === false) {
           showStatus(data.message || '비활성 처리된 영업담당입니다.', 'error');
           return;
         }
-
-        showStatus(data.registered ? '이미 가입되어 있습니다. 로그인해주세요.' : '가입 가능합니다. 비밀번호를 생성해주세요.', 'ok');
+        showStatus(
+          data.registered ? '이미 가입되어 있습니다. 로그인해주세요.' : '가입 가능합니다. 비밀번호를 생성해주세요.',
+          'ok'
+        );
       });
     }
 
-    async function handleSubmit(event) {
-      event.preventDefault();
+    async function handleSubmit() {
       const values = getFormValues();
       if (!values.name || !values.agency || !values.password) {
         showStatus('모든 항목을 입력해주세요.', 'error');
@@ -201,32 +220,129 @@
       }
 
       await withLoading(async () => {
-        showStatus(state.mode === 'login' ? '로그인 중입니다.' : '가입 처리 중입니다.');
-        const data = await rpc(state.mode === 'login' ? 'login_sales_member' : 'register_sales_member', {
-          p_name: values.name,
-          p_agency: values.agency,
-          p_password: values.password,
-        });
+        const isRegister = state.mode === 'register';
+        showStatus(isRegister ? '가입 처리 중입니다.' : '로그인 중입니다.');
 
-        if (state.mode === 'login' && data.loggedIn !== true) throw new Error('로그인 응답이 올바르지 않습니다.');
-        if (state.mode === 'register' && data.registered !== true) throw new Error('가입 응답이 올바르지 않습니다.');
+        // 1단계: Supabase RPC
+        const data = await rpc(
+          isRegister ? 'register_sales_member' : 'login_sales_member',
+          { p_name: values.name, p_agency: values.agency, p_password: values.password }
+        );
 
-        let successMessage = '로그인되었습니다.';
-
-        if (state.mode === 'register') {
-          successMessage = '가입에 성공했습니다';
-        }
+        if (isRegister && data.registered !== true) throw new Error('가입 응답이 올바르지 않습니다.');
+        if (!isRegister && data.loggedIn !== true) throw new Error('로그인 응답이 올바르지 않습니다.');
 
         state.user = {
           name: data.name || values.name,
           agency: data.agency || values.agency,
           notionPageId: data.notionPageId || '',
-          message: successMessage,
+          message: isRegister ? '가입에 성공했습니다.' : '로그인되었습니다.',
           loggedAt: new Date().toISOString(),
         };
         saveSession(state.user);
         showHome();
+
+        // 2단계: 가입 시에만 GAS로 구글시트·노션 동기화 (비동기, 화면 전환 후 진행)
+        if (isRegister) {
+          syncWithGas(values.name, values.agency, values.password);
+        }
       });
+    }
+
+    // ─────────────────────────────────────────────
+    // GAS 동기화: 구글시트 업데이트 + 노션 페이지 생성
+    // ─────────────────────────────────────────────
+    async function syncWithGas(name, agency, password) {
+      if (!GAS_URL || GAS_URL.indexOf('YOUR_') !== -1) {
+        setSyncStatus('sheet', 'error', 'GAS URL 미설정');
+        setSyncStatus('notion', 'error', 'GAS URL 미설정');
+        return;
+      }
+
+      $('syncStatus').style.display = 'grid';
+      setSyncStatus('sheet', 'loading', '구글시트 업데이트 중...');
+      setSyncStatus('notion', 'loading', '노션 페이지 생성 중...');
+
+      try {
+        // GAS는 CORS 제한이 있어 no-cors로 호출, 응답을 읽을 수 없지만 요청은 전달됨
+        // 신뢰도를 높이려면 GAS 측에서 Access-Control-Allow-Origin 헤더를 추가해야 합니다
+        const params = new URLSearchParams({
+          action: 'completeSignup',
+          name: name,
+          agency: agency,
+          password: password,
+          secret: SYNC_SECRET,
+        });
+
+        const gasResponse = await fetchGas(GAS_URL + '?' + params.toString());
+
+        if (gasResponse && gasResponse.ok) {
+          const notionId = gasResponse.data && gasResponse.data.notionPageId;
+          setSyncStatus('sheet', 'ok', '구글시트 업데이트 완료');
+          setSyncStatus('notion', 'ok', notionId ? '노션 페이지 생성 완료' : '노션 페이지 연결됨');
+
+          // notionPageId를 세션에 업데이트
+          if (notionId && !state.user.notionPageId) {
+            state.user.notionPageId = notionId;
+            saveSession(state.user);
+            $('homeNotion').textContent = '연결됨';
+          }
+        } else {
+          const errMsg = gasResponse && gasResponse.error ? gasResponse.error : '동기화 중 오류 발생';
+          setSyncStatus('sheet', 'error', errMsg);
+          setSyncStatus('notion', 'error', errMsg);
+        }
+      } catch (err) {
+        // no-cors 모드에서는 응답을 읽지 못해도 요청은 전달됐을 수 있음
+        const msg = err.message || String(err);
+        if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+          // GAS CORS 이슈일 가능성 → no-cors fallback
+          await fallbackNoCors(name, agency, password);
+        } else {
+          setSyncStatus('sheet', 'error', msg);
+          setSyncStatus('notion', 'error', msg);
+        }
+      }
+    }
+
+    async function fetchGas(url) {
+      const res = await Promise.race([
+        fetch(url, { method: 'GET', redirect: 'follow' }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('GAS 요청 시간 초과')), 30000)),
+      ]);
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error('GAS 응답이 JSON이 아닙니다: ' + text.slice(0, 100));
+      }
+    }
+
+    // GAS가 CORS 헤더를 반환하지 않을 경우 no-cors 폴백
+    // no-cors에서는 응답을 읽을 수 없으므로 "전달됐을 가능성 있음"으로 표시
+    async function fallbackNoCors(name, agency, password) {
+      try {
+        const params = new URLSearchParams({
+          action: 'completeSignup',
+          name: name,
+          agency: agency,
+          password: password,
+          secret: SYNC_SECRET,
+        });
+        await fetch(GAS_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors', redirect: 'follow' });
+        setSyncStatus('sheet', 'ok', '동기화 요청 전송됨 (확인 불가)');
+        setSyncStatus('notion', 'ok', '동기화 요청 전송됨 (확인 불가)');
+      } catch (err2) {
+        setSyncStatus('sheet', 'error', '네트워크 오류: ' + (err2.message || ''));
+        setSyncStatus('notion', 'error', '네트워크 오류: ' + (err2.message || ''));
+      }
+    }
+
+    function setSyncStatus(target, dotState, label) {
+      const dot = $(target === 'sheet' ? 'sheetDot' : 'notionDot');
+      const lbl = $(target === 'sheet' ? 'sheetLabel' : 'notionLabel');
+      dot.className = 'sync-dot ' + dotState;
+      lbl.textContent = label;
     }
 
     function getFormValues() {
@@ -252,14 +368,13 @@
       let data;
       try {
         data = text ? JSON.parse(text) : null;
-      } catch (error) {
+      } catch {
         throw new Error(`Supabase 응답이 JSON이 아닙니다.\n${text.slice(0, 160)}`);
       }
 
       if (!res.ok) {
         throw new Error((data && (data.message || data.error_description || data.error)) || `Supabase 오류 (${res.status})`);
       }
-
       return data;
     }
 
@@ -271,8 +386,8 @@
             fetch(url, options),
             new Promise((_, reject) => setTimeout(() => reject(new Error('요청 시간이 초과되었습니다.')), 25000)),
           ]);
-        } catch (error) {
-          lastError = error;
+        } catch (err) {
+          lastError = err;
           if (i < retries) await new Promise(resolve => setTimeout(resolve, 1200 * (i + 1)));
         }
       }
@@ -287,6 +402,7 @@
       $('homeName').textContent = state.user.name || '-';
       $('homeAgency').textContent = state.user.agency || '-';
       $('homeNotion').textContent = state.user.notionPageId ? '연결됨' : '없음';
+      $('syncStatus').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
@@ -304,8 +420,8 @@
       setButtonsDisabled(true);
       try {
         await fn();
-      } catch (error) {
-        showStatus(error.message || String(error), 'error');
+      } catch (err) {
+        showStatus(err.message || String(err), 'error');
       } finally {
         state.loading = false;
         setButtonsDisabled(false);
@@ -313,9 +429,7 @@
     }
 
     function setButtonsDisabled(disabled) {
-      document.querySelectorAll('button').forEach(button => {
-        button.disabled = disabled;
-      });
+      document.querySelectorAll('button').forEach(b => { b.disabled = disabled; });
     }
 
     function showStatus(message, type) {
@@ -330,19 +444,11 @@
     function readSession() {
       try {
         return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-      } catch (error) {
-        return null;
-      }
+      } catch { return null; }
     }
 
     function esc(value) {
-      return String(value ?? '').replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      }[char]));
+      return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
   </script>
 </body>
