@@ -82,6 +82,10 @@
     .file-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .file-action{min-height:46px;border-radius:12px;background:#eef1f5;color:#111827;display:grid;place-items:center;text-align:center}
     .file-action input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+    .photo-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .photo-thumb{display:grid;gap:4px;min-width:0}
+    .photo-thumb img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:#eef1f5}
+    .photo-thumb span{font-size:11px;color:#667085;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .choice{min-height:42px;border-radius:12px;background:#fff;border:1px solid #d0d5dd;color:#344054}
     .choice.active{background:#111827;border-color:#111827;color:#fff}
@@ -157,7 +161,7 @@
           <div class="field"><label>만족포인트</label><div id="satisfactionChoices" class="choice-grid"></div></div>
           <div class="field"><label>고객과의 히스토리</label><textarea id="customerHistory" placeholder="상담 과정, 선택 이유, 고객 상황 등을 입력하세요."></textarea></div>
           <div class="field"><label>차량 인도 분위기</label><textarea id="deliveryMood" placeholder="출고 당일 분위기, 반응, 전달 포인트를 입력하세요."></textarea></div>
-          <div class="field"><label>검수 사진</label><div class="file-actions"><label class="file-action">갤러리에서 선택<input id="inspectionFiles" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple></label><label class="file-action">카메라 촬영<input id="inspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple></label></div><div id="inspectionFileName" class="file-name"></div></div>
+          <div class="field"><label>검수 사진</label><div class="file-actions"><button class="file-action" type="button" onclick="$('inspectionFiles').click()">갤러리에서 선택</button><button class="file-action" type="button" onclick="$('inspectionCameraFiles').click()">카메라 촬영</button></div><input id="inspectionFiles" type="file" accept="image/*" multiple hidden><input id="inspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple hidden><div id="inspectionFileName" class="file-name"></div><div id="inspectionPreview" class="photo-preview"></div></div>
           <div id="requestStatus" class="status"></div>
           <button id="requestSubmitBtn" class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
         </div>
@@ -230,7 +234,7 @@
       satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
     };
 
-    const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS };
+    const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, inspectionPreviewUrls: [] };
     const $ = id => document.getElementById(id);
 
     init();
@@ -612,6 +616,7 @@
       $('inspectionFiles').value = '';
       $('inspectionCameraFiles').value = '';
       $('inspectionFileName').textContent = '';
+      clearInspectionPreview();
       document.querySelectorAll('.choice.active').forEach(button => button.classList.remove('active'));
     }
 
@@ -627,6 +632,23 @@
       const cameraCount = $('inspectionCameraFiles').files.length;
       const total = galleryCount + cameraCount;
       $('inspectionFileName').textContent = total ? `총 ${total}개 선택됨` : '';
+      renderInspectionPreview();
+    }
+
+    function renderInspectionPreview() {
+      clearInspectionPreview();
+      const files = getInspectionFiles();
+      $('inspectionPreview').innerHTML = files.map(file => {
+        const url = URL.createObjectURL(file);
+        state.inspectionPreviewUrls.push(url);
+        return `<div class="photo-thumb"><img src="${url}" alt=""><span>${esc(file.name || '사진')}</span></div>`;
+      }).join('');
+    }
+
+    function clearInspectionPreview() {
+      state.inspectionPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+      state.inspectionPreviewUrls = [];
+      $('inspectionPreview').innerHTML = '';
     }
 
     function readFileAsDataUrl(file) {
@@ -642,9 +664,56 @@
       const files = Array.from(fileList || []);
       const result = [];
       for (const file of files) {
-        result.push({ name: file.name, type: file.type, data: await readFileAsDataUrl(file) });
+        result.push(await prepareImageFile(file));
       }
       return result;
+    }
+
+    async function prepareImageFile(file) {
+      if (!file || !file.type || !file.type.startsWith('image/')) {
+        return { name: file.name, type: file.type || 'application/octet-stream', data: await readFileAsDataUrl(file) };
+      }
+
+      try {
+        return await compressImageFile(file);
+      } catch (error) {
+        return { name: file.name, type: file.type, data: await readFileAsDataUrl(file) };
+      }
+    }
+
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(url);
+          const maxSide = 1600;
+          const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
+          const width = Math.max(1, Math.round(image.width * ratio));
+          const height = Math.max(1, Math.round(image.height * ratio));
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext('2d');
+          context.drawImage(image, 0, 0, width, height);
+          canvas.toBlob(blob => {
+            if (!blob) return reject(new Error('이미지 압축에 실패했습니다.'));
+            const reader = new FileReader();
+            reader.onload = () => resolve({
+              name: file.name.replace(/\.[^.]+$/, '') + '.jpg',
+              type: 'image/jpeg',
+              data: String(reader.result || ''),
+            });
+            reader.onerror = () => reject(new Error('압축 이미지를 읽지 못했습니다.'));
+            reader.readAsDataURL(blob);
+          }, 'image/jpeg', 0.78);
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('이미지를 미리 처리하지 못했습니다.'));
+        };
+        image.src = url;
+      });
     }
 
     function toggleProfileFields() {
