@@ -105,7 +105,9 @@
         <div class="brand-mark">B</div>
         <h1>영업담당 포털</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
+        <p class="hint">HTML 빌드: 2026-06-07-mobile-debug-1</p>
         <p id="apiStatus" class="hint">API 연결 확인 중입니다.</p>
+        <p id="apiUrlHint" class="hint"></p>
         <button class="ghost" type="button" onclick="openApiTest()">API 직접 확인</button>
       </div>
       <div class="panel">
@@ -265,6 +267,7 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbw_9V5vW7RH87ooYoEiyz-__zVaPsJtXjvyr2KhfTA18b2cOrZE3btrpFhoFv4vZWTd/exec';
     const SESSION_KEY = 'salesMemberSession_v1';
     const EXPECTED_API_VERSION = '2026-06-07-login-repair-1';
+    const HTML_BUILD = '2026-06-07-mobile-debug-1';
     const FALLBACK_VEHICLES = {
       '필랑트 하이브리드 E-Tech': {trims:['테크노','아이코닉','에스프리 알핀','esprit Alpine 1955'],colors:['새틴 유니버스 화이트','새틴 포레스트 블랙','클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['20" 다크 틴티드 투톤 시케인 알로이 휠','20" 투톤 베가 알로이 휠','19" 투톤 알파 알로이 휠']},
       '그랑 콜레오스 하이브리드 E-tech': {trims:['테크노','아이코닉','에스프리 알핀','에스카파드'],colors:['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'],wheels:['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠']},
@@ -293,6 +296,7 @@
       loadAgencies();
       loadBriefOptions();
       loadApiStatus();
+      $('apiUrlHint').textContent = `API: ${API_URL.replace('https://script.google.com/macros/s/','').replace('/exec','')}`;
     }
 
     async function loadApiStatus(){
