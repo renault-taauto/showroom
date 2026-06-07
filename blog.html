@@ -188,6 +188,7 @@
   <script>
     const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
+    const GAS_FUNCTION_NAME = 'swift-function';
     const SESSION_KEY = 'salesLoginSession_v2';
 
     const FALLBACK_OPTIONS = {
@@ -327,7 +328,7 @@
     }
 
     async function gasAction(action, body) {
-      const res = await fetchWithRetry(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/gas-action`, {
+      const res = await fetchWithRetry(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/${GAS_FUNCTION_NAME}`, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action, ...(body || {}) }),
