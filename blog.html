@@ -4,8 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <title>티에이오토 영업담당 로그인</title>
   <style>
     *{box-sizing:border-box}
@@ -15,15 +13,15 @@
     button{border:0;cursor:pointer}
     a{color:inherit}
     .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff}
-    .screen{display:none;min-height:100vh;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
+    .screen{display:none;min-height:100vh;padding:calc(env(safe-area-inset-top)+22px) 18px 28px}
     .screen.active{display:flex}
     .auth{flex-direction:column;justify-content:center;gap:22px}
     .home{flex-direction:column;gap:16px;background:#f6f7f9}
     .brand,.panel,.form,.page{display:grid;gap:14px}
     .mark{width:48px;height:48px;border-radius:14px;background:#111827;color:#fff;display:grid;place-items:center;font-size:21px;font-weight:700}
-    h1{margin:0;font-size:26px;letter-spacing:0}
-    h2{margin:0;font-size:20px;letter-spacing:0}
-    h3{margin:0;font-size:15px;letter-spacing:0}
+    h1{margin:0;font-size:26px}
+    h2{margin:0;font-size:20px}
+    h3{margin:0;font-size:15px}
     p{margin:0;color:#667085;font-size:14px;line-height:1.45}
     .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px;border-radius:14px;background:#eef1f5}
     .tab{min-height:42px;border-radius:11px;background:transparent;color:#667085}
@@ -37,7 +35,6 @@
     .primary,.secondary,.ghost{width:100%;min-height:52px;border-radius:14px}
     .primary{background:#111827;color:#fff}
     .secondary{background:#eef1f5;color:#111827}
-    .ghost{background:transparent;color:#667085}
     button:disabled{opacity:.55}
     .status{min-height:20px;color:#667085;font-size:13px;white-space:pre-wrap;line-height:1.45}
     .status.error{color:#d92d20}
@@ -70,18 +67,17 @@
     .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;color:#111827}
     .drawer-dim{position:fixed;inset:0;background:rgba(17,24,39,.42);display:none;z-index:20}
     .drawer-dim.active{display:block}
-    .drawer{position:fixed;top:0;right:0;width:min(320px,86vw);height:100vh;background:#fff;z-index:21;transform:translateX(100%);transition:.2s ease;padding:calc(env(safe-area-inset-top) + 20px) 18px 24px;display:flex;flex-direction:column;gap:14px}
+    .drawer{position:fixed;top:0;right:0;width:min(320px,86vw);height:100vh;background:#fff;z-index:21;transform:translateX(100%);transition:.2s ease;padding:calc(env(safe-area-inset-top)+20px) 18px 24px;display:flex;flex-direction:column;gap:14px}
     .drawer.active{transform:translateX(0)}
     .drawer-head{display:flex;justify-content:space-between;align-items:center}
     .drawer-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .drawer-menu{display:grid;gap:2px}
-    .drawer-menu button{width:100%;min-height:44px;background:#fff;color:#111827;text-align:left;padding:0;font-weight:400}
+    .drawer-menu button{width:100%;min-height:44px;background:#fff;color:#111827;text-align:left;padding:0}
     .page{display:none}
     .page.active{display:grid}
     .file-name{font-size:12px;color:#667085}
     .file-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .file-action{min-height:46px;border-radius:12px;background:#eef1f5;color:#111827;display:grid;place-items:center;text-align:center}
-    .file-action input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+    .file-action{min-height:46px;border-radius:12px;background:#eef1f5;color:#111827;display:grid;place-items:center}
     .photo-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
     .photo-thumb{display:grid;gap:4px;min-width:0}
     .photo-thumb img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:#eef1f5}
@@ -98,757 +94,664 @@
   </style>
 </head>
 <body>
-  <main class="app">
-    <section id="authScreen" class="screen auth active">
-      <div class="brand">
-        <div class="mark">B</div>
-        <h1>티에이오토 영업담당 로그인</h1>
-        <p>소속 대리점을 먼저 선택해 주세요.</p>
-      </div>
-      <div class="panel">
-        <div class="tabs">
-          <button id="loginTab" class="tab active" type="button" onclick="setMode('login')">로그인</button>
-          <button id="registerTab" class="tab" type="button" onclick="setMode('register')">최초 가입</button>
-        </div>
-        <form id="authForm" class="form">
-          <div class="field"><label for="name">이름</label><input id="name" autocomplete="name" required autofocus></div>
-          <div class="field"><label for="agency">소속 대리점</label><select id="agency" required><option value="">대리점 선택</option></select></div>
-          <div class="field"><label for="password">비밀번호</label><input id="password" type="password" autocomplete="current-password" required><div id="passwordHint" class="hint">가입 때 만든 비밀번호를 입력하세요.</div></div>
-          <div id="status" class="status"></div>
-          <button id="submitBtn" class="primary" type="submit">로그인</button>
-          <button class="secondary" type="button" onclick="checkMember()">가입 가능 확인</button>
-        </form>
-      </div>
-    </section>
+<main class="app">
 
-    <section id="homeScreen" class="screen home">
-      <div id="mainPage" class="page active">
-        <div class="app-top">
-          <div class="user-title"><h2 id="homeTitle"></h2><p id="homeSubtitle"></p></div>
-          <button class="menu-btn" type="button" onclick="openDrawer()" aria-label="메뉴 열기"><span class="menu-icon"><span></span><span></span><span></span></span></button>
-        </div>
-        <button class="banner" type="button" onclick="openPage('campaignPage')"><div class="banner-title">진행 중인 시책</div><div class="banner-desc">참여할 블로그 유형을 선택하고 신청하세요.</div></button>
-        <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div></div>
-        <div class="quick-actions"><button type="button" onclick="openPage('requestPage')">블로그 원고<br>제작 요청</button><button type="button" onclick="openPage('postsPage')">완료된 원고<br>리스트</button></div>
-        <div class="card"><div class="section-head"><h3>접수된 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button></div><div id="completedPostList" class="list"></div></div>
-      </div>
-
-      <div id="profilePage" class="page">
-        <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>내 정보</h2></div>
-        <div class="card form">
-          <div id="profileGuide" class="status warn" style="display:none">내 정보가 비어 있습니다. 먼저 정보를 저장해야 기능을 사용할 수 있습니다.</div>
-          <div class="field"><label>이름</label><input id="profileName" disabled></div>
-          <div class="field"><label>소속 대리점</label><input id="profileAgency" disabled></div>
-          <div class="field"><label>업로드 블로그</label><select id="profileUploadBlog" onchange="toggleProfileFields()"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
-          <div id="blogUrlField" class="field"><label>블로그 URL</label><input id="profileBlogUrl" placeholder="본인 블로그 URL"></div>
-          <div id="testDriveUrlField" class="field"><label>시승신청 URL</label><input id="profileTestDriveUrl" placeholder="본인 시승신청 URL"></div>
-          <div id="businessCardField" class="field"><label>본인 명함 이미지</label><input id="profileBusinessCardFile" type="file" accept="image/*"><div id="businessCardName" class="file-name"></div></div>
-          <div id="profileStatus" class="status"></div>
-          <button class="primary" type="button" onclick="saveMyInfo()">저장하고 시작</button>
-        </div>
-      </div>
-
-      <div id="requestPage" class="page">
-        <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>블로그 원고 제작 요청</h2></div>
-        <div class="card form">
-          <div class="field"><label>업로드 블로그</label><select id="requestUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
-          <div class="field"><label>출고 날짜</label><input id="deliveryDate" type="date"></div>
-          <div class="field"><label>모델</label><select id="vehicleModel" onchange="updateVehicleChildren()"><option value="">모델 선택</option></select></div>
-          <div class="field"><label>트림</label><select id="vehicleTrim"><option value="">트림 선택</option></select></div>
-          <div class="field"><label>색상</label><select id="vehicleColor"><option value="">색상 선택</option></select></div>
-          <div class="field"><label>휠</label><select id="vehicleWheel"><option value="">휠 선택</option></select></div>
-          <div class="field"><label>방문 경로</label><div id="visitRouteChoices" class="choice-grid"></div></div>
-          <div class="field"><label>만족포인트</label><div id="satisfactionChoices" class="choice-grid"></div></div>
-          <div class="field"><label>고객과의 히스토리</label><textarea id="customerHistory" placeholder="상담 과정, 선택 이유, 고객 상황 등을 입력하세요."></textarea></div>
-          <div class="field"><label>차량 인도 분위기</label><textarea id="deliveryMood" placeholder="출고 당일 분위기, 반응, 전달 포인트를 입력하세요."></textarea></div>
-          <div class="field"><label>검수 사진</label><div class="file-actions"><button class="file-action" type="button" onclick="$('inspectionFiles').click()">갤러리에서 선택</button><button class="file-action" type="button" onclick="$('inspectionCameraFiles').click()">카메라 촬영</button></div><input id="inspectionFiles" type="file" accept="image/*" multiple hidden><input id="inspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple hidden><div id="inspectionFileName" class="file-name"></div><div id="inspectionPreview" class="photo-preview"></div></div>
-          <div id="requestStatus" class="status"></div>
-          <button id="requestSubmitBtn" class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
-        </div>
-      </div>
-
-      <div id="campaignPage" class="page">
-        <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>시책 참여 신청</h2></div>
-        <div class="card form">
-          <div class="field"><label>참여 블로그</label><select id="campaignUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
-          <div class="field"><label>메모</label><textarea id="campaignMemo" placeholder="필요한 메모가 있으면 입력하세요."></textarea></div>
-          <div id="campaignStatus" class="status"></div>
-          <button class="primary" type="button" onclick="submitCampaign()">참여 신청</button>
-        </div>
-      </div>
-
-      <div id="postsPage" class="page">
-        <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>나의 원고 리스트</h2></div>
-        <div id="myPostList" class="list"></div>
-      </div>
-
-      <div id="placeholderPage" class="page">
-        <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2 id="placeholderTitle"></h2></div>
-        <div class="empty">준비 중입니다.</div>
-      </div>
-    </section>
-  </main>
-
-  <div id="drawerDim" class="drawer-dim" onclick="closeDrawer()"></div>
-  <aside id="drawer" class="drawer">
-    <div class="drawer-head"><h2>메뉴</h2><button class="drawer-close" type="button" onclick="closeDrawer()">×</button></div>
-    <div class="drawer-menu">
-      <button type="button" onclick="openPageFromDrawer('profilePage')">내 정보</button>
-      <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
-      <button type="button" onclick="openPlaceholder('업로드 콘텐츠')">업로드 콘텐츠</button>
-      <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
-      <button type="button" onclick="openPlaceholder('블로그 스킨제작 요청')">블로그 스킨제작 요청</button>
-      <button type="button" onclick="logout()">로그아웃</button>
+  <!-- 로그인 화면 -->
+  <section id="authScreen" class="screen auth active">
+    <div class="brand">
+      <div class="mark">B</div>
+      <h1>티에이오토 영업담당</h1>
+      <p>소속 대리점을 먼저 선택해 주세요.</p>
     </div>
-  </aside>
-
-  <div id="noticeModalDim" class="modal-dim" onclick="closeNoticeModal()">
-    <section class="modal" onclick="event.stopPropagation()">
-      <div class="modal-head">
-        <div>
-          <h2 id="noticeModalTitle"></h2>
-          <p id="noticeModalDate"></p>
-        </div>
-        <button class="modal-close" type="button" onclick="closeNoticeModal()">×</button>
+    <div class="panel">
+      <div class="tabs">
+        <button id="loginTab" class="tab active" type="button" onclick="setMode('login')">로그인</button>
+        <button id="registerTab" class="tab" type="button" onclick="setMode('register')">최초 가입</button>
       </div>
-      <div id="noticeModalBody" class="modal-body"></div>
-    </section>
+      <div class="form">
+        <div class="field"><label for="name">이름</label><input id="name" autocomplete="name" autofocus></div>
+        <div class="field"><label for="agency">소속 대리점</label><select id="agency"><option value="">대리점 선택</option></select></div>
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <input id="password" type="password" autocomplete="current-password">
+          <div id="passwordHint" class="hint">가입 때 만든 비밀번호를 입력하세요.</div>
+        </div>
+        <div id="status" class="status"></div>
+        <button id="submitBtn" class="primary" type="button" onclick="handleSubmit()">로그인</button>
+        <button class="secondary" type="button" onclick="checkMember()">가입 가능 확인</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 홈 화면 -->
+  <section id="homeScreen" class="screen home">
+
+    <div id="mainPage" class="page active">
+      <div class="app-top">
+        <div class="user-title"><h2 id="homeTitle"></h2><p id="homeSubtitle"></p></div>
+        <button class="menu-btn" type="button" onclick="openDrawer()"><span class="menu-icon"><span></span><span></span><span></span></span></button>
+      </div>
+      <button class="banner" type="button" onclick="openPage('campaignPage')">
+        <div class="banner-title">진행 중인 시책</div>
+        <div class="banner-desc">참여할 블로그 유형을 선택하고 신청하세요.</div>
+      </button>
+      <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div></div>
+      <div class="quick-actions">
+        <button type="button" onclick="openPage('requestPage')">블로그 원고<br>제작 요청</button>
+        <button type="button" onclick="openPage('postsPage')">완료된 원고<br>리스트</button>
+      </div>
+      <div class="card"><div class="section-head"><h3>접수된 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button></div><div id="completedPostList" class="list"></div></div>
+    </div>
+
+    <div id="profilePage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>내 정보</h2></div>
+      <div class="card form">
+        <div id="profileGuide" class="status warn" style="display:none">내 정보가 비어 있습니다. 먼저 정보를 저장해야 기능을 사용할 수 있습니다.</div>
+        <div class="field"><label>이름</label><input id="profileName" disabled></div>
+        <div class="field"><label>소속 대리점</label><input id="profileAgency" disabled></div>
+        <div class="field"><label>업로드 블로그</label><select id="profileUploadBlog" onchange="toggleProfileFields()"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div id="blogUrlField" class="field"><label>블로그 URL</label><input id="profileBlogUrl" placeholder="본인 블로그 URL"></div>
+        <div id="testDriveUrlField" class="field"><label>시승신청 URL</label><input id="profileTestDriveUrl" placeholder="본인 시승신청 URL"></div>
+        <div id="businessCardField" class="field"><label>본인 명함 이미지</label><input id="profileBusinessCardFile" type="file" accept="image/*"><div id="businessCardName" class="file-name"></div></div>
+        <div id="profileStatus" class="status"></div>
+        <button class="primary" type="button" onclick="saveMyInfo()">저장하고 시작</button>
+      </div>
+    </div>
+
+    <div id="requestPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>블로그 원고 제작 요청</h2></div>
+      <div class="card form">
+        <div class="field"><label>업로드 블로그</label><select id="requestUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div class="field"><label>출고 날짜</label><input id="deliveryDate" type="date"></div>
+        <div class="field"><label>모델</label><select id="vehicleModel" onchange="updateVehicleChildren()"><option value="">모델 선택</option></select></div>
+        <div class="field"><label>트림</label><select id="vehicleTrim"><option value="">트림 선택</option></select></div>
+        <div class="field"><label>색상</label><select id="vehicleColor"><option value="">색상 선택</option></select></div>
+        <div class="field"><label>휠</label><select id="vehicleWheel"><option value="">휠 선택</option></select></div>
+        <div class="field"><label>방문 경로</label><div id="visitRouteChoices" class="choice-grid"></div></div>
+        <div class="field"><label>만족포인트</label><div id="satisfactionChoices" class="choice-grid"></div></div>
+        <div class="field"><label>고객과의 히스토리</label><textarea id="customerHistory" placeholder="상담 과정, 선택 이유, 고객 상황 등을 입력하세요."></textarea></div>
+        <div class="field"><label>차량 인도 분위기</label><textarea id="deliveryMood" placeholder="출고 당일 분위기, 반응, 전달 포인트를 입력하세요."></textarea></div>
+        <div class="field">
+          <label>검수 사진</label>
+          <div class="file-actions">
+            <button class="file-action" type="button" onclick="$('inspectionFiles').click()">갤러리에서 선택</button>
+            <button class="file-action" type="button" onclick="$('inspectionCameraFiles').click()">카메라 촬영</button>
+          </div>
+          <input id="inspectionFiles" type="file" accept="image/*" multiple hidden>
+          <input id="inspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple hidden>
+          <div id="inspectionFileName" class="file-name"></div>
+          <div id="inspectionPreview" class="photo-preview"></div>
+        </div>
+        <div id="requestStatus" class="status"></div>
+        <button id="requestSubmitBtn" class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
+      </div>
+    </div>
+
+    <div id="campaignPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>시책 참여 신청</h2></div>
+      <div class="card form">
+        <div class="field"><label>참여 블로그</label><select id="campaignUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div class="field"><label>메모</label><textarea id="campaignMemo" placeholder="필요한 메모가 있으면 입력하세요."></textarea></div>
+        <div id="campaignStatus" class="status"></div>
+        <button class="primary" type="button" onclick="submitCampaign()">참여 신청</button>
+      </div>
+    </div>
+
+    <div id="postsPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>나의 원고 리스트</h2></div>
+      <div id="myPostList" class="list"></div>
+    </div>
+
+    <div id="placeholderPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2 id="placeholderTitle"></h2></div>
+      <div class="empty">준비 중입니다.</div>
+    </div>
+
+  </section>
+</main>
+
+<div id="drawerDim" class="drawer-dim" onclick="closeDrawer()"></div>
+<aside id="drawer" class="drawer">
+  <div class="drawer-head"><h2>메뉴</h2><button class="drawer-close" type="button" onclick="closeDrawer()">×</button></div>
+  <div class="drawer-menu">
+    <button type="button" onclick="openPageFromDrawer('profilePage')">내 정보</button>
+    <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
+    <button type="button" onclick="openPlaceholder('업로드 콘텐츠')">업로드 콘텐츠</button>
+    <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
+    <button type="button" onclick="openPlaceholder('블로그 스킨제작 요청')">블로그 스킨제작 요청</button>
+    <button type="button" onclick="logout()">로그아웃</button>
   </div>
+</aside>
 
-  <script>
-    const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
-    const GAS_FUNCTION_NAME = 'swift-function';
-    const STORAGE_BUCKET = 'inspection-photos';
-    const SESSION_KEY = 'salesLoginSession_v2';
-    const NOTICE_CACHE_KEY = 'salesNoticeCache_v1';
+<div id="noticeModalDim" class="modal-dim" onclick="closeNoticeModal()">
+  <section class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div><h2 id="noticeModalTitle"></h2><p id="noticeModalDate"></p></div>
+      <button class="modal-close" type="button" onclick="closeNoticeModal()">×</button>
+    </div>
+    <div id="noticeModalBody" class="modal-body"></div>
+  </section>
+</div>
 
-    const FALLBACK_OPTIONS = {
-      vehicles: {
-        '필랑트 하이브리드 E-Tech': { trims: ['테크노','아이코닉','에스프리 알핀','esprit Alpine 1955'], colors: ['새틴 유니버스 화이트','새틴 포레스트 블랙','클라우드 펄','어반 그레이','메탈릭 블랙'], wheels: ['20" 다크 틴티드 투톤 시케인 알로이 휠','20" 투톤 베가 알로이 휠','19" 투톤 알파 알로이 휠'] },
-        '그랑 콜레오스 하이브리드 E-tech': { trims: ['테크노','아이코닉','에스프리 알핀','에스카파드'], colors: ['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'], wheels: ['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠'] },
-        '그랑 콜레오스 가솔린 2.0 터보': { trims: ['테크노','아이코닉','에스프리 알핀','아이코닉 4WD','에스카파드','에스카파드 4WD'], colors: ['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'], wheels: ['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠'] },
-        '아르카나 1.6 GTe': { trims: ['아이코닉'], colors: ['클라우드 펄','어반 그레이','메탈릭 블랙'], wheels: ['17" 다크 그레이 휠'] },
-        '아르카나 하이브리드 E-tech': { trims: ['아이코닉'], colors: ['클라우드 펄','어반 그레이','메탈릭 블랙'], wheels: ['17" 다크 그레이 휠'] },
-      },
-      visitRoutes: ['인스타그램','블로그','유튜브','지나가다가','소개로','기타광고'],
-      satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
-    };
+<script>
+  // ★ 설정값
+  const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
+  const GAS_FUNCTION_NAME = 'swift-function';
+  const STORAGE_BUCKET = 'inspection-photos';
+  const SESSION_KEY = 'salesLoginSession_v3';
+  const NOTICE_CACHE_KEY = 'salesNoticeCache_v1';
 
-    const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, inspectionPreviewUrls: [] };
-    const $ = id => document.getElementById(id);
+  const FALLBACK_OPTIONS = {
+    vehicles: {
+      '필랑트 하이브리드 E-Tech': { trims: ['테크노','아이코닉','에스프리 알핀','esprit Alpine 1955'], colors: ['새틴 유니버스 화이트','새틴 포레스트 블랙','클라우드 펄','어반 그레이','메탈릭 블랙'], wheels: ['20" 다크 틴티드 투톤 시케인 알로이 휠','20" 투톤 베가 알로이 휠','19" 투톤 알파 알로이 휠'] },
+      '그랑 콜레오스 하이브리드 E-tech': { trims: ['테크노','아이코닉','에스프리 알핀','에스카파드'], colors: ['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'], wheels: ['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠'] },
+      '그랑 콜레오스 가솔린 2.0 터보': { trims: ['테크노','아이코닉','에스프리 알핀','아이코닉 4WD','에스카파드','에스카파드 4WD'], colors: ['새틴 유니버스 화이트','새틴 어반 그레이','클라우드 펄','어반 그레이','메탈릭 블랙','미네랄 코퍼'], wheels: ['20" 다크 틴티드 하이랜드 알로이 휠','20" 다크 틴티드 투톤 피크 알로이 휠','20" 투톤 하이랜드 알로이 휠','19" 다크 그레이 원톤 레이크 알로이 휠'] },
+      '아르카나 1.6 GTe': { trims: ['아이코닉'], colors: ['클라우드 펄','어반 그레이','메탈릭 블랙'], wheels: ['17" 다크 그레이 휠'] },
+      '아르카나 하이브리드 E-tech': { trims: ['아이코닉'], colors: ['클라우드 펄','어반 그레이','메탈릭 블랙'], wheels: ['17" 다크 그레이 휠'] },
+    },
+    visitRoutes: ['인스타그램','블로그','유튜브','지나가다가','소개로','기타광고'],
+    satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
+  };
 
-    init();
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [] };
+  const $ = id => document.getElementById(id);
 
-    function init() {
-      $('authForm').addEventListener('submit', handleSubmit);
-      $('profileBusinessCardFile').addEventListener('change', () => {
-        const file = $('profileBusinessCardFile').files[0];
-        $('businessCardName').textContent = file ? file.name : '';
+  // ─────────────────────────────
+  // 초기화
+  // ─────────────────────────────
+  (function init() {
+    $('profileBusinessCardFile').addEventListener('change', () => {
+      $('businessCardName').textContent = $('profileBusinessCardFile').files[0]?.name || '';
+    });
+    $('inspectionFiles').addEventListener('change', updateInspectionUI);
+    $('inspectionCameraFiles').addEventListener('change', updateInspectionUI);
+    setupRequestOptions(FALLBACK_OPTIONS);
+    const saved = readSession();
+    if (saved && saved.name) { state.user = saved; showHome(); }
+    loadAgencies();
+  })();
+
+  async function loadAgencies() {
+    try {
+      const agencies = await rpc('list_agencies', {});
+      $('agency').innerHTML = '<option value="">대리점 선택</option>' +
+        (agencies || []).map(item => `<option value="${esc(item.agency)}">${esc(item.agency)}</option>`).join('');
+    } catch (e) {
+      showStatus(e.message || String(e), 'error');
+    }
+  }
+
+  // ─────────────────────────────
+  // 인증
+  // ─────────────────────────────
+  function setMode(mode) {
+    state.mode = mode;
+    $('loginTab').classList.toggle('active', mode === 'login');
+    $('registerTab').classList.toggle('active', mode === 'register');
+    $('submitBtn').textContent = mode === 'login' ? '로그인' : '비밀번호 생성';
+    $('password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
+    $('passwordHint').textContent = mode === 'login' ? '가입 때 만든 비밀번호를 입력하세요.' : '영문과 숫자를 포함해 4~8자로 생성하세요.';
+    showStatus('');
+  }
+
+  async function checkMember() {
+    const v = getFormValues();
+    if (!v.name || !v.agency) return showStatus('이름과 소속 대리점을 입력해주세요.', 'error');
+    await withLoading(async () => {
+      showStatus('확인 중입니다.');
+      const data = await rpc('check_sales_member', { p_name: v.name, p_agency: v.agency });
+      if (!data.exists) return showStatus(data.message || '등록 가능한 영업담당이 아닙니다.', 'error');
+      showStatus(data.registered ? '이미 가입되어 있습니다. 로그인해주세요.' : '가입 가능합니다. 비밀번호를 생성해주세요.', 'ok');
+    });
+  }
+
+  async function handleSubmit() {
+    const v = getFormValues();
+    if (!v.name || !v.agency || !v.password) return showStatus('모든 항목을 입력해주세요.', 'error');
+    await withLoading(async () => {
+      showStatus(state.mode === 'login' ? '로그인 중입니다.' : '가입 처리 중입니다.');
+      const data = await rpc(state.mode === 'login' ? 'login_sales_member' : 'register_sales_member', {
+        p_name: v.name, p_agency: v.agency, p_password: v.password,
       });
-      $('inspectionFiles').addEventListener('change', updateInspectionFileName);
-      $('inspectionCameraFiles').addEventListener('change', updateInspectionFileName);
-      setupRequestOptions(FALLBACK_OPTIONS);
-      const saved = readSession();
-      if (saved && saved.name && saved.agency) {
-        state.user = saved;
-        showHome();
+      if (state.mode === 'login' && !data.loggedIn) throw new Error('로그인 응답이 올바르지 않습니다.');
+      if (state.mode === 'register' && !data.registered) throw new Error('가입 응답이 올바르지 않습니다.');
+
+      state.user = {
+        name: data.name || v.name,
+        agency: data.agency || v.agency,
+        notionPageId: data.notionPageId || '',
+        password: v.password,
+        message: state.mode === 'register' ? '가입에 성공했습니다.' : '로그인되었습니다.',
+        loggedAt: new Date().toISOString(),
+      };
+      saveSession(state.user);
+      showHome();
+
+      // 가입 시 GAS 후처리 (노션 + 시트)
+      if (state.mode === 'register' || !data.notionPageId) {
+        gasAction('completeSignup', { name: state.user.name, agency: state.user.agency, password: v.password, notionPageId: data.notionPageId || '' })
+          .then(d => { if (d && d.notionPageId) { state.user.notionPageId = d.notionPageId; saveSession(state.user); } })
+          .catch(err => console.warn('completeSignup failed', err));
       }
-      boot();
-    }
+    });
+  }
 
-    async function boot() {
-      if (!isConfigured()) {
-        showStatus('Supabase URL과 key를 먼저 입력해야 합니다.', 'error');
-        return;
-      }
-      await loadAgencies();
-    }
+  function getFormValues() {
+    return { name: $('name').value.trim(), agency: $('agency').value.trim(), password: $('password').value.trim() };
+  }
 
-    function isConfigured() {
-      return SUPABASE_URL.indexOf('YOUR_') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_') === -1;
-    }
+  // ─────────────────────────────
+  // Supabase RPC
+  // ─────────────────────────────
+  async function rpc(name, body) {
+    const res = await fetchWithRetry(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {}),
+    });
+    const text = await res.text();
+    let data;
+    try { data = text ? JSON.parse(text) : null; } catch { throw new Error(`Supabase 응답 오류\n${text.slice(0, 160)}`); }
+    if (!res.ok) throw new Error((data && (data.message || data.error_description || data.error)) || `Supabase 오류 (${res.status})`);
+    return data;
+  }
 
-    async function loadAgencies() {
+  // ─────────────────────────────
+  // GAS 호출 (swift-function 경유)
+  // ─────────────────────────────
+  async function gasAction(action, body) {
+    const res = await fetchWithRetry(`${SUPABASE_URL}/functions/v1/${GAS_FUNCTION_NAME}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...(body || {}) }),
+    });
+    const text = await res.text();
+    let data;
+    try { data = text ? JSON.parse(text) : null; } catch { throw new Error(`GAS 응답 오류\n${text.slice(0, 160)}`); }
+    if (!res.ok || !data || data.ok !== true) throw new Error((data && (data.message || data.error)) || `GAS 오류 (${res.status})`);
+    return data.data;
+  }
+
+  async function fetchWithRetry(url, options, retries = 2) {
+    let lastError;
+    for (let i = 0; i <= retries; i++) {
       try {
-        const agencies = await rpc('list_agencies', {});
-        $('agency').innerHTML = '<option value="">대리점 선택</option>' + (agencies || []).map(item => `<option value="${esc(item.agency)}">${esc(item.agency)}</option>`).join('');
-      } catch (error) {
-        showStatus(error.message || String(error), 'error');
+        return await Promise.race([
+          fetch(url, options),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('요청 시간이 초과되었습니다.')), 30000)),
+        ]);
+      } catch (e) {
+        lastError = e;
+        if (i < retries) await new Promise(r => setTimeout(r, 1200 * (i + 1)));
       }
     }
+    throw lastError;
+  }
 
-    function setMode(mode) {
-      state.mode = mode;
-      $('loginTab').classList.toggle('active', mode === 'login');
-      $('registerTab').classList.toggle('active', mode === 'register');
-      $('submitBtn').textContent = mode === 'login' ? '로그인' : '비밀번호 생성';
-      $('password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
-      $('passwordHint').textContent = mode === 'login' ? '가입 때 만든 비밀번호를 입력하세요.' : '영문과 숫자를 포함해 4~8자로 생성하세요.';
-      showStatus('');
-    }
+  // ─────────────────────────────
+  // 홈 화면
+  // ─────────────────────────────
+  function showHome() {
+    $('authScreen').classList.remove('active');
+    $('homeScreen').classList.add('active');
+    $('homeTitle').textContent = state.user.name + '님';
+    $('homeSubtitle').textContent = state.user.agency || '';
+    openPage('mainPage');
+    renderCachedNotices();
+    loadAppHome();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
 
-    async function checkMember() {
-      const values = getFormValues();
-      if (!values.name || !values.agency) return showStatus('이름과 소속 대리점을 입력해주세요.', 'error');
-      await withLoading(async () => {
-        showStatus('가입 가능 여부를 확인하는 중입니다.');
-        const data = await rpc('check_sales_member', { p_name: values.name, p_agency: values.agency });
-        if (!data.exists) return showStatus(data.message || '등록 가능한 영업담당이 아닙니다.', 'error');
-        if (data.active === false) return showStatus(data.message || '비활성 처리된 영업담당입니다.', 'error');
-        showStatus(data.registered ? '이미 가입되어 있습니다. 로그인해주세요.' : '가입 가능합니다. 비밀번호를 생성해주세요.', 'ok');
-      });
-    }
-
-    async function handleSubmit(event) {
-      event.preventDefault();
-      const values = getFormValues();
-      if (!values.name || !values.agency || !values.password) return showStatus('모든 항목을 입력해주세요.', 'error');
-      await withLoading(async () => {
-        showStatus(state.mode === 'login' ? '로그인 중입니다.' : '가입 처리 중입니다.');
-        const data = await rpc(state.mode === 'login' ? 'login_sales_member' : 'register_sales_member', {
-          p_name: values.name,
-          p_agency: values.agency,
-          p_password: values.password,
-        });
-        if (state.mode === 'login' && data.loggedIn !== true) throw new Error('로그인 응답이 올바르지 않습니다.');
-        if (state.mode === 'register' && data.registered !== true) throw new Error('가입 응답이 올바르지 않습니다.');
-
-        const notionPageId = data.notionPageId || '';
-        const successMessage = state.mode === 'register' ? '가입에 성공했습니다' : '로그인되었습니다.';
-        state.user = { name: data.name || values.name, agency: data.agency || values.agency, notionPageId, message: successMessage, password: values.password, loggedAt: new Date().toISOString() };
-        saveSession(state.user);
-        showHome();
-        runPostLoginSync({ shouldSync: state.mode === 'register' || !notionPageId, name: state.user.name, agency: state.user.agency, password: values.password, notionPageId });
-      });
-    }
-
-    function getFormValues() {
-      return { name: $('name').value.trim(), agency: $('agency').value.trim(), password: $('password').value.trim() };
-    }
-
-    async function rpc(name, body) {
-      const res = await fetchWithRetry(`${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/${name}`, {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body || {}),
-      });
-      const text = await res.text();
-      let data;
-      try { data = text ? JSON.parse(text) : null; } catch { throw new Error(`Supabase 응답이 JSON이 아닙니다.\n${text.slice(0, 160)}`); }
-      if (!res.ok) throw new Error((data && (data.message || data.error_description || data.error)) || `Supabase 오류 (${res.status})`);
-      return data;
-    }
-
-    function runPostLoginSync(payload) {
-      if (!payload || !payload.shouldSync) return;
-      gasAction('completeSignup', { name: payload.name, agency: payload.agency, password: payload.password, notionPageId: payload.notionPageId })
-        .then(syncData => {
-          if (syncData && syncData.notionPageId) {
-            state.user.notionPageId = syncData.notionPageId;
-            saveSession(state.user);
-          }
-          return loadAppHome();
-        })
-        .catch(error => console.warn('post login sync failed', error));
-    }
-
-    async function gasAction(action, body) {
-      const res = await fetchWithRetry(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/${GAS_FUNCTION_NAME}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action, ...(body || {}) }),
-      });
-      const text = await res.text();
-      let data;
-      try { data = text ? JSON.parse(text) : null; } catch { throw new Error(`GAS 프록시 응답이 JSON이 아닙니다.\n${text.slice(0, 160)}`); }
-      if (!res.ok || !data || data.ok !== true) throw new Error((data && (data.message || data.error)) || `GAS 프록시 오류 (${res.status})`);
-      return data.data;
-    }
-
-    async function fetchWithRetry(url, options, retries = 2) {
-      let lastError;
-      for (let i = 0; i <= retries; i += 1) {
-        try {
-          return await Promise.race([
-            fetch(url, options),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('요청 시간이 초과되었습니다.')), 30000)),
-          ]);
-        } catch (error) {
-          lastError = error;
-          if (i < retries) await new Promise(resolve => setTimeout(resolve, 1200 * (i + 1)));
-        }
+  async function loadAppHome() {
+    try {
+      const data = await gasAction('getAppHome', { name: state.user.name, agency: state.user.agency });
+      state.appHome = data || {};
+      state.options = state.appHome.options || FALLBACK_OPTIONS;
+      setupRequestOptions(state.options);
+      renderProfile(state.appHome.profile || {});
+      renderNotices(state.appHome.notices || []);
+      saveNoticeCache(state.appHome.notices || []);
+      renderCompletedPosts(state.appHome.completedPosts || []);
+      if (state.appHome.profile && state.appHome.profile.needsProfile) {
+        $('profileGuide').style.display = 'block';
+        openPage('profilePage');
       }
-      throw lastError;
+    } catch (e) {
+      renderNotices([{ title: '공지사항을 불러오지 못했습니다', date: '', content: e.message || String(e) }]);
     }
+  }
 
-    function showHome() {
-      $('authScreen').classList.remove('active');
-      $('homeScreen').classList.add('active');
-      $('homeTitle').textContent = `${state.user.name}님`;
-      $('homeSubtitle').textContent = state.user.agency || state.user.message || '';
+  // ─────────────────────────────
+  // 프로필
+  // ─────────────────────────────
+  function renderProfile(profile) {
+    $('profileName').value = profile.name || state.user.name || '';
+    $('profileAgency').value = profile.agency || state.user.agency || '';
+    $('profileUploadBlog').value = profile.uploadBlog || '';
+    $('profileBlogUrl').value = profile.blogUrl || '';
+    $('profileTestDriveUrl').value = profile.testDriveUrl || '';
+    $('businessCardName').textContent = profile.businessCardImage ? '기존 명함 이미지 등록됨' : '';
+    toggleProfileFields();
+    if (profile.uploadBlog) $('requestUploadBlog').value = profile.uploadBlog;
+  }
+
+  function toggleProfileFields() {
+    const type = $('profileUploadBlog').value;
+    $('blogUrlField').style.display = type === '본인 블로그' ? 'grid' : 'none';
+    $('testDriveUrlField').style.display = type === '지점 블로그' ? 'grid' : 'none';
+    $('businessCardField').style.display = type === '지점 블로그' ? 'grid' : 'none';
+  }
+
+  async function saveMyInfo() {
+    setPageStatus('profileStatus', '저장 중입니다.');
+    try {
+      const file = $('profileBusinessCardFile').files[0];
+      const fileData = file ? await readFileAsDataUrl(file) : '';
+      const result = await gasAction('saveMyInfo', {
+        name: state.user.name, agency: state.user.agency,
+        uploadBlog: $('profileUploadBlog').value.trim(),
+        blogUrl: $('profileBlogUrl').value.trim(),
+        testDriveUrl: $('profileTestDriveUrl').value.trim(),
+        businessCardData: fileData, businessCardName: file ? file.name : '',
+      });
+      setPageStatus('profileStatus', result.message || '저장되었습니다.', 'ok');
+      $('profileGuide').style.display = 'none';
+      await loadAppHome();
       openPage('mainPage');
-      renderCachedNotices();
-      loadAppHome();
-      window.scrollTo({ top: 0, behavior: 'auto' });
+    } catch (e) {
+      setPageStatus('profileStatus', e.message || String(e), 'error');
     }
+  }
 
-    async function loadAppHome() {
-      try {
-        const data = await gasAction('getAppHome', { name: state.user.name, agency: state.user.agency });
-        state.appHome = data || {};
-        state.options = state.appHome.options || state.options || FALLBACK_OPTIONS;
-        setupRequestOptions(state.options);
-        renderProfile(state.appHome.profile || {});
-        renderNotices(state.appHome.notices || []);
-        saveNoticeCache(state.appHome.notices || []);
-        renderCompletedPosts(state.appHome.completedPosts || []);
-        if (state.appHome.profile && state.appHome.profile.needsProfile) {
-          $('profileGuide').style.display = 'block';
-          openPage('profilePage');
-        }
-      } catch (error) {
-        renderNotices([{ title: '공지사항을 불러오지 못했습니다', date: '', content: error.message || String(error), url: '' }]);
-        renderCompletedPosts([]);
-      }
-    }
+  // ─────────────────────────────
+  // 블로그 원고 요청 (사진 포함)
+  // ─────────────────────────────
+  async function requestBlogDraft() {
+    if (state.requestSubmitting) return;
+    state.requestSubmitting = true;
+    $('requestSubmitBtn').disabled = true;
+    $('requestSubmitBtn').textContent = '제출 중...';
+    setPageStatus('requestStatus', '사진을 업로드하는 중입니다.');
 
-    function renderProfile(profile) {
-      $('profileName').value = profile.name || state.user.name || '';
-      $('profileAgency').value = profile.agency || state.user.agency || '';
-      $('profileUploadBlog').value = profile.uploadBlog || '';
-      $('profileBlogUrl').value = profile.blogUrl || '';
-      $('profileTestDriveUrl').value = profile.testDriveUrl || '';
-      $('businessCardName').textContent = profile.businessCardImage ? '기존 명함 이미지 등록됨' : '';
-      toggleProfileFields();
-      if (profile.uploadBlog) $('requestUploadBlog').value = profile.uploadBlog;
-    }
-
-    function renderNotices(notices) {
-      const box = $('noticeList');
-      if (!notices || notices.length === 0) return box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
-      box.innerHTML = notices.map((item, index) => {
-        const pin = item.pinned ? '<span class="notice-pin">●</span>' : '';
-        return `<button class="notice-row" type="button" onclick="openNoticeModal(${index})"><span class="notice-title">${pin}${pin ? ' ' : ''}${esc(item.title)}</span><span class="notice-date">- ${esc(item.date || '')}</span></button>`;
-      }).join('');
-    }
-
-    function renderCachedNotices() {
-      const cached = readNoticeCache();
-      if (!cached || !cached.length) return;
-      state.appHome = state.appHome || {};
-      state.appHome.notices = cached;
-      renderNotices(cached);
-    }
-
-    function saveNoticeCache(notices) {
-      try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(notices || [])); } catch {}
-    }
-
-    function readNoticeCache() {
-      try { return JSON.parse(localStorage.getItem(NOTICE_CACHE_KEY) || '[]'); } catch { return []; }
-    }
-
-    function openNoticeModal(index) {
-      const notice = (state.appHome && state.appHome.notices && state.appHome.notices[index]) || null;
-      if (!notice) return;
-      $('noticeModalTitle').textContent = notice.title || '';
-      $('noticeModalDate').textContent = notice.date || '';
-      $('noticeModalBody').innerHTML = renderNoticeBody(notice);
-      $('noticeModalDim').classList.add('active');
-    }
-
-    function closeNoticeModal() {
-      $('noticeModalDim').classList.remove('active');
-    }
-
-    function renderNoticeBody(notice) {
-      const blocks = Array.isArray(notice.blocks) ? notice.blocks : [];
-      if (!blocks.length && notice.content) return `<div class="notice-content">${esc(notice.content)}</div>`;
-      if (!blocks.length) return '<div class="empty">공지 내용이 없습니다.</div>';
-      return blocks.map(block => {
-        if (block.type === 'image' && block.url) {
-          const caption = block.caption ? `<div class="list-meta">${esc(block.caption)}</div>` : '';
-          return `<div><img class="notice-image" src="${esc(block.url)}" alt="">${caption}</div>`;
-        }
-        if (block.type === 'divider') return '<hr>';
-        return `<div class="notice-content">${esc(block.text || '')}</div>`;
-      }).join('');
-    }
-
-    function renderCompletedPosts(posts) {
-      const box = $('completedPostList');
-      if (!posts || posts.length === 0) return box.innerHTML = '<div class="empty">접수된 내역이 없습니다.</div>';
-      box.innerHTML = posts.map(post => `<div class="list-item"><div class="list-title">${esc(post.title || '제목 없음')} - ${esc(post.date || '')}</div><div class="list-meta">${esc(post.status || '')}</div></div>`).join('');
-    }
-
-    function renderMyPosts(posts) {
-      const box = $('myPostList');
-      if (!posts || posts.length === 0) return box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
-      box.innerHTML = posts.map(post => `<div class="list-item"><div class="list-title">${esc(post.title || '제목 없음')} - ${esc(post.date || '')}</div>${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener">구글독스 열기</a>` : '<div class="list-meta">구글독스 링크 없음</div>'}</div>`).join('');
-    }
-
-    async function saveMyInfo() {
-      $('profileStatus').className = 'status';
-      $('profileStatus').textContent = '저장 중입니다.';
-      try {
-        const file = $('profileBusinessCardFile').files[0];
-        const fileData = file ? await readFileAsDataUrl(file) : '';
-        const result = await gasAction('saveMyInfo', {
-          name: state.user.name,
-          agency: state.user.agency,
-          uploadBlog: $('profileUploadBlog').value.trim(),
-          blogUrl: $('profileBlogUrl').value.trim(),
-          testDriveUrl: $('profileTestDriveUrl').value.trim(),
-          businessCardData: fileData,
-          businessCardName: file ? file.name : '',
-        });
-        $('profileStatus').className = 'status ok';
-        $('profileStatus').textContent = result.message || '저장되었습니다.';
-        $('profileGuide').style.display = 'none';
-        await loadAppHome();
-        openPage('mainPage');
-      } catch (error) {
-        $('profileStatus').className = 'status error';
-        $('profileStatus').textContent = error.message || String(error);
-      }
-    }
-
-    async function requestBlogDraft() {
-      if (state.requestSubmitting) return;
-      state.requestSubmitting = true;
-      setRequestSubmitting(true);
-      $('requestStatus').className = 'status';
-      $('requestStatus').textContent = '정보를 제출 중입니다.';
-      try {
-        const files = await uploadInspectionFilesToStorage(getInspectionFiles());
-        const result = await gasAction('requestBlogDraft', {
-          name: state.user.name,
-          agency: state.user.agency,
-          uploadBlog: $('requestUploadBlog').value.trim(),
-          deliveryDate: $('deliveryDate').value,
-          vehicleModel: $('vehicleModel').value,
-          trim: $('vehicleTrim').value,
-          color: $('vehicleColor').value,
-          wheel: $('vehicleWheel').value,
-          visitRoutes: getActiveChoices('visitRouteChoices'),
-          satisfactionPoints: getActiveChoices('satisfactionChoices'),
-          customerHistory: $('customerHistory').value.trim(),
-          deliveryMood: $('deliveryMood').value.trim(),
-          inspectionFiles: files,
-        });
-        $('requestStatus').className = 'status ok';
-        $('requestStatus').textContent = result.message || '요청되었습니다.';
-        clearRequestForm();
-        await loadAppHome();
-      } catch (error) {
-        $('requestStatus').className = 'status error';
-        $('requestStatus').textContent = error.message || String(error);
-      } finally {
-        state.requestSubmitting = false;
-        setRequestSubmitting(false);
-      }
-    }
-
-    function setRequestSubmitting(isSubmitting) {
-      const button = $('requestSubmitBtn');
-      if (!button) return;
-      button.disabled = isSubmitting;
-      button.textContent = isSubmitting ? '제출 중' : '요청하기';
-    }
-
-    async function submitCampaign() {
-      $('campaignStatus').className = 'status';
-      $('campaignStatus').textContent = '신청 중입니다.';
-      try {
-        const result = await gasAction('submitCampaign', {
-          name: state.user.name,
-          agency: state.user.agency,
-          uploadBlog: $('campaignUploadBlog').value.trim(),
-          memo: $('campaignMemo').value.trim(),
-        });
-        $('campaignStatus').className = 'status ok';
-        $('campaignStatus').textContent = result.message || '시책 참여 신청이 접수되었습니다.';
-        $('campaignMemo').value = '';
-      } catch (error) {
-        $('campaignStatus').className = 'status error';
-        $('campaignStatus').textContent = error.message || String(error);
-      }
-    }
-
-    function setupRequestOptions(options) {
-      state.options = options || FALLBACK_OPTIONS;
-      const vehicles = state.options.vehicles || FALLBACK_OPTIONS.vehicles;
-      $('vehicleModel').innerHTML = '<option value="">모델 선택</option>' + Object.keys(vehicles).map(name => `<option value="${esc(name)}">${esc(name)}</option>`).join('');
-      renderChoices('visitRouteChoices', state.options.visitRoutes || FALLBACK_OPTIONS.visitRoutes);
-      renderChoices('satisfactionChoices', state.options.satisfactionPoints || FALLBACK_OPTIONS.satisfactionPoints);
-      updateVehicleChildren();
-    }
-
-    function updateVehicleChildren() {
-      const vehicle = (state.options.vehicles || FALLBACK_OPTIONS.vehicles)[$('vehicleModel').value] || { trims: [], colors: [], wheels: [] };
-      setSelectOptions('vehicleTrim', '트림 선택', vehicle.trims);
-      setSelectOptions('vehicleColor', '색상 선택', vehicle.colors);
-      setSelectOptions('vehicleWheel', '휠 선택', vehicle.wheels);
-    }
-
-    function setSelectOptions(id, placeholder, items) {
-      $(id).innerHTML = `<option value="">${placeholder}</option>` + (items || []).map(item => `<option value="${esc(item)}">${esc(item)}</option>`).join('');
-    }
-
-    function renderChoices(id, items) {
-      $(id).innerHTML = (items || []).map(item => `<button type="button" class="choice" data-value="${esc(item)}" onclick="toggleChoice(this)">${esc(item)}</button>`).join('');
-    }
-
-    function toggleChoice(button) {
-      button.classList.toggle('active');
-    }
-
-    function getActiveChoices(id) {
-      return Array.from($(id).querySelectorAll('.choice.active')).map(button => button.dataset.value);
-    }
-
-    function clearRequestForm() {
-      $('deliveryDate').value = '';
-      $('vehicleModel').value = '';
-      updateVehicleChildren();
-      $('customerHistory').value = '';
-      $('deliveryMood').value = '';
-      $('inspectionFiles').value = '';
-      $('inspectionCameraFiles').value = '';
-      $('inspectionFileName').textContent = '';
-      clearInspectionPreview();
-      document.querySelectorAll('.choice.active').forEach(button => button.classList.remove('active'));
-    }
-
-    function getInspectionFiles() {
-      return [
-        ...Array.from($('inspectionFiles').files || []),
-        ...Array.from($('inspectionCameraFiles').files || []),
-      ];
-    }
-
-    function updateInspectionFileName() {
-      const galleryCount = $('inspectionFiles').files.length;
-      const cameraCount = $('inspectionCameraFiles').files.length;
-      const total = galleryCount + cameraCount;
-      $('inspectionFileName').textContent = total ? `총 ${total}개 선택됨` : '';
-      renderInspectionPreview();
-    }
-
-    function renderInspectionPreview() {
-      clearInspectionPreview();
+    try {
+      // 1. 사진 Supabase Storage에 업로드
       const files = getInspectionFiles();
-      $('inspectionPreview').innerHTML = files.map(file => {
-        const url = URL.createObjectURL(file);
-        state.inspectionPreviewUrls.push(url);
-        return `<div class="photo-thumb"><img src="${url}" alt=""><span>${esc(file.name || '사진')}</span></div>`;
-      }).join('');
-    }
-
-    function clearInspectionPreview() {
-      state.inspectionPreviewUrls.forEach(url => URL.revokeObjectURL(url));
-      state.inspectionPreviewUrls = [];
-      $('inspectionPreview').innerHTML = '';
-    }
-
-    function readFileAsDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ''));
-        reader.onerror = () => reject(new Error('파일을 읽지 못했습니다.'));
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function readFilesAsPayload(fileList) {
-      const files = Array.from(fileList || []);
-      const result = [];
-      for (const file of files) {
-        result.push(await prepareImageFile(file));
-      }
-      return result;
-    }
-
-    async function uploadInspectionFilesToStorage(fileList) {
-      const files = Array.from(fileList || []);
       if (!files.length) throw new Error('검수 사진을 1장 이상 선택해주세요.');
+      const uploadedUrls = await uploadPhotosToStorage(files);
 
-      const uploaded = [];
-      for (let index = 0; index < files.length; index += 1) {
-        const file = files[index];
-        $('requestStatus').textContent = `사진 업로드 중입니다. (${index + 1}/${files.length})`;
-        const blob = await prepareImageBlob(file);
-        const fileName = `${Date.now()}-${index + 1}.jpg`;
-        const path = [
-          'requests',
-          safeStoragePart($('deliveryDate').value || 'no-date'),
-          `${Date.now()}-${index + 1}-${Math.random().toString(36).slice(2, 8)}.jpg`,
-        ].join('/');
-        const url = await uploadBlobToStorage(path, blob);
-        uploaded.push({ name: fileName, type: blob.type || 'image/jpeg', url: url });
-      }
-      $('requestStatus').textContent = '정보를 제출 중입니다.';
-      return uploaded;
-    }
-
-    async function uploadBlobToStorage(path, blob) {
-      const endpoint = `${SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/${STORAGE_BUCKET}/${path}`;
-      const response = await fetchWithRetry(endpoint, {
-        method: 'POST',
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': blob.type || 'application/octet-stream',
-          'x-upsert': 'false',
-        },
-        body: blob,
-      }, 1);
-      const text = await response.text();
-      if (!response.ok) {
-        throw new Error(`사진 업로드 실패 (${response.status}): ${text.slice(0, 180)}`);
-      }
-      return `${SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
-    }
-
-    async function prepareImageBlob(file) {
-      if (!file || !file.type || !file.type.startsWith('image/')) return file;
-      try {
-        return await compressImageBlob(file);
-      } catch (error) {
-        return file;
-      }
-    }
-
-    function compressImageBlob(file) {
-      return new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const image = new Image();
-        image.onload = () => {
-          URL.revokeObjectURL(url);
-          const maxSide = 1600;
-          const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
-          const width = Math.max(1, Math.round(image.width * ratio));
-          const height = Math.max(1, Math.round(image.height * ratio));
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const context = canvas.getContext('2d');
-          context.drawImage(image, 0, 0, width, height);
-          canvas.toBlob(blob => {
-            if (!blob) return reject(new Error('이미지 압축에 실패했습니다.'));
-            resolve(blob);
-          }, 'image/jpeg', 0.78);
-        };
-        image.onerror = () => {
-          URL.revokeObjectURL(url);
-          reject(new Error('이미지를 미리 처리하지 못했습니다.'));
-        };
-        image.src = url;
+      // 2. GAS에 정보 + Storage URL 전달 (swift-function이 백그라운드로 처리)
+      setPageStatus('requestStatus', '정보를 제출하는 중입니다.');
+      await gasAction('requestBlogDraft', {
+        name: state.user.name, agency: state.user.agency,
+        uploadBlog: $('requestUploadBlog').value.trim(),
+        deliveryDate: $('deliveryDate').value,
+        vehicleModel: $('vehicleModel').value,
+        trim: $('vehicleTrim').value,
+        color: $('vehicleColor').value,
+        wheel: $('vehicleWheel').value,
+        visitRoutes: getActiveChoices('visitRouteChoices'),
+        satisfactionPoints: getActiveChoices('satisfactionChoices'),
+        customerHistory: $('customerHistory').value.trim(),
+        deliveryMood: $('deliveryMood').value.trim(),
+        inspectionFiles: uploadedUrls,
       });
+
+      setPageStatus('requestStatus', '블로그 원고 제작 요청이 접수되었습니다.', 'ok');
+      clearRequestForm();
+      loadAppHome();
+    } catch (e) {
+      setPageStatus('requestStatus', e.message || String(e), 'error');
+    } finally {
+      state.requestSubmitting = false;
+      $('requestSubmitBtn').disabled = false;
+      $('requestSubmitBtn').textContent = '요청하기';
     }
+  }
 
-    function safeStoragePart(value) {
-      return String(value || 'item')
-        .trim()
-        .replace(/[^A-Za-z0-9._-]+/g, '-')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
-        .slice(0, 80) || 'item';
+  async function uploadPhotosToStorage(files) {
+    const urls = [];
+    for (let i = 0; i < files.length; i++) {
+      setPageStatus('requestStatus', `사진 업로드 중 (${i + 1}/${files.length})`);
+      const blob = await compressImage(files[i]);
+      const path = `requests/${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const url = await uploadToStorage(path, blob);
+      urls.push(url);
     }
+    return urls;
+  }
 
-    async function prepareImageFile(file) {
-      if (!file || !file.type || !file.type.startsWith('image/')) {
-        return { name: file.name, type: file.type || 'application/octet-stream', data: await readFileAsDataUrl(file) };
-      }
-
-      try {
-        return await compressImageFile(file);
-      } catch (error) {
-        return { name: file.name, type: file.type, data: await readFileAsDataUrl(file) };
-      }
+  async function uploadToStorage(path, blob) {
+    const endpoint = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`;
+    const res = await fetchWithRetry(endpoint, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': blob.type || 'image/jpeg',
+        'x-upsert': 'false',
+      },
+      body: blob,
+    }, 1);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`사진 업로드 실패 (${res.status}): ${text.slice(0, 100)}`);
     }
+    return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+  }
 
-    function compressImageFile(file) {
-      return new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const image = new Image();
-        image.onload = () => {
-          URL.revokeObjectURL(url);
-          const maxSide = 1600;
-          const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
-          const width = Math.max(1, Math.round(image.width * ratio));
-          const height = Math.max(1, Math.round(image.height * ratio));
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const context = canvas.getContext('2d');
-          context.drawImage(image, 0, 0, width, height);
-          canvas.toBlob(blob => {
-            if (!blob) return reject(new Error('이미지 압축에 실패했습니다.'));
-            const reader = new FileReader();
-            reader.onload = () => resolve({
-              name: file.name.replace(/\.[^.]+$/, '') + '.jpg',
-              type: 'image/jpeg',
-              data: String(reader.result || ''),
-            });
-            reader.onerror = () => reject(new Error('압축 이미지를 읽지 못했습니다.'));
-            reader.readAsDataURL(blob);
-          }, 'image/jpeg', 0.78);
-        };
-        image.onerror = () => {
-          URL.revokeObjectURL(url);
-          reject(new Error('이미지를 미리 처리하지 못했습니다.'));
-        };
-        image.src = url;
+  function compressImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const maxSide = 1600;
+        const ratio = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('압축 실패')), 'image/jpeg', 0.78);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('이미지 로드 실패')); };
+      img.src = url;
+    });
+  }
+
+  // ─────────────────────────────
+  // 시책 참여
+  // ─────────────────────────────
+  async function submitCampaign() {
+    setPageStatus('campaignStatus', '신청 중입니다.');
+    try {
+      const result = await gasAction('submitCampaign', {
+        name: state.user.name, agency: state.user.agency,
+        uploadBlog: $('campaignUploadBlog').value.trim(),
+        memo: $('campaignMemo').value.trim(),
       });
+      setPageStatus('campaignStatus', result.message || '시책 참여 신청이 접수되었습니다.', 'ok');
+      $('campaignMemo').value = '';
+    } catch (e) {
+      setPageStatus('campaignStatus', e.message || String(e), 'error');
     }
+  }
 
-    function toggleProfileFields() {
-      const type = $('profileUploadBlog').value;
-      $('blogUrlField').style.display = type === '본인 블로그' ? 'grid' : 'none';
-      $('testDriveUrlField').style.display = type === '지점 블로그' ? 'grid' : 'none';
-      $('businessCardField').style.display = type === '지점 블로그' ? 'grid' : 'none';
-    }
+  // ─────────────────────────────
+  // 공지사항
+  // ─────────────────────────────
+  function renderNotices(notices) {
+    const box = $('noticeList');
+    if (!notices || !notices.length) return box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
+    box.innerHTML = notices.map((item, i) => {
+      const pin = item.pinned ? '<span class="notice-pin">●</span> ' : '';
+      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${pin}${esc(item.title)}</span><span class="notice-date">${esc(item.date || '')}</span></button>`;
+    }).join('');
+  }
 
-    function openDrawer(){ $('drawerDim').classList.add('active'); $('drawer').classList.add('active'); }
-    function closeDrawer(){ $('drawerDim').classList.remove('active'); $('drawer').classList.remove('active'); }
-    function openPageFromDrawer(pageId){ closeDrawer(); openPage(pageId); }
-    function openPlaceholder(title){ closeDrawer(); $('placeholderTitle').textContent = title; openPage('placeholderPage'); }
-    function openPage(pageId) {
-      document.querySelectorAll('#homeScreen .page').forEach(page => page.classList.remove('active'));
-      $(pageId).classList.add('active');
-      if (pageId === 'postsPage') gasAction('getMyPosts', { name: state.user.name, agency: state.user.agency }).then(posts => renderMyPosts(Array.isArray(posts) ? posts : [])).catch(error => renderMyPosts([{ title: '목록을 불러오지 못했습니다', status: error.message || String(error) }]));
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
+  function renderCachedNotices() {
+    const cached = readNoticeCache();
+    if (cached && cached.length) renderNotices(cached);
+  }
 
-    function logout() {
-      localStorage.removeItem(SESSION_KEY);
-      state.user = null;
-      $('homeScreen').classList.remove('active');
-      $('authScreen').classList.add('active');
-      closeDrawer();
-      showStatus('');
-    }
+  function openNoticeModal(index) {
+    const notice = state.appHome && state.appHome.notices && state.appHome.notices[index];
+    if (!notice) return;
+    $('noticeModalTitle').textContent = notice.title || '';
+    $('noticeModalDate').textContent = notice.date || '';
+    $('noticeModalBody').innerHTML = renderNoticeBody(notice);
+    $('noticeModalDim').classList.add('active');
+  }
 
-    async function withLoading(fn) {
-      if (state.loading) return;
-      state.loading = true;
-      setButtonsDisabled(true);
-      try { await fn(); } catch (error) { showStatus(error.message || String(error), 'error'); } finally { state.loading = false; setButtonsDisabled(false); }
-    }
+  function closeNoticeModal() { $('noticeModalDim').classList.remove('active'); }
 
-    function setButtonsDisabled(disabled){
-      document.querySelectorAll('button').forEach(button => {
-        if (button.id !== 'requestSubmitBtn') button.disabled = disabled;
-      });
-      $('name').disabled = false;
+  function renderNoticeBody(notice) {
+    const blocks = Array.isArray(notice.blocks) ? notice.blocks : [];
+    if (!blocks.length && notice.content) return `<div class="notice-content">${esc(notice.content)}</div>`;
+    if (!blocks.length) return '<div class="empty">공지 내용이 없습니다.</div>';
+    return blocks.map(block => {
+      if (block.type === 'image' && block.url) return `<div><img class="notice-image" src="${esc(block.url)}" alt="">${block.caption ? `<div class="list-meta">${esc(block.caption)}</div>` : ''}</div>`;
+      if (block.type === 'divider') return '<hr>';
+      return `<div class="notice-content">${esc(block.text || '')}</div>`;
+    }).join('');
+  }
+
+  function saveNoticeCache(notices) { try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(notices || [])); } catch {} }
+  function readNoticeCache() { try { return JSON.parse(localStorage.getItem(NOTICE_CACHE_KEY) || '[]'); } catch { return []; } }
+
+  // ─────────────────────────────
+  // 원고 리스트
+  // ─────────────────────────────
+  function renderCompletedPosts(posts) {
+    const box = $('completedPostList');
+    if (!posts || !posts.length) return box.innerHTML = '<div class="empty">접수된 내역이 없습니다.</div>';
+    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div class="list-meta">${esc(p.status || '')}</div></div>`).join('');
+  }
+
+  function renderMyPosts(posts) {
+    const box = $('myPostList');
+    if (!posts || !posts.length) return box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
+    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">구글독스 열기</a>` : '<div class="list-meta">링크 없음</div>'}</div>`).join('');
+  }
+
+  // ─────────────────────────────
+  // 차량 옵션
+  // ─────────────────────────────
+  function setupRequestOptions(options) {
+    state.options = options || FALLBACK_OPTIONS;
+    const vehicles = state.options.vehicles || FALLBACK_OPTIONS.vehicles;
+    $('vehicleModel').innerHTML = '<option value="">모델 선택</option>' + Object.keys(vehicles).map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+    renderChoices('visitRouteChoices', state.options.visitRoutes || FALLBACK_OPTIONS.visitRoutes);
+    renderChoices('satisfactionChoices', state.options.satisfactionPoints || FALLBACK_OPTIONS.satisfactionPoints);
+    updateVehicleChildren();
+  }
+
+  function updateVehicleChildren() {
+    const vehicle = (state.options.vehicles || FALLBACK_OPTIONS.vehicles)[$('vehicleModel').value] || { trims: [], colors: [], wheels: [] };
+    setSelectOptions('vehicleTrim', '트림 선택', vehicle.trims);
+    setSelectOptions('vehicleColor', '색상 선택', vehicle.colors);
+    setSelectOptions('vehicleWheel', '휠 선택', vehicle.wheels);
+  }
+
+  function setSelectOptions(id, placeholder, items) {
+    $(id).innerHTML = `<option value="">${placeholder}</option>` + (items || []).map(item => `<option value="${esc(item)}">${esc(item)}</option>`).join('');
+  }
+
+  function renderChoices(id, items) {
+    $(id).innerHTML = (items || []).map(item => `<button type="button" class="choice" data-value="${esc(item)}" onclick="toggleChoice(this)">${esc(item)}</button>`).join('');
+  }
+
+  function toggleChoice(btn) { btn.classList.toggle('active'); }
+  function getActiveChoices(id) { return Array.from($(id).querySelectorAll('.choice.active')).map(b => b.dataset.value); }
+
+  // ─────────────────────────────
+  // 사진 UI
+  // ─────────────────────────────
+  function getInspectionFiles() {
+    return [...Array.from($('inspectionFiles').files || []), ...Array.from($('inspectionCameraFiles').files || [])];
+  }
+
+  function updateInspectionUI() {
+    const files = getInspectionFiles();
+    $('inspectionFileName').textContent = files.length ? `총 ${files.length}개 선택됨` : '';
+    state.previewUrls.forEach(u => URL.revokeObjectURL(u));
+    state.previewUrls = [];
+    $('inspectionPreview').innerHTML = files.map(file => {
+      const url = URL.createObjectURL(file);
+      state.previewUrls.push(url);
+      return `<div class="photo-thumb"><img src="${url}" alt=""><span>${esc(file.name)}</span></div>`;
+    }).join('');
+  }
+
+  function clearRequestForm() {
+    $('deliveryDate').value = '';
+    $('vehicleModel').value = '';
+    updateVehicleChildren();
+    $('customerHistory').value = '';
+    $('deliveryMood').value = '';
+    $('inspectionFiles').value = '';
+    $('inspectionCameraFiles').value = '';
+    $('inspectionFileName').textContent = '';
+    state.previewUrls.forEach(u => URL.revokeObjectURL(u));
+    state.previewUrls = [];
+    $('inspectionPreview').innerHTML = '';
+    document.querySelectorAll('.choice.active').forEach(b => b.classList.remove('active'));
+  }
+
+  // ─────────────────────────────
+  // 페이지 네비게이션
+  // ─────────────────────────────
+  function openDrawer()  { $('drawerDim').classList.add('active'); $('drawer').classList.add('active'); }
+  function closeDrawer() { $('drawerDim').classList.remove('active'); $('drawer').classList.remove('active'); }
+  function openPageFromDrawer(pageId) { closeDrawer(); openPage(pageId); }
+  function openPlaceholder(title) { closeDrawer(); $('placeholderTitle').textContent = title; openPage('placeholderPage'); }
+
+  function openPage(pageId) {
+    document.querySelectorAll('#homeScreen .page').forEach(p => p.classList.remove('active'));
+    $(pageId).classList.add('active');
+    if (pageId === 'postsPage') {
+      gasAction('getMyPosts', { name: state.user.name, agency: state.user.agency })
+        .then(posts => renderMyPosts(Array.isArray(posts) ? posts : []))
+        .catch(e => renderMyPosts([{ title: '목록을 불러오지 못했습니다', status: e.message }]));
     }
-    function showStatus(message, type){ $('status').className = `status ${type || ''}`; $('status').textContent = message || ''; }
-    function saveSession(user){ localStorage.setItem(SESSION_KEY, JSON.stringify(user)); }
-    function readSession(){ try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; } }
-    function esc(value){ return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
-  </script>
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function logout() {
+    localStorage.removeItem(SESSION_KEY);
+    state.user = null;
+    $('homeScreen').classList.remove('active');
+    $('authScreen').classList.add('active');
+    closeDrawer();
+    showStatus('');
+  }
+
+  // ─────────────────────────────
+  // 공통 유틸
+  // ─────────────────────────────
+  async function withLoading(fn) {
+    if (state.loading) return;
+    state.loading = true;
+    document.querySelectorAll('button').forEach(b => b.disabled = true);
+    try { await fn(); }
+    catch (e) { showStatus(e.message || String(e), 'error'); }
+    finally { state.loading = false; document.querySelectorAll('button').forEach(b => b.disabled = false); }
+  }
+
+  function showStatus(msg, type) { $('status').className = 'status ' + (type || ''); $('status').textContent = msg || ''; }
+  function setPageStatus(id, msg, type) { $(id).className = 'status ' + (type || ''); $(id).textContent = msg || ''; }
+  function saveSession(u) { localStorage.setItem(SESSION_KEY, JSON.stringify(u)); }
+  function readSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; } }
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('파일을 읽지 못했습니다.'));
+      reader.readAsDataURL(file);
+    });
+  }
+  function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
 </body>
 </html>
