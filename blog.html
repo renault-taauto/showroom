@@ -264,7 +264,9 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwgvJ_NaTZUTVaN1W2mG-7-OXfc105ZlQR0s87lvAYjzGXhnqoRxOr20wGPvHao0N7K/exec';
+    const API_URLS = [
+      'https://script.google.com/macros/s/AKfycbzq3uj_Ux7p2L6g4lfeAaggkjKXnG_8T7P4_st0LdV8tMLugjHpvBAioARWqpmyztE6/exec'];
+    let API_URL = API_URLS[0];
     const SESSION_KEY = 'salesMemberSession_v1';
     const EXPECTED_API_VERSION = '2026-06-07-login-repair-1';
     const HTML_BUILD = '2026-06-07-mobile-debug-1';
@@ -276,7 +278,7 @@
       '아르카나 하이브리드 E-tech': {trims:['아이코닉'],colors:['클라우드 펄','어반 그레이','메탈릭 블랙'],wheels:['17" 다크 그레이 휠']}
     };
 
-    const state = {authMode:'login',loading:false,user:null,profileRequired:false,options:null,step:0,total:5,inspectionFiles:[],apiVersion:''};
+    const state = {authMode:'login',loading:false,user:null,profileRequired:false,options:null,step:0,total:5,inspectionFiles:[],apiVersion:'',apiReady:false};
     const $ = id => document.getElementById(id);
 
     init();
@@ -293,27 +295,54 @@
       $('vehicleModel').onchange=refreshVehicleChildren;
       $('trim').onchange=refreshWheels;
       $('inspectionFiles').onchange=addInspectionFiles;
-      loadAgencies();
-      loadBriefOptions();
-      loadApiStatus();
-      $('apiUrlHint').textContent = `API: ${API_URL.replace('https://script.google.com/macros/s/','').replace('/exec','')}`;
+      bootApi();
+      updateApiUrlHint();
+    }
+
+    async function bootApi(){
+      await loadApiStatus();
+      await loadAgencies();
+      await loadBriefOptions();
     }
 
     async function loadApiStatus(){
-      try{
-        const res=await apiGet({action:'version'});
-        state.apiVersion=res.version||'';
-        $('apiStatus').textContent=res.version?`API 연결됨: ${res.version}`:'API 연결됨';
-        $('apiStatus').className=res.version===EXPECTED_API_VERSION?'hint':'hint status error';
-      }catch(error){
-        state.apiVersion='';
-        $('apiStatus').className='hint status error';
-        $('apiStatus').textContent=`API 연결 실패: ${error.message||String(error)}`;
+      state.apiReady=false;
+      state.apiVersion='';
+      const errors=[];
+      for(const candidate of API_URLS){
+        try{
+          const res=await fetchJson(candidate,{action:'version'},8000);
+          if(res&&res.ok){
+            API_URL=candidate;
+            state.apiReady=true;
+            state.apiVersion=res.version||'';
+            $('apiStatus').textContent=res.version===EXPECTED_API_VERSION
+              ? `API 연결됨: ${res.version}`
+              : `API 연결됨: ${res.version||'버전 확인됨'}\n최신 배포 필요: ${EXPECTED_API_VERSION}`;
+            $('apiStatus').className=res.version===EXPECTED_API_VERSION?'hint':'hint status error';
+            updateApiUrlHint();
+            return;
+          }
+          errors.push(`${shortApiId(candidate)}: ${res&&res.error?res.error:'응답 형식 오류'}`);
+        }catch(error){
+          errors.push(`${shortApiId(candidate)}: ${error.message||String(error)}`);
+        }
       }
+      $('apiStatus').className='hint status error';
+      $('apiStatus').textContent=`API 연결 실패\n${errors.join('\n')}`;
+      updateApiUrlHint();
     }
 
     function openApiTest(){
       window.open(`${API_URL}?action=version&_=${Date.now()}`,'_blank','noopener');
+    }
+
+    function updateApiUrlHint(){
+      $('apiUrlHint').textContent = `API: ${shortApiId(API_URL)}`;
+    }
+
+    function shortApiId(url){
+      return String(url).replace('https://script.google.com/macros/s/','').replace('/exec','');
     }
 
     async function loadAgencies(){
@@ -368,9 +397,6 @@
       if(!payload.name||!payload.agency||!payload.password){showStatus('모든 항목을 입력해주세요.','error');return}
       await withLoading(async()=>{
         await loadApiStatus();
-        if(state.apiVersion&&state.apiVersion!==EXPECTED_API_VERSION){
-          throw new Error(`Apps Script 배포가 예전 버전입니다.\n현재: ${state.apiVersion}\n필요: ${EXPECTED_API_VERSION}`);
-        }
         showStatus(state.authMode==='login'?'로그인 중입니다.':'가입 처리 중입니다.');
         const res=await apiGet(payload);
         if(!res.ok)throw new Error(res.error||'요청에 실패했습니다.');
@@ -603,50 +629,51 @@
 
     function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('파일을 읽지 못했습니다.'));reader.readAsDataURL(file)})}
     async function fileToPayload(file){const data=await fileToDataUrl(file);return {name:file.name,mimeType:file.type||'application/octet-stream',data}}
-    async function apiGet(params){return jsonp(API_URL,params)}
+    async function apiGet(params){return fetchJson(API_URL,params,25000)}
     async function apiPost(payload){
       if(!payload.businessCardFile&&!payload.fileData&&!(payload.inspectionFiles&&payload.inspectionFiles.length)){
         return apiGet(payload);
       }
-      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),redirect:'follow'});
-      return res.json();
+      const res=await fetchWithRetry(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),redirect:'follow'},2,45000);
+      const text=await res.text();
+      try{
+        return JSON.parse(text);
+      }catch(error){
+        const preview=text.replace(/\s+/g,' ').slice(0,160);
+        throw new Error(`API가 JSON이 아닌 응답을 보냈습니다.\n${preview}`);
+      }
     }
-    function jsonp(url,params){
-      return new Promise((resolve,reject)=>{
-        const callback=`__salesPortalCb_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        const script=document.createElement('script');
-        const query=new URLSearchParams();
-        Object.keys(params||{}).forEach(key=>{
-          const value=params[key];
-          if(value!==undefined&&value!==null)query.set(key,String(value));
-        });
-        query.set('callback',callback);
-        query.set('_',String(Date.now()));
-        let settled=false;
-        let timer=setTimeout(()=>{
-          cleanup();
-          reject(new Error(`API 응답 시간이 초과되었습니다.\nAPI 직접 확인 버튼을 눌러 JSON이 열리는지 확인해주세요.\nJSON이 안 열리면 Apps Script 웹앱 접근 권한 또는 모바일 브라우저 문제가 먼저입니다.`));
-        },15000);
-        window[callback]=data=>{
-          settled=true;
-          cleanup();
-          resolve(data);
-        };
-        script.async=true;
-        script.referrerPolicy='no-referrer';
-        script.onerror=()=>{
-          if(settled)return;
-          cleanup();
-          reject(new Error(`API 스크립트를 불러오지 못했습니다.\nAPI 직접 확인 버튼을 눌렀을 때 JSON이 아니라 로그인/오류 화면이 뜨면 Apps Script 배포 권한을 확인해야 합니다.`));
-        };
-        script.src=`${url}?${query.toString()}`;
-        document.head.appendChild(script);
-        function cleanup(){
-          clearTimeout(timer);
-          delete window[callback];
-          if(script.parentNode)script.parentNode.removeChild(script);
-        }
+    async function fetchJson(url,params,timeoutMs){
+      const query=new URLSearchParams();
+      Object.keys(params||{}).forEach(key=>{
+        const value=params[key];
+        if(value!==undefined&&value!==null)query.set(key,String(value));
       });
+      query.set('_',String(Date.now()));
+      const res=await fetchWithRetry(`${url}?${query.toString()}`,{method:'GET',redirect:'follow'},2,timeoutMs||25000);
+      const text=await res.text();
+      try{
+        return JSON.parse(text);
+      }catch(error){
+        const preview=text.replace(/\s+/g,' ').slice(0,160);
+        throw new Error(`API가 JSON이 아닌 응답을 보냈습니다.\n${preview}`);
+      }
+    }
+
+    async function fetchWithRetry(url,options,retries,timeoutMs){
+      let lastError;
+      for(let i=0;i<=(retries||0);i++){
+        try{
+          return await Promise.race([
+            fetch(url,options),
+            new Promise((_,reject)=>setTimeout(()=>reject(new Error('요청 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.')),timeoutMs||25000))
+          ]);
+        }catch(error){
+          lastError=error;
+          if(i<(retries||0))await new Promise(resolve=>setTimeout(resolve,1200*(i+1)));
+        }
+      }
+      throw lastError;
     }
 
     async function withLoading(fn,statusFn){if(state.loading)return;state.loading=true;setButtonsDisabled(true);try{await fn()}catch(error){(statusFn||showStatus)(error.message||String(error),'error')}finally{state.loading=false;setButtonsDisabled(false)}}
