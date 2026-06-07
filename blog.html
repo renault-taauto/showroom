@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>영업담당 앱</title>
+  <title>티에이오토 영업담당 로그인</title>
   <style>
     *{box-sizing:border-box}
     html,body{width:100%;min-height:100%;margin:0}
@@ -58,7 +58,8 @@
     .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none}
     .list-title{font-size:14px;color:#111827}
     .list-meta{font-size:12px;color:#667085}
-    .notice-content{font-size:13px;color:#475467;line-height:1.45;white-space:pre-wrap}
+    .notice-content{font-size:14px;color:#475467;line-height:1.55;white-space:pre-wrap}
+    .notice-image{width:100%;border-radius:12px;display:block}
     .empty{padding:18px;border-radius:14px;background:#fff;border:1px dashed #d0d5dd;color:#98a2b3;text-align:center;font-size:13px}
     .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;color:#111827}
@@ -76,6 +77,12 @@
     .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .choice{min-height:42px;border-radius:12px;background:#fff;border:1px solid #d0d5dd;color:#344054}
     .choice.active{background:#111827;border-color:#111827;color:#fff}
+    .modal-dim{position:fixed;inset:0;background:rgba(17,24,39,.52);display:none;z-index:30;padding:24px 16px;align-items:center;justify-content:center}
+    .modal-dim.active{display:flex}
+    .modal{width:min(440px,100%);max-height:84vh;overflow:auto;background:#fff;border-radius:16px;padding:16px;display:grid;gap:12px}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .modal-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
+    .modal-body{display:grid;gap:12px}
   </style>
 </head>
 <body>
@@ -83,10 +90,8 @@
     <section id="authScreen" class="screen auth active">
       <div class="brand">
         <div class="mark">B</div>
-        <h1>영업담당 로그인</h1>
-        <p>등록된 영업담당만 사용할 수 있습니다.</p>
-        <p class="hint">빌드: 2026-06-07 campaign-fetch-repair-1</p>
-        <p id="apiStatus" class="status">Supabase 연결 확인 중입니다.</p>
+        <h1>티에이오토 영업담당 로그인</h1>
+        <p>소속 대리점을 먼저 선택해 주세요.</p>
       </div>
       <div class="panel">
         <div class="tabs">
@@ -185,6 +190,19 @@
     </div>
   </aside>
 
+  <div id="noticeModalDim" class="modal-dim" onclick="closeNoticeModal()">
+    <section class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h2 id="noticeModalTitle"></h2>
+          <p id="noticeModalDate"></p>
+        </div>
+        <button class="modal-close" type="button" onclick="closeNoticeModal()">×</button>
+      </div>
+      <div id="noticeModalBody" class="modal-body"></div>
+    </section>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_sR1pzsDldppwVEUMQUNOnQ_x0TE_lMv';
@@ -229,13 +247,10 @@
 
     async function boot() {
       if (!isConfigured()) {
-        $('apiStatus').className = 'status error';
-        $('apiStatus').textContent = 'Supabase URL과 key를 먼저 입력해야 합니다.';
+        showStatus('Supabase URL과 key를 먼저 입력해야 합니다.', 'error');
         return;
       }
       await loadAgencies();
-      $('apiStatus').className = 'status ok';
-      $('apiStatus').textContent = 'Supabase 연결 준비 완료';
     }
 
     function isConfigured() {
@@ -247,8 +262,7 @@
         const agencies = await rpc('list_agencies', {});
         $('agency').innerHTML = '<option value="">대리점 선택</option>' + (agencies || []).map(item => `<option value="${esc(item.agency)}">${esc(item.agency)}</option>`).join('');
       } catch (error) {
-        $('apiStatus').className = 'status error';
-        $('apiStatus').textContent = error.message || String(error);
+        showStatus(error.message || String(error), 'error');
       }
     }
 
@@ -399,11 +413,36 @@
     function renderNotices(notices) {
       const box = $('noticeList');
       if (!notices || notices.length === 0) return box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
-      box.innerHTML = notices.map(item => {
+      box.innerHTML = notices.map((item, index) => {
         const title = `${item.pinned ? '상단고정 · ' : ''}${esc(item.title)}`;
-        const content = item.content ? `<div class="notice-content">${esc(item.content)}</div>` : '';
-        const inner = `<div class="list-title">${title}</div><div class="list-meta">${esc(item.date || '')}</div>${content}`;
-        return item.url ? `<a class="list-item" href="${esc(item.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="list-item">${inner}</div>`;
+        return `<button class="list-item" type="button" onclick="openNoticeModal(${index})"><div class="list-title">${title}</div><div class="list-meta">${esc(item.date || '')}</div></button>`;
+      }).join('');
+    }
+
+    function openNoticeModal(index) {
+      const notice = (state.appHome && state.appHome.notices && state.appHome.notices[index]) || null;
+      if (!notice) return;
+      $('noticeModalTitle').textContent = notice.title || '';
+      $('noticeModalDate').textContent = notice.date || '';
+      $('noticeModalBody').innerHTML = renderNoticeBody(notice);
+      $('noticeModalDim').classList.add('active');
+    }
+
+    function closeNoticeModal() {
+      $('noticeModalDim').classList.remove('active');
+    }
+
+    function renderNoticeBody(notice) {
+      const blocks = Array.isArray(notice.blocks) ? notice.blocks : [];
+      if (!blocks.length && notice.content) return `<div class="notice-content">${esc(notice.content)}</div>`;
+      if (!blocks.length) return '<div class="empty">공지 내용이 없습니다.</div>';
+      return blocks.map(block => {
+        if (block.type === 'image' && block.url) {
+          const caption = block.caption ? `<div class="list-meta">${esc(block.caption)}</div>` : '';
+          return `<div><img class="notice-image" src="${esc(block.url)}" alt="">${caption}</div>`;
+        }
+        if (block.type === 'divider') return '<hr>';
+        return `<div class="notice-content">${esc(block.text || '')}</div>`;
       }).join('');
     }
 
