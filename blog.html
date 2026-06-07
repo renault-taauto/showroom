@@ -85,7 +85,7 @@
         <div class="mark">B</div>
         <h1>영업담당 로그인</h1>
         <p>등록된 영업담당만 사용할 수 있습니다.</p>
-        <p class="hint">빌드: 2026-06-07 profile-blog-notice-1</p>
+        <p class="hint">빌드: 2026-06-07 campaign-fetch-repair-1</p>
         <p id="apiStatus" class="status">Supabase 연결 확인 중입니다.</p>
       </div>
       <div class="panel">
@@ -110,7 +110,7 @@
           <div class="user-title"><h2 id="homeTitle"></h2><p id="homeSubtitle"></p></div>
           <button class="menu-btn" type="button" onclick="openDrawer()" aria-label="메뉴 열기"><span class="menu-icon"><span></span><span></span><span></span></span></button>
         </div>
-        <button class="banner" type="button" onclick="openPage('requestPage')"><div class="banner-title">블로그 원고 제작 요청</div><div class="banner-desc">출고 정보와 고객 히스토리를 입력해 요청하세요.</div></button>
+        <button class="banner" type="button" onclick="openPage('campaignPage')"><div class="banner-title">진행 중인 시책</div><div class="banner-desc">참여할 블로그 유형을 선택하고 신청하세요.</div></button>
         <div class="card"><div class="section-head"><h3>공지사항</h3><button class="small-btn" type="button" onclick="loadAppHome()">새로고침</button></div><div id="noticeList" class="list"></div></div>
         <div class="quick-actions"><button type="button" onclick="openPage('requestPage')">블로그 원고<br>제작 요청</button><button type="button" onclick="openPage('postsPage')">완료된 원고<br>리스트</button></div>
         <div class="card"><div class="section-head"><h3>완료된 원고 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">전체보기</button></div><div id="completedPostList" class="list"></div></div>
@@ -147,6 +147,16 @@
           <div class="field"><label>검수 사진</label><input id="inspectionFiles" type="file" accept="image/*" multiple><div id="inspectionFileName" class="file-name"></div></div>
           <div id="requestStatus" class="status"></div>
           <button class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
+        </div>
+      </div>
+
+      <div id="campaignPage" class="page">
+        <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>시책 참여 신청</h2></div>
+        <div class="card form">
+          <div class="field"><label>참여 블로그</label><select id="campaignUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+          <div class="field"><label>메모</label><textarea id="campaignMemo" placeholder="필요한 메모가 있으면 입력하세요."></textarea></div>
+          <div id="campaignStatus" class="status"></div>
+          <button class="primary" type="button" onclick="submitCampaign()">참여 신청</button>
         </div>
       </div>
 
@@ -319,7 +329,7 @@
     async function gasAction(action, body) {
       const res = await fetchWithRetry(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/gas-action`, {
         method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action, ...(body || {}) }),
       });
       const text = await res.text();
@@ -461,6 +471,25 @@
       } catch (error) {
         $('requestStatus').className = 'status error';
         $('requestStatus').textContent = error.message || String(error);
+      }
+    }
+
+    async function submitCampaign() {
+      $('campaignStatus').className = 'status';
+      $('campaignStatus').textContent = '신청 중입니다.';
+      try {
+        const result = await gasAction('submitCampaign', {
+          name: state.user.name,
+          agency: state.user.agency,
+          uploadBlog: $('campaignUploadBlog').value.trim(),
+          memo: $('campaignMemo').value.trim(),
+        });
+        $('campaignStatus').className = 'status ok';
+        $('campaignStatus').textContent = result.message || '시책 참여 신청이 접수되었습니다.';
+        $('campaignMemo').value = '';
+      } catch (error) {
+        $('campaignStatus').className = 'status error';
+        $('campaignStatus').textContent = error.message || String(error);
       }
     }
 
