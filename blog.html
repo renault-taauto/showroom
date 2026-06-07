@@ -60,8 +60,10 @@
     .list-meta{font-size:12px;color:#667085}
     .notice-content{font-size:14px;color:#475467;line-height:1.55;white-space:pre-wrap}
     .notice-image{width:100%;border-radius:12px;display:block}
-    .notice-section{display:grid;gap:8px}
-    .notice-row{width:100%;background:transparent;padding:7px 0;text-align:left;color:#111827;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .notice-section{display:grid;gap:4px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:12px}
+    .notice-row{width:100%;background:transparent;padding:3px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:8px}
+    .notice-title{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .notice-date{flex:0 0 auto;color:#667085;font-size:12px}
     .notice-pin{color:#d92d20}
     .empty{padding:18px;border-radius:14px;background:#fff;border:1px dashed #d0d5dd;color:#98a2b3;text-align:center;font-size:13px}
     .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -420,8 +422,8 @@
       const box = $('noticeList');
       if (!notices || notices.length === 0) return box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
       box.innerHTML = notices.map((item, index) => {
-        const title = `${item.pinned ? '<span class="notice-pin">●</span> ' : ''}${esc(item.title)} - ${esc(item.date || '')}`;
-        return `<button class="notice-row" type="button" onclick="openNoticeModal(${index})">${title}</button>`;
+        const pin = item.pinned ? '<span class="notice-pin">●</span>' : '';
+        return `<button class="notice-row" type="button" onclick="openNoticeModal(${index})"><span class="notice-title">${pin}${pin ? ' ' : ''}${esc(item.title)}</span><span class="notice-date">- ${esc(item.date || '')}</span></button>`;
       }).join('');
     }
 
