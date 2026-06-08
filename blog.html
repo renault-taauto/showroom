@@ -63,6 +63,11 @@
     .notice-title{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .notice-date{flex:0 0 auto;color:#667085;font-size:12px}
     .notice-pin{color:#d92d20}
+    .month-group{display:grid;gap:8px}
+    .month-head{width:100%;min-height:42px;border-radius:12px;background:#eef1f5;color:#344054;padding:0 12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;text-align:left}
+    .month-count{font-size:12px;color:#667085;font-weight:500}
+    .month-items{display:grid;gap:8px}
+    .month-group.collapsed .month-items{display:none}
     .empty{padding:18px;border-radius:14px;background:#fff;border:1px dashed #d0d5dd;color:#98a2b3;text-align:center;font-size:13px}
     .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;color:#111827}
@@ -102,7 +107,7 @@
     <div class="brand">
       <div class="mark">B</div>
       <h1>티에이오토 영업담당</h1>
-      <p>최초가입으로 비밀번호 설정 후 이용해주세요.</p>
+      <p>소속 대리점을 먼저 선택해 주세요.</p>
     </div>
     <div class="panel">
       <div class="tabs">
@@ -115,7 +120,7 @@
         <div class="field">
           <label for="password">비밀번호</label>
           <input id="password" type="password" autocomplete="current-password">
-          <div id="passwordHint" class="hint">비밀번호 찾기 문의: sky13@teianmotors.com</div>
+          <div id="passwordHint" class="hint">가입 때 만든 비밀번호를 입력하세요.</div>
         </div>
         <div id="status" class="status"></div>
         <button id="submitBtn" class="primary" type="button" onclick="handleSubmit()">로그인</button>
@@ -133,7 +138,7 @@
         <button class="menu-btn" type="button" onclick="openDrawer()"><span class="menu-icon"><span></span><span></span><span></span></span></button>
       </div>
       <button class="banner" type="button" onclick="openPage('campaignPage')">
-        <div class="banner-title">영업담당 SNS 활동 시책 참여신청<br>기간: 6월 8일~7월 31일</div>
+        <div class="banner-title">진행 중인 시책</div>
         <div class="banner-desc">참여할 블로그 유형을 선택하고 신청하세요.</div>
       </button>
       <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div></div>
@@ -147,7 +152,7 @@
     <div id="profilePage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>내 정보</h2></div>
       <div class="card form">
-        <div id="profileGuide" class="status warn" style="display:none">내 정보가 비어 있습니다. 먼저 정보를 저장하고 사용해주세요.</div>
+        <div id="profileGuide" class="status warn" style="display:none">내 정보가 비어 있습니다. 먼저 정보를 저장해야 기능을 사용할 수 있습니다.</div>
         <div class="field"><label>이름</label><input id="profileName" disabled></div>
         <div class="field"><label>소속 대리점</label><input id="profileAgency" disabled></div>
         <div class="field"><label>업로드 블로그</label><select id="profileUploadBlog" onchange="toggleProfileFields()"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
@@ -191,7 +196,7 @@
     <div id="campaignPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>시책 참여 신청</h2></div>
       <div id="campaignDone" class="card" style="display:none">
-        <div class="status ok">시책 참여 신청이 완료되었습니다.</div>
+        <div class="status ok">이번 시책 참여 신청이 완료되었습니다.</div>
       </div>
       <div id="campaignForm" class="card form">
         <div class="field"><label>참여 블로그</label><select id="campaignUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
@@ -531,7 +536,14 @@
       });
 
       setPageStatus('requestStatus', '블로그 원고 제작 요청이 접수되었습니다.', 'ok');
+      addRequestToHomeList({
+        title: [$('vehicleModel').value, $('vehicleTrim').value, $('vehicleColor').value].filter(Boolean).join(' ') || '블로그 원고 요청',
+        date: $('deliveryDate').value,
+        status: '접수',
+        url: '',
+      });
       clearRequestForm();
+      openPage('mainPage');
       loadAppHome();
     } catch (e) {
       setPageStatus('requestStatus', e.message || String(e), 'error');
@@ -678,8 +690,9 @@
   // ─────────────────────────────
   function renderCompletedPosts(posts) {
     const box = $('completedPostList');
-    if (!posts || !posts.length) return box.innerHTML = '<div class="empty">접수된 내역이 없습니다.</div>';
-    box.innerHTML = posts.map(p => {
+    const activePosts = (posts || []).filter(p => p.status !== '완료');
+    if (!activePosts.length) return box.innerHTML = '<div class="empty">접수된 내역이 없습니다.</div>';
+    box.innerHTML = activePosts.map(p => {
       const isDone = p.status === '완료';
       const statusClass = isDone ? 'list-meta done' : 'list-meta';
       const link = isDone && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
@@ -689,8 +702,48 @@
 
   function renderMyPosts(posts) {
     const box = $('myPostList');
-    if (!posts || !posts.length) return box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
-    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '<div class="list-meta">링크 없음</div>'}</div>`).join('');
+    if (!posts || !posts.length) return box.innerHTML = '<div class="empty">원고 내역이 없습니다.</div>';
+    const groups = groupPostsByMonth(posts);
+    box.innerHTML = Object.keys(groups).map((month, index) => {
+      const items = groups[month].map(p => {
+        const link = p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(p.status || '')}</div>${link}</div></div>`;
+      }).join('');
+      const collapsed = index === 0 ? '' : ' collapsed';
+      const symbol = index === 0 ? '▾' : '▸';
+      return `<div class="month-group${collapsed}"><button class="month-head" type="button" onclick="toggleMonthGroup(this)"><span>${esc(month)}</span><span class="month-count">${groups[month].length}건 ${symbol}</span></button><div class="month-items">${items}</div></div>`;
+    }).join('');
+  }
+
+  function toggleMonthGroup(btn) {
+    const group = btn.closest('.month-group');
+    if (!group) return;
+    group.classList.toggle('collapsed');
+    const count = btn.querySelector('.month-count');
+    if (count) count.textContent = count.textContent.replace(/[▾▸]$/, group.classList.contains('collapsed') ? '▸' : '▾');
+  }
+
+  function groupPostsByMonth(posts) {
+    return (posts || []).reduce((acc, post) => {
+      const month = getPostMonthLabel(post.date);
+      (acc[month] ||= []).push(post);
+      return acc;
+    }, {});
+  }
+
+  function getPostMonthLabel(dateText) {
+    const value = String(dateText || '').trim();
+    const match = value.match(/^(\d{4})-(\d{1,2})/);
+    if (match) return `${match[1]}년 ${Number(match[2])}월`;
+    return '날짜 없음';
+  }
+
+  function addRequestToHomeList(item) {
+    const current = readCompletedPostsCache().filter(p => p.status !== '완료');
+    const next = [item, ...current].slice(0, 5);
+    renderCompletedPosts(next);
+    saveCompletedPostsCache(next);
+    state.appHome = { ...(state.appHome || {}), completedPosts: next };
   }
 
   function renderUploadContents(posts) {
