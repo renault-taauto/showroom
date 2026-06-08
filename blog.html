@@ -415,19 +415,33 @@
     renderCachedNotices();
     renderCachedCompletedPosts();
     // 새 데이터 로드
+    loadNotices();
     loadAppHome();
     window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  async function loadNotices() {
+    try {
+      const notices = await gasAction('getNotices');
+      const list = Array.isArray(notices) ? notices : [];
+      renderNotices(list);
+      saveNoticeCache(list);
+      if (!state.appHome) state.appHome = {};
+      state.appHome.notices = list;
+    } catch (e) {
+      if (!readNoticeCache().length) {
+        renderNotices([{ title: '공지사항을 불러오지 못했습니다', date: '', content: e.message || String(e) }]);
+      }
+    }
   }
 
   async function loadAppHome() {
     try {
       const data = await gasAction('getAppHome', { name: state.user.name, agency: state.user.agency });
-      state.appHome = data || {};
+      state.appHome = { ...(state.appHome || {}), ...(data || {}) };
       state.options = state.appHome.options || FALLBACK_OPTIONS;
       setupRequestOptions(state.options);
       renderProfile(state.appHome.profile || {});
-      renderNotices(state.appHome.notices || []);
-      saveNoticeCache(state.appHome.notices || []);
       renderCompletedPosts(state.appHome.completedPosts || []);
       saveCompletedPostsCache(state.appHome.completedPosts || []);
       if (state.appHome.profile && state.appHome.profile.needsProfile) {
@@ -435,7 +449,7 @@
         openPage('profilePage');
       }
     } catch (e) {
-      renderNotices([{ title: '공지사항을 불러오지 못했습니다', date: '', content: e.message || String(e) }]);
+      renderNotices([{ title: '홈 데이터를 불러오지 못했습니다', date: '', content: e.message || String(e) }]);
     }
   }
 
@@ -682,7 +696,8 @@
     if (!posts || !posts.length) return box.innerHTML = '<div class="empty">업로드된 콘텐츠가 없습니다.</div>';
     box.innerHTML = posts.map(p => {
       const label = esc(p.linkLabel || p.model || p.title || '콘텐츠 보기');
-      return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">${label}</a>` : ''}</div>`;
+      const meta = p.status && !p.url ? `<div class="list-meta">${esc(p.status)}</div>` : '';
+      return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">${label}</a>` : meta}</div>`;
     }).join('');
   }
 
@@ -791,7 +806,7 @@
           saveUploadContentsCache(list);
         })
         .catch(e => {
-          if (!cached.length) renderUploadContents([]);
+          if (!cached.length) renderUploadContents([{ title: '업로드 콘텐츠를 불러오지 못했습니다', status: e.message }]);
         });
     }
 
