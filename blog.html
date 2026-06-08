@@ -666,8 +666,7 @@
     box.innerHTML = posts.map(p => {
       const isDone = p.status === '완료';
       const statusClass = isDone ? 'list-meta done' : 'list-meta';
-      const label = esc(p.linkLabel || p.model || p.title || '원고보기');
-      const link = isDone && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">${label}</a>` : '';
+      const link = isDone && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
       return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between"><div class="${statusClass}">${esc(p.status || '')}</div>${link}</div></div>`;
     }).join('');
   }
@@ -675,10 +674,7 @@
   function renderMyPosts(posts) {
     const box = $('myPostList');
     if (!posts || !posts.length) return box.innerHTML = '<div class="empty">완료된 원고가 없습니다.</div>';
-    box.innerHTML = posts.map(p => {
-      const label = esc(p.linkLabel || p.model || p.title || '원고보기');
-      return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">${label}</a>` : '<div class="list-meta">링크 없음</div>'}</div>`;
-    }).join('');
+    box.innerHTML = posts.map(p => `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '<div class="list-meta">링크 없음</div>'}</div>`).join('');
   }
 
   function renderUploadContents(posts) {
