@@ -67,5 +67,60 @@
       춘천대리점 시승 신청하기
     </a>
   </main>
+  <script>
+    (function () {
+      var TRACKING_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyYaRfn8stk6f6XBgeVCc3rQfgCpyhgm6OZPOCUxnzRIcok8x29a29BRgK2EL86k77fxA/exec';
+
+      if (!TRACKING_ENDPOINT || TRACKING_ENDPOINT.indexOf('PASTE_') === 0) {
+        return;
+      }
+
+      var sessionKey = 'renaultGangwonSessionId';
+      var sessionId = sessionStorage.getItem(sessionKey);
+
+      if (!sessionId) {
+        sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+        sessionStorage.setItem(sessionKey, sessionId);
+      }
+
+      function sendTrafficEvent(eventName, branch, href) {
+        var payload = JSON.stringify({
+          event: eventName,
+          branch: branch || '',
+          page: location.href,
+          href: href || '',
+          referrer: document.referrer,
+          userAgent: navigator.userAgent,
+          sessionId: sessionId
+        });
+
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(TRACKING_ENDPOINT, payload);
+          return;
+        }
+
+        fetch(TRACKING_ENDPOINT, {
+          method: 'POST',
+          mode: 'no-cors',
+          keepalive: true,
+          body: payload
+        });
+      }
+
+      sendTrafficEvent('view', '', '');
+
+      document.querySelector('.cta-link--wonju').addEventListener('click', function (event) {
+        sendTrafficEvent('click', 'wonju', event.currentTarget.href);
+      });
+
+      document.querySelector('.cta-link--gangneung').addEventListener('click', function (event) {
+        sendTrafficEvent('click', 'gangneung', event.currentTarget.href);
+      });
+
+      document.querySelector('.cta-link--chuncheon').addEventListener('click', function (event) {
+        sendTrafficEvent('click', 'chuncheon', event.currentTarget.href);
+      });
+    })();
+  </script>
 </body>
 </html>
