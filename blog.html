@@ -706,8 +706,10 @@
     const groups = groupPostsByMonth(posts);
     box.innerHTML = Object.keys(groups).map((month, index) => {
       const items = groups[month].map(p => {
-        const link = p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
-        return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(p.status || '')}</div>${link}</div></div>`;
+        const googleLink = p.googleUrl ? `<a href="${esc(p.googleUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">구글원고</a>` : '';
+        const uploadLink = p.uploadUrl ? `<a href="${esc(p.uploadUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">업로드보기</a>` : '';
+        const fallbackLink = !googleLink && !uploadLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(p.status || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${googleLink}${uploadLink}${fallbackLink}</div></div></div>`;
       }).join('');
       const collapsed = index === 0 ? '' : ' collapsed';
       const symbol = index === 0 ? '▾' : '▸';
