@@ -60,7 +60,7 @@
   <header class="top">
     <div>
       <h1>관리자 앱</h1>
-      <p>등록 요청과 진행중 원고</p>
+      <p>등록 요청과 진행중 원고를 먼저 확인합니다.</p>
     </div>
     <button class="secondary" type="button" onclick="loadDashboard()">새로고침</button>
   </header>
@@ -210,7 +210,7 @@
         const checkedMeta = p.completedCheckedAt ? ` · 확인 ${esc(p.completedCheckedAt)}` : '';
         return `<article class="item">
           <div class="item-head">
-            <div><div class="title">${esc(p.title || '제목 없음')}</div><div class="meta">${esc(p.date || '')} · ${esc(p.salesperson || '-')} · ${esc(p.agency || '-')}${checkedMeta}</div></div>
+            <div><div class="title">${esc(p.title || '제목 없음')}</div><div class="meta">신청일 ${esc(p.createdAt || p.date || '')} · ${esc(p.salesperson || '-')} · ${esc(p.agency || '-')}${checkedMeta}</div></div>
             ${checked}
           </div>
         </article>`;
@@ -225,13 +225,18 @@
       $('campaignList').innerHTML = '<div class="empty">시책 신청 내역이 없습니다.</div>';
       return;
     }
-    $('campaignList').innerHTML = state.campaigns.map(item => `<article class="item">
+    $('campaignList').innerHTML = state.campaigns.map(item => {
+      const blog = item.blogUrl
+        ? `<a href="${esc(item.blogUrl)}" target="_blank" rel="noopener">${esc(item.uploadBlog || '본인 블로그')}</a>`
+        : esc(item.uploadBlog || '-');
+      return `<article class="item">
       <div class="item-head">
-        <div><div class="title">${esc(item.name || '-')} · ${esc(item.agency || '-')}</div><div class="meta">${esc(item.appliedAt || '')} · ${esc(item.uploadBlog || '-')}</div></div>
+        <div><div class="title">${esc(item.name || '-')} · ${esc(item.agency || '-')} · ${blog}</div><div class="meta">${esc(item.appliedAt || '')}</div></div>
         <span class="badge dark">${esc(item.score || '신청')}</span>
       </div>
       ${item.memo ? `<div class="meta">${esc(item.memo)}</div>` : ''}
-    </article>`).join('');
+    </article>`;
+    }).join('');
   }
 
   function toggleMonth(btn) {
@@ -243,14 +248,14 @@
 
   function groupByMonth(items) {
     return items.reduce((acc, item) => {
-      const month = getMonthLabel(item.date);
+      const month = getMonthLabel(item.createdAt || item.date);
       (acc[month] ||= []).push(item);
       return acc;
     }, {});
   }
 
   function sortByDate(items) {
-    return items.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+    return items.slice().sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
   }
 
   function getMonthLabel(dateText) {
