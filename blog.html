@@ -723,7 +723,11 @@
 
   function renderCachedNotices() {
     const cached = readNoticeCache();
-    if (cached && cached.length) renderNotices(cached);
+    if (cached && cached.length) {
+      if (!state.appHome) state.appHome = {};
+      state.appHome.notices = cached;
+      renderNotices(cached);
+    }
   }
 
   function openNoticeModal(index) {
@@ -733,6 +737,17 @@
     $('noticeModalDate').textContent = notice.date || '';
     $('noticeModalBody').innerHTML = renderNoticeBody(notice);
     $('noticeModalDim').classList.add('active');
+    markNoticeViewed(notice);
+  }
+
+  function markNoticeViewed(notice) {
+    if (!notice || !notice.id || !state.user) return;
+    gasAction('markNoticeViewed', {
+      noticeId: notice.id,
+      title: notice.title || '',
+      name: state.user.name,
+      agency: state.user.agency,
+    }).catch(err => console.warn('markNoticeViewed failed', err));
   }
 
   function closeNoticeModal() { $('noticeModalDim').classList.remove('active'); }
@@ -795,8 +810,10 @@
         const checkAttr = p.status === '완료' && p.pageId ? ` onclick="markCompletedPostChecked('${esc(p.pageId)}')"` : '';
         const googleLink = p.googleUrl ? `<a href="${esc(p.googleUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">구글원고</a>` : '';
         const uploadLink = p.uploadUrl ? `<a href="${esc(p.uploadUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">업로드보기</a>` : '';
-        const fallbackLink = !googleLink && !uploadLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
-        return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(p.status || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${googleLink}${uploadLink}${fallbackLink}</div></div></div>`;
+        const draftLink = p.draftUrl ? `<a href="${esc(p.draftUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        const fallbackLink = !googleLink && !uploadLink && !draftLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        const type = p.type ? `<span class="list-meta">${esc(p.type)} · </span>` : '';
+        return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${type}${esc(p.status || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${googleLink}${uploadLink}${draftLink}${fallbackLink}</div></div></div>`;
       }).join('');
       const collapsed = index === 0 ? '' : ' collapsed';
       const symbol = index === 0 ? '▾' : '▸';
