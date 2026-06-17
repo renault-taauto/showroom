@@ -78,7 +78,9 @@
     .drawer-head{display:flex;justify-content:space-between;align-items:center}
     .drawer-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .drawer-menu{display:grid;gap:2px}
-    .drawer-menu button{width:100%;min-height:44px;background:#fff;color:#111827;text-align:left;padding:0}
+    .drawer-menu button{width:100%;min-height:44px;background:#fff;color:#111827;text-align:left;padding:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .count-badge{display:none;min-width:20px;height:20px;border-radius:999px;background:#d92d20;color:#fff;font-size:12px;font-weight:700;place-items:center;padding:0 6px}
+    .count-badge.active{display:grid}
     .page{display:none}
     .page.active{display:grid}
     .file-name{font-size:12px;color:#667085}
@@ -91,12 +93,16 @@
     .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .choice{min-height:42px;border-radius:12px;background:#fff;border:1px solid #d0d5dd;color:#344054}
     .choice.active{background:#111827;border-color:#111827;color:#fff}
+    .check-row{display:flex;align-items:center;gap:9px;font-size:13px;color:#344054}
+    .check-row input{width:18px;min-height:18px;height:18px;margin:0}
     .modal-dim{position:fixed;inset:0;background:rgba(17,24,39,.52);display:none;z-index:30;padding:24px 16px;align-items:center;justify-content:center}
     .modal-dim.active{display:flex}
     .modal{width:min(440px,100%);max-height:84vh;overflow:auto;background:#fff;border-radius:16px;padding:16px;display:grid;gap:12px}
     .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
     .modal-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .modal-body{display:grid;gap:12px}
+    .message-item.unread{border-color:#f04438;background:#fffafa}
+    .message-body{font-size:14px;color:#344054;line-height:1.55;white-space:pre-wrap}
   </style>
 </head>
 <body>
@@ -143,8 +149,8 @@
       </button>
       <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div></div>
       <div class="quick-actions">
-        <button type="button" onclick="openPage('requestPage')">블로그 원고<br>제작 요청</button>
-        <button type="button" onclick="openPage('postsPage')">완료된 원고<br>리스트</button>
+        <button type="button" onclick="openPage('requestPage')">출고후기 원고<br>작성 요청</button>
+        <button type="button" onclick="openPage('renaultDraftPage')">르노 차량<br>원고 작성</button>
       </div>
       <div class="card"><div class="section-head"><h3>접수된 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button></div><div id="completedPostList" class="list"></div></div>
     </div>
@@ -159,15 +165,16 @@
         <div id="blogUrlField" class="field"><label>블로그 URL</label><input id="profileBlogUrl" placeholder="본인 블로그 URL"></div>
         <div id="testDriveUrlField" class="field"><label>시승신청 URL</label><input id="profileTestDriveUrl" placeholder="본인 시승신청 URL"></div>
         <div id="businessCardField" class="field"><label>본인 명함 이미지</label><input id="profileBusinessCardFile" type="file" accept="image/*"><div id="businessCardName" class="file-name"></div></div>
+        <label class="check-row"><input id="profileBranchManager" type="checkbox" onchange="toggleProfileFields()">지점장입니다</label>
         <div id="profileStatus" class="status"></div>
         <button class="primary" type="button" onclick="saveMyInfo()">저장하고 시작</button>
       </div>
     </div>
 
     <div id="requestPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>블로그 원고 제작 요청</h2></div>
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>출고후기 원고 작성 요청</h2></div>
       <div class="card form">
-        <div class="field"><label>업로드 블로그</label><select id="requestUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div class="field"><label>업로드 블로그</label><select id="requestUploadBlog" onchange="updateRequestPhotoGuide()"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
         <div class="field"><label>출고 날짜</label><input id="deliveryDate" type="date"></div>
         <div class="field"><label>모델</label><select id="vehicleModel" onchange="updateVehicleChildren()"><option value="">모델 선택</option></select></div>
         <div class="field"><label>트림</label><select id="vehicleTrim"><option value="">트림 선택</option></select></div>
@@ -185,11 +192,23 @@
           </div>
           <input id="inspectionFiles" type="file" accept="image/*" multiple hidden>
           <input id="inspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple hidden>
+          <div id="inspectionGuide" class="hint"></div>
           <div id="inspectionFileName" class="file-name"></div>
           <div id="inspectionPreview" class="photo-preview"></div>
         </div>
         <div id="requestStatus" class="status"></div>
         <button id="requestSubmitBtn" class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
+      </div>
+    </div>
+
+    <div id="renaultDraftPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>르노 차량 원고 작성</h2></div>
+      <div class="card form">
+        <div class="field"><label>업로드</label><select id="renaultUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div class="field"><label>키워드</label><input id="renaultKeyword" placeholder="예: 그랑 콜레오스 하이브리드 장점"></div>
+        <div class="field"><label>요청 사항</label><textarea id="renaultRequestDetails" placeholder="원고에 꼭 들어가야 할 내용이나 방향을 입력하세요."></textarea></div>
+        <div id="renaultDraftStatus" class="status"></div>
+        <button class="primary" type="button" onclick="submitRenaultDraft()">요청하기</button>
       </div>
     </div>
 
@@ -216,6 +235,11 @@
       <div id="uploadContentsList" class="list"></div>
     </div>
 
+    <div id="messagesPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>메시지함</h2></div>
+      <div id="messageList" class="list"></div>
+    </div>
+
     <div id="placeholderPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2 id="placeholderTitle"></h2></div>
       <div class="empty">준비 중입니다.</div>
@@ -231,6 +255,7 @@
     <button type="button" onclick="openPageFromDrawer('profilePage')">내 정보</button>
     <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
     <button type="button" onclick="openPageFromDrawer('uploadContentsPage')">업로드 콘텐츠</button>
+    <button type="button" onclick="openPageFromDrawer('messagesPage')"><span>메시지함</span><span id="messageUnreadBadge" class="count-badge"></span></button>
     <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
     <button type="button" onclick="openPlaceholder('블로그 스킨제작 요청')">블로그 스킨제작 요청</button>
     <button type="button" onclick="logout()">로그아웃</button>
@@ -259,6 +284,7 @@
   const MY_POSTS_CACHE_KEY = 'salesMyPostsCache_v1';
   const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
   const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
+  const MESSAGES_CACHE_KEY = 'salesMessagesCache_v1';
 
   const FALLBACK_OPTIONS = {
     vehicles: {
@@ -272,7 +298,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [] };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [] };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -419,8 +445,10 @@
     // 캐시 먼저 렌더링
     renderCachedNotices();
     renderCachedCompletedPosts();
+    renderCachedMessages();
     // 새 데이터 로드
     loadNotices();
+    loadMessages();
     loadAppHome();
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
@@ -458,6 +486,22 @@
     }
   }
 
+  async function loadMessages() {
+    if (!state.user) return;
+    try {
+      const messages = await gasAction('getMessages', { name: state.user.name, agency: state.user.agency });
+      const list = Array.isArray(messages) ? messages : [];
+      state.messages = list;
+      saveMessagesCache(list);
+      updateMessageBadge(list);
+      if ($('messagesPage').classList.contains('active')) renderMessages(list);
+    } catch (e) {
+      if ($('messagesPage').classList.contains('active') && !readMessagesCache().length) {
+        renderMessages([{ body: '메시지를 불러오지 못했습니다.\n' + (e.message || String(e)), sentAt: '', read: true }]);
+      }
+    }
+  }
+
   // ─────────────────────────────
   // 프로필
   // ─────────────────────────────
@@ -468,15 +512,20 @@
     $('profileBlogUrl').value = profile.blogUrl || '';
     $('profileTestDriveUrl').value = profile.testDriveUrl || '';
     $('businessCardName').textContent = profile.businessCardImage ? '기존 명함 이미지 등록됨' : '';
+    $('profileBranchManager').checked = !!profile.isBranchManager;
     toggleProfileFields();
     if (profile.uploadBlog) $('requestUploadBlog').value = profile.uploadBlog;
+    updateRequestPhotoGuide();
   }
 
   function toggleProfileFields() {
+    const isBranchManager = $('profileBranchManager').checked;
+    if (isBranchManager) $('profileUploadBlog').value = '지점 블로그';
+    $('profileUploadBlog').disabled = isBranchManager;
     const type = $('profileUploadBlog').value;
     $('blogUrlField').style.display = type === '본인 블로그' ? 'grid' : 'none';
-    $('testDriveUrlField').style.display = type === '지점 블로그' ? 'grid' : 'none';
-    $('businessCardField').style.display = type === '지점 블로그' ? 'grid' : 'none';
+    $('testDriveUrlField').style.display = type === '지점 블로그' && !isBranchManager ? 'grid' : 'none';
+    $('businessCardField').style.display = type === '지점 블로그' && !isBranchManager ? 'grid' : 'none';
   }
 
   async function saveMyInfo() {
@@ -489,6 +538,7 @@
         uploadBlog: $('profileUploadBlog').value.trim(),
         blogUrl: $('profileBlogUrl').value.trim(),
         testDriveUrl: $('profileTestDriveUrl').value.trim(),
+        isBranchManager: $('profileBranchManager').checked,
         businessCardData: fileData, businessCardName: file ? file.name : '',
       });
       setPageStatus('profileStatus', result.message || '저장되었습니다.', 'ok');
@@ -509,13 +559,15 @@
     $('requestSubmitBtn').disabled = true;
     $('requestSubmitBtn').textContent = '제출 중...';
     const uploadBlog = $('requestUploadBlog').value.trim();
-    const needsPhotos = uploadBlog !== '본인 블로그';
-    setPageStatus('requestStatus', needsPhotos ? '사진을 업로드하는 중입니다.' : '정보를 제출하는 중입니다.');
+    const needsPhotos = uploadBlog === '지점 블로그';
+    setPageStatus('requestStatus', needsPhotos ? '사진을 확인하는 중입니다.' : '정보를 제출하는 중입니다.');
 
     try {
       // 1. 사진 Supabase Storage에 업로드
       const files = getInspectionFiles();
-      if (needsPhotos && !files.length) throw new Error('검수 사진을 1장 이상 선택해주세요.');
+      if (!$('customerHistory').value.trim()) throw new Error('고객과의 히스토리를 입력해주세요.');
+      if (!$('deliveryMood').value.trim()) throw new Error('차량 인도 분위기를 입력해주세요.');
+      if (needsPhotos && files.length < 5) throw new Error('지점 블로그는 검수 사진을 5장 이상 선택해주세요.');
       const uploadedUrls = files.length ? await uploadPhotosToStorage(files) : [];
 
       // 2. GAS에 정보 + Storage URL 전달 (swift-function이 백그라운드로 처리)
@@ -626,6 +678,31 @@
     }
   }
 
+  async function submitRenaultDraft() {
+    const uploadBlog = $('renaultUploadBlog').value.trim();
+    const keyword = $('renaultKeyword').value.trim();
+    const requestDetails = $('renaultRequestDetails').value.trim();
+    if (!uploadBlog) return setPageStatus('renaultDraftStatus', '업로드를 선택해주세요.', 'error');
+    if (!keyword) return setPageStatus('renaultDraftStatus', '키워드를 입력해주세요.', 'error');
+    if (!requestDetails) return setPageStatus('renaultDraftStatus', '요청 사항을 입력해주세요.', 'error');
+
+    setPageStatus('renaultDraftStatus', '요청 중입니다.');
+    try {
+      const result = await gasAction('requestRenaultDraft', {
+        name: state.user.name,
+        agency: state.user.agency,
+        uploadBlog,
+        keyword,
+        requestDetails,
+      });
+      setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
+      $('renaultKeyword').value = '';
+      $('renaultRequestDetails').value = '';
+    } catch (e) {
+      setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
+    }
+  }
+
   function showCampaignDone() {
     const isDone = localStorage.getItem(CAMPAIGN_DONE_KEY) === '1';
     $('campaignDone').style.display = isDone ? 'grid' : 'none';
@@ -685,6 +762,15 @@
   function saveUploadContentsCache(posts) { try { localStorage.setItem(UPLOAD_CONTENTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readUploadContentsCache() { try { return JSON.parse(localStorage.getItem(UPLOAD_CONTENTS_CACHE_KEY) || '[]'); } catch { return []; } }
 
+  function saveMessagesCache(messages) { try { localStorage.setItem(MESSAGES_CACHE_KEY, JSON.stringify(messages || [])); } catch {} }
+  function readMessagesCache() { try { return JSON.parse(localStorage.getItem(MESSAGES_CACHE_KEY) || '[]'); } catch { return []; } }
+  function renderCachedMessages() {
+    const cached = readMessagesCache();
+    state.messages = cached;
+    updateMessageBadge(cached);
+    if ($('messagesPage').classList.contains('active')) renderMessages(cached);
+  }
+
   // ─────────────────────────────
   // 원고 리스트
   // ─────────────────────────────
@@ -706,9 +792,10 @@
     const groups = groupPostsByMonth(posts);
     box.innerHTML = Object.keys(groups).map((month, index) => {
       const items = groups[month].map(p => {
-        const googleLink = p.googleUrl ? `<a href="${esc(p.googleUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">구글원고</a>` : '';
-        const uploadLink = p.uploadUrl ? `<a href="${esc(p.uploadUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">업로드보기</a>` : '';
-        const fallbackLink = !googleLink && !uploadLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        const checkAttr = p.status === '완료' && p.pageId ? ` onclick="markCompletedPostChecked('${esc(p.pageId)}')"` : '';
+        const googleLink = p.googleUrl ? `<a href="${esc(p.googleUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">구글원고</a>` : '';
+        const uploadLink = p.uploadUrl ? `<a href="${esc(p.uploadUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">업로드보기</a>` : '';
+        const fallbackLink = !googleLink && !uploadLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
         return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(p.status || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${googleLink}${uploadLink}${fallbackLink}</div></div></div>`;
       }).join('');
       const collapsed = index === 0 ? '' : ' collapsed';
@@ -748,6 +835,12 @@
     state.appHome = { ...(state.appHome || {}), completedPosts: next };
   }
 
+  function markCompletedPostChecked(pageId) {
+    if (!pageId || !state.user) return;
+    gasAction('markCompletionChecked', { name: state.user.name, agency: state.user.agency, pageId })
+      .catch(err => console.warn('markCompletionChecked failed', err));
+  }
+
   function renderUploadContents(posts) {
     const box = $('uploadContentsList');
     if (!posts || !posts.length) return box.innerHTML = '<div class="empty">업로드된 콘텐츠가 없습니다.</div>';
@@ -756,6 +849,41 @@
       const meta = p.status && !p.url ? `<div class="list-meta">${esc(p.status)}</div>` : '';
       return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">${label}</a>` : meta}</div>`;
     }).join('');
+  }
+
+  function renderMessages(messages) {
+    const box = $('messageList');
+    const list = Array.isArray(messages) ? messages : [];
+    updateMessageBadge(list);
+    if (!list.length) return box.innerHTML = '<div class="empty">도착한 메시지가 없습니다.</div>';
+    box.innerHTML = list.map(message => `<button class="list-item message-item ${message.read ? '' : 'unread'}" type="button" onclick="readMessage('${esc(message.id || '')}')">
+      <div class="list-title">${message.read ? '읽은 메시지' : '새 메시지'}</div>
+      <div class="message-body">${esc(message.body || '')}</div>
+      <div class="list-meta">${esc(message.sentAt || '')}${message.readAt ? ' · 읽음 ' + esc(message.readAt) : ''}</div>
+    </button>`).join('');
+  }
+
+  function updateMessageBadge(messages) {
+    const count = (messages || []).filter(message => !message.read).length;
+    const badge = $('messageUnreadBadge');
+    if (!badge) return;
+    badge.textContent = count > 99 ? '99+' : String(count);
+    badge.classList.toggle('active', count > 0);
+  }
+
+  async function readMessage(messageId) {
+    const message = (state.messages || []).find(item => item.id === messageId);
+    if (!message || message.read) return;
+    message.read = true;
+    message.readAt = '방금';
+    renderMessages(state.messages);
+    saveMessagesCache(state.messages);
+    try {
+      await gasAction('markMessageRead', { name: state.user.name, agency: state.user.agency, messageId });
+      loadMessages();
+    } catch (e) {
+      loadMessages();
+    }
   }
 
   // ─────────────────────────────
@@ -798,6 +926,7 @@
   function updateInspectionUI() {
     const files = getInspectionFiles();
     $('inspectionFileName').textContent = files.length ? `총 ${files.length}개 선택됨` : '';
+    updateRequestPhotoGuide();
     state.previewUrls.forEach(u => URL.revokeObjectURL(u));
     state.previewUrls = [];
     $('inspectionPreview').innerHTML = files.map(file => {
@@ -805,6 +934,18 @@
       state.previewUrls.push(url);
       return `<div class="photo-thumb"><img src="${url}" alt=""><span>${esc(file.name)}</span></div>`;
     }).join('');
+  }
+
+  function updateRequestPhotoGuide() {
+    const type = $('requestUploadBlog').value;
+    const count = getInspectionFiles().length;
+    if (type === '본인 블로그') {
+      $('inspectionGuide').textContent = '본인 블로그는 사진 없이도 제출할 수 있습니다. 사진을 선택하면 함께 저장됩니다.';
+    } else if (type === '지점 블로그') {
+      $('inspectionGuide').textContent = `지점 블로그는 검수 사진 5장 이상 필수입니다. 현재 ${count}장 선택됨.`;
+    } else {
+      $('inspectionGuide').textContent = '업로드 블로그를 선택하면 사진 제출 기준이 표시됩니다.';
+    }
   }
 
   function clearRequestForm() {
@@ -816,6 +957,7 @@
     $('inspectionFiles').value = '';
     $('inspectionCameraFiles').value = '';
     $('inspectionFileName').textContent = '';
+    updateRequestPhotoGuide();
     state.previewUrls.forEach(u => URL.revokeObjectURL(u));
     state.previewUrls = [];
     $('inspectionPreview').innerHTML = '';
@@ -833,6 +975,12 @@
   function openPage(pageId) {
     document.querySelectorAll('#homeScreen .page').forEach(p => p.classList.remove('active'));
     $(pageId).classList.add('active');
+
+    if (pageId === 'renaultDraftPage') {
+      const profile = (state.appHome && state.appHome.profile) || {};
+      if (!$('renaultUploadBlog').value) $('renaultUploadBlog').value = profile.uploadBlog || '';
+      setPageStatus('renaultDraftStatus', '');
+    }
 
     if (pageId === 'campaignPage') {
       showCampaignDone();
@@ -865,6 +1013,11 @@
         .catch(e => {
           if (!cached.length) renderUploadContents([{ title: '업로드 콘텐츠를 불러오지 못했습니다', status: e.message }]);
         });
+    }
+
+    if (pageId === 'messagesPage') {
+      renderCachedMessages();
+      loadMessages();
     }
 
     window.scrollTo({ top: 0, behavior: 'auto' });
