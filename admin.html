@@ -78,6 +78,7 @@
   <section class="menu">
     <button id="completedBtn" type="button" onclick="openView('completed')">완료 확인<span id="uncheckedCount" class="count" style="display:none">0</span></button>
     <button id="campaignBtn" type="button" onclick="openView('campaign')">시책 신청 현황</button>
+    <button id="noticeBtn" type="button" onclick="openView('notice')">공지 조회수</button>
   </section>
 
   <section id="completedView" class="view">
@@ -94,15 +95,24 @@
     </div>
   </section>
 
+  <section id="noticeView" class="view">
+    <div class="panel">
+      <div class="section-head"><h2>공지사항 조회수</h2><p id="noticeCount"></p></div>
+      <div id="noticeViewList" class="list"></div>
+    </div>
+  </section>
+
   <div id="adminStatus" class="status"></div>
 </main>
 
 <script>
   const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
   const GAS_FUNCTION_NAME = 'swift-function';
-  const state = { activePosts: [], completedPosts: [], campaigns: [], view: '' };
+  const ADMIN_CACHE_KEY = 'adminDashboardCache_v1';
+  const state = { activePosts: [], completedPosts: [], campaigns: [], noticeViews: [], view: '' };
   const $ = id => document.getElementById(id);
 
+  renderCachedDashboard();
   loadDashboard();
 
   async function gasAction(action, body) {
@@ -121,22 +131,56 @@
   async function loadDashboard() {
     setStatus('불러오는 중입니다.');
     try {
-      const [activePosts, completedPosts, campaigns] = await Promise.all([
+      const [activePosts, completedPosts, campaigns, noticeViews] = await Promise.all([
         gasAction('getAdminActivePosts'),
         gasAction('getAdminCompletedPosts'),
         gasAction('getCampaignApplications'),
+        gasAction('getAdminNoticeViews'),
       ]);
       state.activePosts = Array.isArray(activePosts) ? activePosts : [];
       state.completedPosts = sortByDate(Array.isArray(completedPosts) ? completedPosts : []);
       state.campaigns = Array.isArray(campaigns) ? campaigns : [];
+      state.noticeViews = Array.isArray(noticeViews) ? noticeViews : [];
       renderActivePosts();
       renderCompletedPosts();
       renderCampaigns();
+      renderNoticeViews();
+      saveDashboardCache();
       setStatus('불러왔습니다.', 'ok');
     } catch (e) {
       setStatus(e.message || String(e), 'error');
       $('activeList').innerHTML = '<div class="empty">목록을 불러오지 못했습니다.</div>';
     }
+  }
+
+  function renderCachedDashboard() {
+    const cached = readDashboardCache();
+    if (!cached) return;
+    state.activePosts = Array.isArray(cached.activePosts) ? cached.activePosts : [];
+    state.completedPosts = sortByDate(Array.isArray(cached.completedPosts) ? cached.completedPosts : []);
+    state.campaigns = Array.isArray(cached.campaigns) ? cached.campaigns : [];
+    state.noticeViews = Array.isArray(cached.noticeViews) ? cached.noticeViews : [];
+    renderActivePosts();
+    renderCompletedPosts();
+    renderCampaigns();
+    renderNoticeViews();
+    setStatus('저장된 목록을 먼저 보여주는 중입니다.');
+  }
+
+  function saveDashboardCache() {
+    try {
+      localStorage.setItem(ADMIN_CACHE_KEY, JSON.stringify({
+        activePosts: state.activePosts,
+        completedPosts: state.completedPosts,
+        campaigns: state.campaigns,
+        noticeViews: state.noticeViews,
+        savedAt: new Date().toISOString(),
+      }));
+    } catch {}
+  }
+
+  function readDashboardCache() {
+    try { return JSON.parse(localStorage.getItem(ADMIN_CACHE_KEY) || 'null'); } catch { return null; }
   }
 
   function renderActivePosts() {
@@ -189,8 +233,10 @@
     state.view = state.view === view ? '' : view;
     $('completedView').classList.toggle('active', state.view === 'completed');
     $('campaignView').classList.toggle('active', state.view === 'campaign');
+    $('noticeView').classList.toggle('active', state.view === 'notice');
     $('completedBtn').classList.toggle('active', state.view === 'completed');
     $('campaignBtn').classList.toggle('active', state.view === 'campaign');
+    $('noticeBtn').classList.toggle('active', state.view === 'notice');
   }
 
   function renderCompletedPosts() {
@@ -207,7 +253,7 @@
       const collapsed = index === 0 ? '' : ' collapsed';
       const items = groups[month].map(p => {
         const checked = p.completedChecked ? `<span class="badge done">담당자 확인</span>` : '<span class="badge warn">담당자 미확인</span>';
-        const checkedMeta = p.completedCheckedAt ? ` · 확인 ${esc(p.completedCheckedAt)}` : '';
+        const checkedMeta = p.completedCheckedAt ? ` · 담당자 확인 시간 ${esc(p.completedCheckedAt)}` : '';
         return `<article class="item">
           <div class="item-head">
             <div><div class="title">${esc(p.title || '제목 없음')}</div><div class="meta">신청일 ${esc(p.createdAt || p.date || '')} · ${esc(p.salesperson || '-')} · ${esc(p.agency || '-')}${checkedMeta}</div></div>
@@ -237,6 +283,24 @@
       ${item.memo ? `<div class="meta">${esc(item.memo)}</div>` : ''}
     </article>`;
     }).join('');
+  }
+
+  function renderNoticeViews() {
+    $('noticeCount').textContent = `${state.noticeViews.length}건`;
+    if (!state.noticeViews.length) {
+      $('noticeViewList').innerHTML = '<div class="empty">공지 조회 기록이 없습니다.</div>';
+      return;
+    }
+    $('noticeViewList').innerHTML = state.noticeViews.map(item => `<article class="item">
+      <div class="item-head">
+        <div>
+          <div class="title">${esc(item.title || '제목 없음')}</div>
+          <div class="meta">${esc(item.date || '')}${item.lastViewedAt ? ' · 최근 조회 ' + esc(item.lastViewedAt) : ''}</div>
+        </div>
+        <span class="badge dark">${Number(item.viewCount || 0)} views</span>
+      </div>
+      <div class="meta">조회 담당자 ${Number(item.viewerCount || 0)}명</div>
+    </article>`).join('');
   }
 
   function toggleMonth(btn) {
