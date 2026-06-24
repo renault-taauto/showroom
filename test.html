@@ -50,7 +50,9 @@
     .banner{overflow:hidden;border-radius:18px;background:#111827;color:#fff;min-height:118px;display:grid;align-content:end;padding:18px;text-align:left;width:100%}
     .banner-title{font-size:18px;font-weight:700}
     .banner-desc{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px}
-    .skin-banner{min-height:76px;background:#1769e0;align-content:center}
+    .skin-banner{min-height:76px;background:#111827;align-content:center}
+    .skin-preview-pc{width:100%;border-radius:10px}
+    .skin-preview-mobile{width:38%;margin:0 auto;border-radius:10px}
     .skin-revision{display:none}
     .skin-revision.active{display:grid}
     .notice-required{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#fff1f0;color:#d92d20;font-size:10px;font-weight:800;flex:0 0 auto}
@@ -156,7 +158,7 @@
         <div class="banner-desc">최초 1회 참여 신청을 해주셔야 참여가 완료됩니다.</div>
       </button>
       <button id="skinRequestBanner" class="banner skin-banner" type="button" onclick="openSkinRequest()">
-        <div id="skinRequestBannerTitle" class="banner-title">스킨 제작 요청</div>
+        <div id="skinRequestBannerTitle" class="banner-title">블로그 스킨 제작 요청</div>
       </button>
       <div id="skinRevisionPanel" class="card form skin-revision">
         <h3>수정사항 요청하기</h3>
@@ -175,6 +177,37 @@
     <div id="skinRequestsPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>요청 확인</h2></div>
       <div id="skinRequestList" class="list"></div>
+    </div>
+
+    <div id="skinSelectPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>스킨 제작 요청</h2></div>
+      <div class="list">
+        <button class="choice" type="button" onclick="toggleSkinPreview('one')">1번 시안 보기</button>
+        <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/1.png"><img class="skin-preview-mobile" src="assets/skin-examples/1-1.png"><button class="primary" type="button" onclick="startSkinRequest('1번')">1번 시안 요청</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div>
+        <button class="choice" type="button" onclick="toggleSkinPreview('two')">2번 시안 보기</button>
+        <div id="skinPreviewTwo" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/2.png"><img class="skin-preview-mobile" src="assets/skin-examples/2-1.png"><button class="primary" type="button" onclick="startSkinRequest('2번')">2번 시안 요청</button><button class="secondary" type="button" onclick="toggleSkinPreview('two')">접기</button></div>
+        <button class="choice" type="button" onclick="startSkinRequest('기타')">기타 레퍼런스 요청</button>
+      </div>
+    </div>
+
+    <div id="skinFormPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('skinSelectPage')">‹</button><h2 id="skinFormTitle">스킨 제작 요청</h2></div>
+      <div class="card form">
+        <div class="field"><label>전화번호</label><input id="skinPhone" inputmode="tel" placeholder="010-0000-0000"></div>
+        <div id="skinDesignFields" class="form">
+          <div class="field"><label>배경 사진</label><select id="skinBackgroundChoice" onchange="toggleSkinBackgroundFile()"><option value="공식 이미지 - 필랑트">공식 이미지 - 필랑트</option><option value="공식 이미지 - 콜레오스">공식 이미지 - 콜레오스</option><option value="공식 이미지 - 아르카나">공식 이미지 - 아르카나</option><option value="개인 차량 사진">개인 차량 사진</option></select></div>
+          <div id="skinBackgroundFileField" class="field" style="display:none"><label>개인 차량 사진</label><input id="skinBackgroundPhoto" type="file" accept="image/*,.heic,.heif"></div>
+          <div id="skinProfileField" class="field" style="display:none"><label>프로필 사진</label><input id="skinProfilePhoto" type="file" accept="image/*,.heic,.heif"></div>
+          <div id="skinIntroField" class="field" style="display:none"><label>소개문구</label><textarea id="skinIntroduction"></textarea></div>
+          <div class="field"><label>SNS 버튼</label><textarea id="skinSns" placeholder="인스타그램: URL&#10;카카오톡: URL"></textarea></div>
+          <div class="field"><label id="skinMenuLabel">메뉴</label><textarea id="skinMenu" placeholder="메뉴명: URL"></textarea></div>
+        </div>
+        <div id="skinReferenceFields" class="form" style="display:none"><div class="field"><label>기타 레퍼런스</label><textarea id="skinReference"></textarea></div><div class="field"><label>추가 파일</label><input id="skinReferenceFiles" type="file" multiple accept="image/*,.heic,.heif,.pdf"></div></div>
+        <div class="field"><label>기타 요구사항</label><textarea id="skinDetails"></textarea></div>
+        <div class="field"><label>설정방법</label><select id="skinSetupMethod" onchange="toggleSkinAccountFields()"><option value="스스로">스스로</option><option value="요청">요청</option></select></div>
+        <div id="skinAccountFields" class="form" style="display:none"><div class="field"><label>아이디</label><input id="skinAccountId"></div><div class="field"><label>비밀번호</label><input id="skinAccountPassword" type="password"></div></div>
+        <div id="skinFormStatus" class="status"></div><button id="skinSubmitButton" class="primary" type="button" onclick="submitSkinRequestFromApp()">스킨 요청 접수</button>
+      </div>
     </div>
 
     <div id="profilePage" class="page">
@@ -277,9 +310,7 @@
     <button type="button" onclick="openPageFromDrawer('profilePage')">내 정보</button>
     <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
     <button type="button" onclick="openPageFromDrawer('uploadContentsPage')">업로드 콘텐츠</button>
-    <button type="button" onclick="openPageFromDrawer('messagesPage')"><span>메시지함</span><span id="messageUnreadBadge" class="count-badge"></span></button>
     <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
-    <button type="button" onclick="openSkinRequest()">스킨 제작 요청</button>
     <button type="button" onclick="logout()">로그아웃</button>
   </div>
 </aside>
@@ -1124,7 +1155,46 @@
       openPage('skinRequestsPage');
       return;
     }
-    window.location.href = 'skin-preview.html';
+    openPage('skinSelectPage');
+  }
+  function toggleSkinPreview(kind) {
+    const one = $('skinPreviewOne'); const two = $('skinPreviewTwo');
+    const target = kind === 'one' ? one : two;
+    const wasOpen = target.style.display !== 'none';
+    one.style.display = 'none'; two.style.display = 'none';
+    if (!wasOpen) target.style.display = 'grid';
+  }
+  function startSkinRequest(skin) {
+    state.skinDraft = skin;
+    $('skinFormTitle').textContent = skin + ' 스킨 제작 요청';
+    $('skinDesignFields').style.display = skin === '기타' ? 'none' : 'grid';
+    $('skinReferenceFields').style.display = skin === '기타' ? 'grid' : 'none';
+    $('skinProfileField').style.display = skin === '2번' ? 'grid' : 'none';
+    $('skinIntroField').style.display = skin === '2번' ? 'grid' : 'none';
+    $('skinMenuLabel').textContent = skin === '2번' ? '상단 메뉴' : '하단 메뉴';
+    openPage('skinFormPage');
+  }
+  function toggleSkinBackgroundFile() { $('skinBackgroundFileField').style.display = $('skinBackgroundChoice').value === '개인 차량 사진' ? 'grid' : 'none'; }
+  function toggleSkinAccountFields() { $('skinAccountFields').style.display = $('skinSetupMethod').value === '요청' ? 'grid' : 'none'; }
+  function skinFileData(file) { return file ? readFileAsDataUrl(file) : Promise.resolve(''); }
+  async function submitSkinRequestFromApp() {
+    const skin = state.skinDraft || '기타';
+    const setupMethod = $('skinSetupMethod').value;
+    const accountId = $('skinAccountId').value.trim();
+    const accountPassword = $('skinAccountPassword').value;
+    if (setupMethod === '요청' && (!accountId || !accountPassword)) return setPageStatus('skinFormStatus', '아이디와 비밀번호를 입력해주세요.', 'error');
+    const referenceFiles = await Promise.all([...$('skinReferenceFiles').files].map(skinFileData));
+    const payload = { action:'submitNotionSkinRequest', name:state.user.name, agency:state.user.agency, skin:skin, phone:$('skinPhone').value.trim(), backgroundChoice:$('skinBackgroundChoice').value, backgroundPhoto:await skinFileData($('skinBackgroundPhoto').files[0]), profilePhoto:await skinFileData($('skinProfilePhoto').files[0]), introduction:$('skinIntroduction').value.trim(), snsLinks:$('skinSns').value.trim(), menuUrls:$('skinMenu').value.trim(), requestDetails:$('skinDetails').value.trim(), reference:skin === '기타' ? $('skinReference').value.trim() : '', referenceFiles:referenceFiles, setupMethod:setupMethod, accountId:accountId, accountPassword:accountPassword };
+    try {
+      $('skinSubmitButton').disabled = true; setPageStatus('skinFormStatus', '요청 중입니다.');
+      const response = await fetch('https://script.google.com/macros/s/AKfycbzzuanI9dypWWvYO37xC_Dqq5DYlwyTzPnvmgHuP8YIf-DM_NkUaHvVkG5HESoZJVKlmQ/exec', { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
+      const result = await response.json(); if (!result.ok) throw new Error(result.error || '요청에 실패했습니다.');
+      setPageStatus('skinFormStatus', '접수가 완료되었습니다.', 'ok');
+      state.appHome = { ...(state.appHome || {}), skinRequests:[{ skin:skin, status:'요청', date:new Date().toISOString().slice(0,10) }, ...((state.appHome && state.appHome.skinRequests) || [])] };
+      renderSkinRequests(state.appHome.skinRequests);
+      setTimeout(() => openPage('mainPage'), 800);
+    } catch (e) { setPageStatus('skinFormStatus', e.message || String(e), 'error'); }
+    finally { $('skinSubmitButton').disabled = false; }
   }
   function openPageFromDrawer(pageId) { closeDrawer(); openPage(pageId); }
   function openPlaceholder(title) { closeDrawer(); $('placeholderTitle').textContent = title; openPage('placeholderPage'); }
