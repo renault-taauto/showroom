@@ -50,6 +50,10 @@
     .banner{overflow:hidden;border-radius:18px;background:#111827;color:#fff;min-height:118px;display:grid;align-content:end;padding:18px;text-align:left;width:100%}
     .banner-title{font-size:18px;font-weight:700}
     .banner-desc{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px}
+    .skin-banner{min-height:76px;background:#1769e0;align-content:center}
+    .skin-revision{display:none}
+    .skin-revision.active{display:grid}
+    .notice-required{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#fff1f0;color:#d92d20;font-size:10px;font-weight:800;flex:0 0 auto}
     .small-btn{min-height:34px;padding:7px 10px;border-radius:10px;background:#eef1f5;color:#111827;font-size:12px}
     .list{display:grid;gap:8px}
     .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none}
@@ -58,11 +62,15 @@
     .list-meta.done{color:#d92d20;font-weight:600}
     .notice-content{font-size:14px;color:#475467;line-height:1.55;white-space:pre-wrap}
     .notice-image{width:100%;border-radius:12px;display:block}
-    .notice-section{display:grid;gap:4px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:12px}
-    .notice-row{width:100%;background:transparent;padding:3px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:8px}
+    .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px}
+    .notice-section .list{gap:1px}
+    .notice-row{width:100%;min-height:32px;background:transparent;padding:2px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:7px}
     .notice-title{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .notice-date{flex:0 0 auto;color:#667085;font-size:12px}
     .notice-pin{color:#d92d20}
+    .notice-pagination{display:flex;justify-content:center;gap:6px;padding-top:8px}
+    .notice-pagination button{width:30px;height:30px;border-radius:8px;background:transparent;color:#667085;font-size:13px}
+    .notice-pagination button.active{background:#111827;color:#fff}
     .month-group{display:grid;gap:8px}
     .month-head{width:100%;min-height:42px;border-radius:12px;background:#eef1f5;color:#344054;padding:0 12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;text-align:left}
     .month-count{font-size:12px;color:#667085;font-weight:500}
@@ -145,14 +153,28 @@
       </div>
       <button class="banner" type="button" onclick="openPage('campaignPage')">
         <div class="banner-title">영업담당 SNS 활동 시책 참여신청<br>기간 : 6월 8일~7월 31일</div>
-        <div class="banner-desc">참여할 블로그 유형을 선택하고 신청하세요.</div>
+        <div class="banner-desc">최초 1회 참여 신청을 해주셔야 참여가 완료됩니다.</div>
       </button>
-      <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div></div>
+      <button id="skinRequestBanner" class="banner skin-banner" type="button" onclick="openSkinRequest()">
+        <div id="skinRequestBannerTitle" class="banner-title">스킨 제작 요청</div>
+      </button>
+      <div id="skinRevisionPanel" class="card form skin-revision">
+        <h3>수정사항 요청하기</h3>
+        <textarea id="skinRevisionDetails" placeholder="수정이 필요한 내용을 입력하세요."></textarea>
+        <div id="skinRevisionStatus" class="status"></div>
+        <button class="primary" type="button" onclick="submitSkinRevision()">수정사항 요청</button>
+      </div>
+      <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div><div id="noticePagination" class="notice-pagination"></div></div>
       <div class="quick-actions">
         <button type="button" onclick="openPage('requestPage')">출고후기 원고<br>작성 요청</button>
         <button type="button" onclick="openPage('renaultDraftPage')">르노 차량<br>원고 작성</button>
       </div>
       <div class="card"><div class="section-head"><h3>접수된 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button></div><div id="completedPostList" class="list"></div></div>
+    </div>
+
+    <div id="skinRequestsPage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>요청 확인</h2></div>
+      <div id="skinRequestList" class="list"></div>
     </div>
 
     <div id="profilePage" class="page">
@@ -257,7 +279,7 @@
     <button type="button" onclick="openPageFromDrawer('uploadContentsPage')">업로드 콘텐츠</button>
     <button type="button" onclick="openPageFromDrawer('messagesPage')"><span>메시지함</span><span id="messageUnreadBadge" class="count-badge"></span></button>
     <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
-    <button type="button" onclick="openPlaceholder('블로그 스킨제작 요청')">블로그 스킨제작 요청</button>
+    <button type="button" onclick="openSkinRequest()">스킨 제작 요청</button>
     <button type="button" onclick="logout()">로그아웃</button>
   </div>
 </aside>
@@ -285,6 +307,7 @@
   const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
   const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
   const MESSAGES_CACHE_KEY = 'salesMessagesCache_v1';
+  const SKIN_REQUESTS_CACHE_KEY = 'salesSkinRequestsCache_v1';
 
   const FALLBACK_OPTIONS = {
     vehicles: {
@@ -298,7 +321,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [] };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [], visibleNotices: [], noticePage: 1 };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -445,12 +468,29 @@
     // 캐시 먼저 렌더링
     renderCachedNotices();
     renderCachedCompletedPosts();
+    renderCachedSkinRequests();
     renderCachedMessages();
+    markTrafficVisit();
     // 새 데이터 로드
     loadNotices();
     loadMessages();
     loadAppHome();
     window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function markTrafficVisit() {
+    if (!state.user || !state.user.name || !state.user.agency) return;
+    const key = `trafficVisit:${state.user.name}:${state.user.agency}`;
+    try {
+      if (sessionStorage.getItem(key) === '1') return;
+      sessionStorage.setItem(key, '1');
+    } catch {}
+    gasAction('markTrafficVisit', {
+      name: state.user.name,
+      agency: state.user.agency,
+      screen: 'home',
+      userAgent: navigator.userAgent || '',
+    }).catch(err => console.warn('markTrafficVisit failed', err));
   }
 
   async function loadNotices() {
@@ -477,6 +517,8 @@
       renderProfile(state.appHome.profile || {});
       renderCompletedPosts(state.appHome.completedPosts || []);
       saveCompletedPostsCache(state.appHome.completedPosts || []);
+      renderSkinRequests(state.appHome.skinRequests || []);
+      saveSkinRequestsCache(state.appHome.skinRequests || []);
       if (state.appHome.profile && state.appHome.profile.needsProfile) {
         $('profileGuide').style.display = 'block';
         openPage('profilePage');
@@ -714,11 +756,35 @@
   // ─────────────────────────────
   function renderNotices(notices) {
     const box = $('noticeList');
-    if (!notices || !notices.length) return box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
-    box.innerHTML = notices.map((item, i) => {
-      const pin = item.pinned ? '<span class="notice-pin">●</span> ' : '';
-      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${pin}${esc(item.title)}</span><span class="notice-date">${esc(item.date || '')}</span></button>`;
+    const pager = $('noticePagination');
+    const all = [...(notices || [])].sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      return String(b.date || '').localeCompare(String(a.date || ''));
+    });
+    if (!all.length) {
+      box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
+      pager.innerHTML = '';
+      state.visibleNotices = [];
+      return;
+    }
+    const pageSize = 5;
+    const pageCount = Math.ceil(all.length / pageSize);
+    state.noticePage = Math.max(1, Math.min(state.noticePage, pageCount));
+    const start = (state.noticePage - 1) * pageSize;
+    state.visibleNotices = all.slice(start, start + pageSize);
+    box.innerHTML = state.visibleNotices.map((item, i) => {
+      const required = item.pinned ? '<span class="notice-required">필독</span>' : '';
+      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${esc(item.title)}</span>${required}<span class="notice-date">${esc(item.date || '')}</span></button>`;
     }).join('');
+    pager.innerHTML = Array.from({ length: pageCount }, (_, index) => {
+      const page = index + 1;
+      return `<button class="${page === state.noticePage ? 'active' : ''}" type="button" onclick="setNoticePage(${page})">${page}</button>`;
+    }).join('');
+  }
+
+  function setNoticePage(page) {
+    state.noticePage = page;
+    renderNotices((state.appHome && state.appHome.notices) || []);
   }
 
   function renderCachedNotices() {
@@ -731,7 +797,7 @@
   }
 
   function openNoticeModal(index) {
-    const notice = state.appHome && state.appHome.notices && state.appHome.notices[index];
+    const notice = state.visibleNotices[index];
     if (!notice) return;
     $('noticeModalTitle').textContent = notice.title || '';
     $('noticeModalDate').textContent = notice.date || '';
@@ -765,6 +831,71 @@
 
   function saveNoticeCache(notices) { try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(notices || [])); } catch {} }
   function readNoticeCache() { try { return JSON.parse(localStorage.getItem(NOTICE_CACHE_KEY) || '[]'); } catch { return []; } }
+
+  function saveSkinRequestsCache(items) { try { localStorage.setItem(SKIN_REQUESTS_CACHE_KEY, JSON.stringify(items || [])); } catch {} }
+  function readSkinRequestsCache() { try { return JSON.parse(localStorage.getItem(SKIN_REQUESTS_CACHE_KEY) || '[]'); } catch { return []; } }
+  function renderCachedSkinRequests() {
+    const cached = readSkinRequestsCache();
+    if (cached.length) renderSkinRequests(cached);
+  }
+
+  function renderSkinRequests(items) {
+    const list = Array.isArray(items) ? items : [];
+    const box = $('skinRequestList');
+    updateSkinRequestHome(list);
+    if (!list.length) {
+      box.innerHTML = '<div class="empty">스킨 요청 내역이 없습니다.</div>';
+      return;
+    }
+    box.innerHTML = list.map(item => {
+      const links = [
+        item.resultUrl ? `<a href="${esc(item.resultUrl)}" target="_blank" rel="noopener" style="font-size:12px;text-decoration:underline">결과물 보기</a>` : '',
+        item.blogUrl ? `<a href="${esc(item.blogUrl)}" target="_blank" rel="noopener" style="font-size:12px;text-decoration:underline">블로그 보기</a>` : '',
+      ].join('');
+      return `<div class="list-item"><div class="list-title">${esc(item.skin || '스킨 요청')} · ${esc(item.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${item.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(item.status || '요청')}</div><div style="display:flex;gap:8px">${links}</div></div></div>`;
+    }).join('');
+  }
+
+  function updateSkinRequestHome(items) {
+    const latest = (items || [])[0];
+    const banner = $('skinRequestBanner');
+    const title = $('skinRequestBannerTitle');
+    const revision = $('skinRevisionPanel');
+    banner.disabled = false;
+    revision.classList.remove('active');
+    if (!latest) {
+      title.textContent = '스킨 제작 요청';
+      return;
+    }
+    if (latest.status === '완료') {
+      title.textContent = '스킨 제작 완료';
+      banner.disabled = true;
+      revision.classList.add('active');
+      revision.dataset.pageId = latest.pageId || '';
+      return;
+    }
+    title.textContent = latest.status === '요청' ? '스킨 제작 요청' : '스킨 제작중';
+    banner.disabled = true;
+  }
+
+  async function submitSkinRevision() {
+    const panel = $('skinRevisionPanel');
+    const details = $('skinRevisionDetails').value.trim();
+    if (!details) return setPageStatus('skinRevisionStatus', '수정사항을 입력해주세요.', 'error');
+    try {
+      setPageStatus('skinRevisionStatus', '요청 중입니다.');
+      const result = await gasAction('submitSkinRevision', {
+        name: state.user.name,
+        agency: state.user.agency,
+        pageId: panel.dataset.pageId || '',
+        details: details,
+      });
+      $('skinRevisionDetails').value = '';
+      setPageStatus('skinRevisionStatus', result.message || '수정사항 요청이 접수되었습니다.', 'ok');
+    } catch (e) {
+      setPageStatus('skinRevisionStatus', e.message || String(e), 'error');
+    }
+  }
 
   function saveCompletedPostsCache(posts) { try { localStorage.setItem(COMPLETED_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readCompletedPostsCache() { try { return JSON.parse(localStorage.getItem(COMPLETED_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
@@ -986,6 +1117,15 @@
   // ─────────────────────────────
   function openDrawer()  { $('drawerDim').classList.add('active'); $('drawer').classList.add('active'); }
   function closeDrawer() { $('drawerDim').classList.remove('active'); $('drawer').classList.remove('active'); }
+  function openSkinRequest() {
+    const latest = ((state.appHome && state.appHome.skinRequests) || readSkinRequestsCache())[0];
+    if (latest && latest.status !== '완료') {
+      closeDrawer();
+      openPage('skinRequestsPage');
+      return;
+    }
+    window.location.href = 'skin-preview.html';
+  }
   function openPageFromDrawer(pageId) { closeDrawer(); openPage(pageId); }
   function openPlaceholder(title) { closeDrawer(); $('placeholderTitle').textContent = title; openPage('placeholderPage'); }
 
@@ -1001,6 +1141,20 @@
 
     if (pageId === 'campaignPage') {
       showCampaignDone();
+    }
+
+    if (pageId === 'skinRequestsPage') {
+      renderCachedSkinRequests();
+      gasAction('getMySkinRequests', { name: state.user.name, agency: state.user.agency })
+        .then(items => {
+          const list = Array.isArray(items) ? items : [];
+          renderSkinRequests(list);
+          saveSkinRequestsCache(list);
+          state.appHome = { ...(state.appHome || {}), skinRequests: list };
+        })
+        .catch(e => {
+          if (!readSkinRequestsCache().length) renderSkinRequests([]);
+        });
     }
 
     if (pageId === 'postsPage') {
