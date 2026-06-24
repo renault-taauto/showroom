@@ -54,7 +54,7 @@
     .skin-banner .banner-title{font-size:15px}
     .skin-home-actions{display:flex;gap:8px;align-items:stretch}
     .skin-home-actions .skin-banner{flex:1;min-width:0}
-    .skin-final-actions{display:none;width:100%;min-height:48px;background:#1570ef;border-radius:12px;overflow:hidden}
+    .skin-final-actions{display:none;width:100%;min-height:48px;background:#35668c;border-radius:12px;overflow:hidden}
     .skin-final-actions.active{display:grid;grid-template-columns:1fr 1fr 1fr}
     .skin-final-actions button{min-width:0;border:0;border-left:1px solid rgba(255,255,255,.35);border-radius:0;background:transparent;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
     .skin-final-actions button:first-child{border-left:0}
@@ -369,7 +369,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [] };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -523,8 +523,20 @@
     loadNotices();
     loadMessages();
     loadAppHome();
+    startHomeStatusRefresh();
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
+
+  function startHomeStatusRefresh() {
+    if (state.homeRefreshTimer) clearInterval(state.homeRefreshTimer);
+    state.homeRefreshTimer = setInterval(() => {
+      if (state.user && document.visibilityState === 'visible' && $('homeScreen').classList.contains('active')) loadAppHome();
+    }, 30000);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (state.user && document.visibilityState === 'visible' && $('homeScreen').classList.contains('active')) loadAppHome();
+  });
 
   function markTrafficVisit() {
     if (!state.user || !state.user.name || !state.user.agency) return;
@@ -967,6 +979,7 @@
   function acknowledgeSkinResult() {
     const latest = ((state.appHome && state.appHome.skinRequests) || readSkinRequestsCache())[0];
     if (!latest) return;
+    if (!confirm('최종 확인을 완료하시겠습니까?\n취소를 누르면 계속 결과 확인과 수정사항 요청을 할 수 있습니다.')) return;
     try { localStorage.setItem(skinResultAcknowledgementKey(latest), '1'); } catch {}
     $('skinRevisionPanel').classList.remove('active');
     updateSkinRequestHome((state.appHome && state.appHome.skinRequests) || [latest]);
