@@ -54,6 +54,10 @@
     .skin-banner .banner-title{font-size:15px}
     .skin-home-actions{display:flex;gap:8px;align-items:stretch}
     .skin-home-actions .skin-banner{flex:1;min-width:0}
+    .skin-final-actions{display:none;width:100%;min-height:48px;background:#1570ef;border-radius:12px;overflow:hidden}
+    .skin-final-actions.active{display:grid;grid-template-columns:1fr 1fr 1fr}
+    .skin-final-actions button{min-width:0;border:0;border-left:1px solid rgba(255,255,255,.35);border-radius:0;background:transparent;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
+    .skin-final-actions button:first-child{border-left:0}
     .skin-preview-pc{width:100%;border-radius:10px}
     .skin-preview-mobile{width:38%;margin:0 auto;border-radius:10px}
     .skin-preview-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:2px}
@@ -177,8 +181,8 @@
         <div class="banner-title">영업담당 SNS 활동 시책 참여신청<br>기간 : 6월 8일~7월 31일</div>
         <div class="banner-desc">최초 1회 참여 신청을 해주셔야 참여가 완료됩니다.</div>
       </button>
-      <div id="skinHomeActions" class="skin-home-actions"><button id="skinRequestBanner" class="banner skin-banner" type="button" onclick="openSkinRequest()"><div id="skinRequestBannerTitle" class="banner-title">블로그 스킨 제작 요청</div></button></div>
-      <div id="skinRevisionPanel" class="card form skin-revision"><textarea id="skinRevisionDetails" placeholder="수정사항을 입력하세요."></textarea><div id="skinRevisionStatus" class="status"></div><div class="skin-revision-actions"><button type="button" onclick="submitSkinRevision()">보내기</button><button type="button" onclick="acknowledgeSkinResult()">완료</button></div></div>
+      <div id="skinHomeActions" class="skin-home-actions"><button id="skinRequestBanner" class="banner skin-banner" type="button" onclick="openSkinRequest()"><div id="skinRequestBannerTitle" class="banner-title">블로그 스킨 제작 요청</div></button><div id="skinFinalActions" class="skin-final-actions"><button id="skinResultButton" type="button" onclick="openCurrentSkinResult()">스킨 결과</button><button type="button" onclick="openSkinRevision()">수정사항 보내기</button><button type="button" onclick="acknowledgeSkinResult()">최종 확인 완료</button></div></div>
+      <div id="skinRevisionPanel" class="card form skin-revision"><textarea id="skinRevisionDetails" placeholder="수정사항을 입력하세요."></textarea><div id="skinRevisionStatus" class="status"></div><div class="skin-revision-actions"><button type="button" onclick="submitSkinRevision()">보내기</button></div></div>
       <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div><div id="noticePagination" class="notice-pagination"></div></div>
       <div class="quick-actions">
         <button type="button" onclick="openPage('requestPage')">출고후기 원고<br>작성 요청</button>
@@ -906,8 +910,11 @@
     const title = $('skinRequestBannerTitle');
     const revision = $('skinRevisionPanel');
     const actions = $('skinHomeActions');
+    const finalActions = $('skinFinalActions');
     banner.disabled = false;
+    banner.style.display = 'block';
     actions.style.display = 'flex';
+    finalActions.classList.remove('active');
     revision.classList.remove('active');
     revision.dataset.pageId = '';
     if (!latest) {
@@ -919,8 +926,10 @@
         actions.style.display = 'none';
         return;
       }
-      title.textContent = latest.status === '수정완료' ? '스킨 수정 완료' : '스킨 결과 확인 · 수정사항 보내기';
-      banner.disabled = !(latest.resultUrl || latest.blogUrl);
+      banner.style.display = 'none';
+      $('skinResultButton').textContent = latest.status === '수정완료' ? '스킨 수정 완료' : '스킨 결과';
+      $('skinResultButton').disabled = !(latest.resultUrl || latest.blogUrl);
+      finalActions.classList.add('active');
       revision.dataset.pageId = latest.pageId || '';
       return;
     }
@@ -935,6 +944,16 @@
   function openSkinResult(item) {
     const url = item && (item.resultUrl || item.blogUrl);
     if (url) window.open(url, '_blank', 'noopener');
+  }
+
+  function openCurrentSkinResult() {
+    const latest = ((state.appHome && state.appHome.skinRequests) || readSkinRequestsCache())[0];
+    openSkinResult(latest);
+  }
+
+  function openSkinRevision() {
+    $('skinRevisionPanel').classList.add('active');
+    $('skinRevisionDetails').focus();
   }
 
   function skinResultAcknowledgementKey(item) {
