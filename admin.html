@@ -52,6 +52,13 @@
     .month-items{display:grid;gap:8px}
     .month-group.collapsed .month-items{display:none}
     .empty{padding:18px;border-radius:16px;background:#fff;border:1px dashed #bfd7f7;color:#8aa0b8;text-align:center;font-size:13px}
+    .chart{min-height:188px;border:1px solid #dbeafe;border-radius:16px;background:#fff;padding:12px;overflow:hidden}
+    .chart svg{width:100%;height:164px;display:block}
+    .table-wrap{overflow:auto;border:1px solid #dbeafe;border-radius:16px;background:#fff}
+    table{width:100%;min-width:560px;border-collapse:collapse;font-size:12px}
+    th,td{padding:10px;border-bottom:1px solid #e8f2ff;text-align:left;white-space:nowrap}
+    th{background:#f4f9ff;color:#153c75;font-weight:800}
+    td{color:#42566f}
     @media (max-width:560px){.top{display:grid}.summary,.menu{grid-template-columns:1fr}}
   </style>
 </head>
@@ -79,6 +86,7 @@
     <button id="completedBtn" type="button" onclick="openView('completed')">완료 확인<span id="uncheckedCount" class="count" style="display:none">0</span></button>
     <button id="campaignBtn" type="button" onclick="openView('campaign')">시책 신청 현황</button>
     <button id="noticeBtn" type="button" onclick="openView('notice')">공지 조회수</button>
+    <button id="trafficBtn" type="button" onclick="openView('traffic')">방문자 트래픽</button>
   </section>
 
   <section id="completedView" class="view">
@@ -102,6 +110,14 @@
     </div>
   </section>
 
+  <section id="trafficView" class="view">
+    <div class="panel">
+      <div class="section-head"><h2>방문자 트래픽</h2><p id="trafficCount"></p></div>
+      <div id="trafficChart" class="chart"></div>
+      <div id="trafficTable" class="table-wrap"></div>
+    </div>
+  </section>
+
   <div id="adminStatus" class="status"></div>
 </main>
 
@@ -109,7 +125,7 @@
   const SUPABASE_URL = 'https://gwajgqdqwovwuqhwoebq.supabase.co';
   const GAS_FUNCTION_NAME = 'swift-function';
   const ADMIN_CACHE_KEY = 'adminDashboardCache_v1';
-  const state = { activePosts: [], completedPosts: [], campaigns: [], noticeViews: [], view: '' };
+  const state = { activePosts: [], completedPosts: [], campaigns: [], noticeViews: [], traffic: { total: 0, daily: [], rows: [] }, view: '' };
   const $ = id => document.getElementById(id);
 
   renderCachedDashboard();
@@ -131,20 +147,23 @@
   async function loadDashboard() {
     setStatus('불러오는 중입니다.');
     try {
-      const [activePosts, completedPosts, campaigns, noticeViews] = await Promise.all([
+      const [activePosts, completedPosts, campaigns, noticeViews, traffic] = await Promise.all([
         gasAction('getAdminActivePosts'),
         gasAction('getAdminCompletedPosts'),
         gasAction('getCampaignApplications'),
         gasAction('getAdminNoticeViews'),
+        gasAction('getAdminTraffic').catch(() => ({ total: 0, daily: [], rows: [] })),
       ]);
       state.activePosts = Array.isArray(activePosts) ? activePosts : [];
       state.completedPosts = sortByDate(Array.isArray(completedPosts) ? completedPosts : []);
       state.campaigns = Array.isArray(campaigns) ? campaigns : [];
       state.noticeViews = Array.isArray(noticeViews) ? noticeViews : [];
+      state.traffic = traffic || { total: 0, daily: [], rows: [] };
       renderActivePosts();
       renderCompletedPosts();
       renderCampaigns();
       renderNoticeViews();
+      renderTraffic();
       saveDashboardCache();
       setStatus('불러왔습니다.', 'ok');
     } catch (e) {
@@ -160,10 +179,12 @@
     state.completedPosts = sortByDate(Array.isArray(cached.completedPosts) ? cached.completedPosts : []);
     state.campaigns = Array.isArray(cached.campaigns) ? cached.campaigns : [];
     state.noticeViews = Array.isArray(cached.noticeViews) ? cached.noticeViews : [];
+    state.traffic = cached.traffic || { total: 0, daily: [], rows: [] };
     renderActivePosts();
     renderCompletedPosts();
     renderCampaigns();
     renderNoticeViews();
+    renderTraffic();
     setStatus('저장된 목록을 먼저 보여주는 중입니다.');
   }
 
@@ -174,6 +195,7 @@
         completedPosts: state.completedPosts,
         campaigns: state.campaigns,
         noticeViews: state.noticeViews,
+        traffic: state.traffic,
         savedAt: new Date().toISOString(),
       }));
     } catch {}
@@ -234,9 +256,11 @@
     $('completedView').classList.toggle('active', state.view === 'completed');
     $('campaignView').classList.toggle('active', state.view === 'campaign');
     $('noticeView').classList.toggle('active', state.view === 'notice');
+    $('trafficView').classList.toggle('active', state.view === 'traffic');
     $('completedBtn').classList.toggle('active', state.view === 'completed');
     $('campaignBtn').classList.toggle('active', state.view === 'campaign');
     $('noticeBtn').classList.toggle('active', state.view === 'notice');
+    $('trafficBtn').classList.toggle('active', state.view === 'traffic');
   }
 
   function renderCompletedPosts() {
@@ -299,8 +323,73 @@
         </div>
         <span class="badge dark">${Number(item.viewCount || 0)} views</span>
       </div>
-      <div class="meta">조회 담당자 ${Number(item.viewerCount || 0)}명</div>
     </article>`).join('');
+  }
+
+  function renderTraffic() {
+    const traffic = state.traffic || { total: 0, daily: [], rows: [] };
+    const rows = Array.isArray(traffic.rows) ? traffic.rows : [];
+    const daily = Array.isArray(traffic.daily) ? traffic.daily : [];
+    $('trafficCount').textContent = `${Number(traffic.total || rows.length)}회`;
+    renderTrafficChart(daily);
+    renderTrafficTable(rows);
+  }
+
+  function renderTrafficChart(daily) {
+    if (!daily.length) {
+      $('trafficChart').innerHTML = '<div class="empty">방문 기록이 없습니다.</div>';
+      return;
+    }
+    const width = 640;
+    const height = 164;
+    const padX = 36;
+    const padY = 24;
+    const max = Math.max(...daily.map(item => Number(item.count || 0)), 1);
+    const step = daily.length > 1 ? (width - padX * 2) / (daily.length - 1) : 0;
+    const points = daily.map((item, index) => {
+      const x = padX + (daily.length === 1 ? (width - padX * 2) / 2 : step * index);
+      const y = height - padY - (Number(item.count || 0) / max) * (height - padY * 2);
+      return { x, y, count: Number(item.count || 0), date: item.date || '' };
+    });
+    const pointText = points.map(p => `${p.x},${p.y}`).join(' ');
+    const circles = points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#1268f3"></circle><text x="${p.x}" y="${p.y - 9}" text-anchor="middle" font-size="11" fill="#153c75" font-weight="700">${p.count}</text>`).join('');
+    const labels = points.map((p, index) => {
+      if (daily.length > 7 && index % 2 === 1) return '';
+      const label = String(p.date).slice(5);
+      return `<text x="${p.x}" y="${height - 4}" text-anchor="middle" font-size="10" fill="#6a7d94">${esc(label)}</text>`;
+    }).join('');
+    $('trafficChart').innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="방문자 트래픽">
+      <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="#dbeafe"></line>
+      <polyline points="${pointText}" fill="none" stroke="#1268f3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+      ${circles}
+      ${labels}
+    </svg>`;
+  }
+
+  function renderTrafficTable(rows) {
+    if (!rows.length) {
+      $('trafficTable').innerHTML = '<div class="empty">방문 기록이 없습니다.</div>';
+      return;
+    }
+    $('trafficTable').innerHTML = `<table>
+      <thead><tr><th>방문일시</th><th>이름</th><th>대리점</th><th>화면</th><th>기기</th></tr></thead>
+      <tbody>${rows.map(row => `<tr>
+        <td>${esc(row.visitedAt || '')}</td>
+        <td>${esc(row.name || '')}</td>
+        <td>${esc(row.agency || '')}</td>
+        <td>${esc(row.screen || '')}</td>
+        <td>${esc(shortUserAgent(row.userAgent || ''))}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  function shortUserAgent(userAgent) {
+    const text = String(userAgent || '');
+    if (/iPhone|iPad/i.test(text)) return 'iPhone Safari';
+    if (/Android/i.test(text)) return 'Android';
+    if (/Windows/i.test(text)) return 'Windows';
+    if (/Macintosh|Mac OS/i.test(text)) return 'Mac';
+    return text.slice(0, 42);
   }
 
   function toggleMonth(btn) {
