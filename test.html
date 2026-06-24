@@ -51,13 +51,17 @@
     .banner-title{font-size:18px;font-weight:700}
     .banner-desc{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px}
     .skin-banner{min-height:76px;background:#111827;align-content:center}
+    .skin-home-actions{display:flex;gap:8px;align-items:stretch}
+    .skin-home-actions .skin-banner{flex:1;min-width:0}
+    .skin-revision-toggle{display:none;min-height:76px;padding:0 12px;border:1px solid #d0d5dd;border-radius:12px;background:#fff;color:#111827;font-size:12px;font-weight:700;white-space:nowrap}
+    .skin-revision-toggle.active{display:block}
     .skin-preview-pc{width:100%;border-radius:10px}
     .skin-preview-mobile{width:38%;margin:0 auto;border-radius:10px}
     .skin-preview-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:2px}
     .skin-preview-actions button{width:auto;min-height:30px;padding:0;border:0;border-radius:0;background:transparent;font-size:13px;font-weight:700}
     .skin-preview-actions .primary{color:#111827}
     .skin-preview-actions .secondary{color:#667085}
-    .skin-revision{display:none}
+    .skin-revision{display:none;padding:10px;gap:8px}
     .skin-revision.active{display:grid}
     .notice-required{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#fff1f0;color:#d92d20;font-size:10px;font-weight:800;flex:0 0 auto}
     .small-btn{min-height:34px;padding:7px 10px;border-radius:10px;background:#eef1f5;color:#111827;font-size:12px}
@@ -171,10 +175,11 @@
         <div class="banner-title">영업담당 SNS 활동 시책 참여신청<br>기간 : 6월 8일~7월 31일</div>
         <div class="banner-desc">최초 1회 참여 신청을 해주셔야 참여가 완료됩니다.</div>
       </button>
-      <button id="skinRequestBanner" class="banner skin-banner" type="button" onclick="openSkinRequest()">
-        <div id="skinRequestBannerTitle" class="banner-title">블로그 스킨 제작 요청</div>
-      </button>
-      <div id="skinRevisionPanel" class="card form skin-revision"></div>
+      <div class="skin-home-actions">
+        <button id="skinRequestBanner" class="banner skin-banner" type="button" onclick="openSkinRequest()"><div id="skinRequestBannerTitle" class="banner-title">블로그 스킨 제작 요청</div></button>
+        <button id="skinRevisionToggle" class="skin-revision-toggle" type="button" onclick="toggleSkinRevision()">수정사항 보내기</button>
+      </div>
+      <div id="skinRevisionPanel" class="card form skin-revision"><textarea id="skinRevisionDetails" placeholder="수정사항을 입력하세요."></textarea><div id="skinRevisionStatus" class="status"></div><button class="primary" type="button" onclick="submitSkinRevision()">보내기</button></div>
       <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div><div id="noticePagination" class="notice-pagination"></div></div>
       <div class="quick-actions">
         <button type="button" onclick="openPage('requestPage')">출고후기 원고<br>작성 요청</button>
@@ -192,9 +197,9 @@
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>스킨 제작 요청</h2></div>
       <div class="list">
         <button class="choice" type="button" onclick="toggleSkinPreview('one')">1번 시안 보기</button>
-        <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/1.png" onerror="this.onerror=null;this.src='outputs/assets/skin-examples/1.png'" alt="1번 PC 시안"><img class="skin-preview-mobile" src="assets/skin-examples/1-1.png" onerror="this.onerror=null;this.src='outputs/assets/skin-examples/1-1.png'" alt="1번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('1번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div></div>
+        <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1.png" alt="1번 PC 시안"><img class="skin-preview-mobile" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1-1.png" alt="1번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('1번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div></div>
         <button class="choice" type="button" onclick="toggleSkinPreview('two')">2번 시안 보기</button>
-        <div id="skinPreviewTwo" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/2.png" onerror="this.onerror=null;this.src='outputs/assets/skin-examples/2.png'" alt="2번 PC 시안"><img class="skin-preview-mobile" src="assets/skin-examples/2-1.png" onerror="this.onerror=null;this.src='outputs/assets/skin-examples/2-1.png'" alt="2번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('2번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('two')">접기</button></div></div>
+        <div id="skinPreviewTwo" class="card" style="display:none"><img class="skin-preview-pc" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/2.png" alt="2번 PC 시안"><img class="skin-preview-mobile" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/2-1.png" alt="2번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('2번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('two')">접기</button></div></div>
         <button class="choice" type="button" onclick="startSkinRequest('기타')">기타 레퍼런스 요청</button>
       </div>
     </div>
@@ -901,59 +906,39 @@
     const banner = $('skinRequestBanner');
     const title = $('skinRequestBannerTitle');
     const revision = $('skinRevisionPanel');
-
+    const revisionToggle = $('skinRevisionToggle');
     banner.disabled = false;
     revision.classList.remove('active');
+    revisionToggle.classList.remove('active');
     revision.dataset.pageId = '';
-    revision.dataset.completeUrl = '';
-    revision.innerHTML = '';
-
     if (!latest) {
-      title.textContent = '블로그 스킨 제작 요청';
+      title.textContent = '스킨 제작 요청';
       return;
     }
-
+    if (isSkinFinalStatus(latest.status)) {
+      title.textContent = latest.status === '수정완료' ? '스킨 수정 완료' : '스킨 결과 확인';
+      banner.disabled = !(latest.resultUrl || latest.blogUrl);
+      revisionToggle.classList.add('active');
+      revision.dataset.pageId = latest.pageId || '';
+      return;
+    }
     title.textContent = '블로그 스킨 요청 완료';
     banner.disabled = true;
-
-    const status = String(latest.status || '').trim();
-    if (status !== '완료') return;
-
-    const setupMethod = String(latest.setupMethod || '').trim();
-    revision.dataset.pageId = latest.pageId || '';
-    revision.dataset.completeUrl = latest.resultUrl || latest.blogUrl || '';
-    revision.classList.add('active');
-
-    if (setupMethod === '요청' || setupMethod === '설정방법 요청') {
-      revision.innerHTML = `
-        <h3>수정사항 요청하기</h3>
-        <div class="status">완료된 스킨에 수정이 필요하면 아래 버튼을 눌러 요청해주세요.</div>
-        <button class="primary" type="button" onclick="openSkinRevisionForm()">수정사항 요청하기</button>
-        <div id="skinRevisionForm" style="display:none; margin-top:12px;">
-          <textarea id="skinRevisionDetails" placeholder="수정이 필요한 내용을 입력하세요."></textarea>
-          <div id="skinRevisionStatus" class="status"></div>
-          <button class="primary" type="button" onclick="submitSkinRevision()">수정사항 요청</button>
-        </div>`;
-      return;
-    }
-
-    revision.innerHTML = `
-      <h3>스킨 결과 확인</h3>
-      <div class="status">완료된 스킨 이미지를 아래 버튼에서 확인할 수 있습니다.</div>
-      <button class="primary" type="button" onclick="openSkinResultLink()">이미지 확인하기</button>
-      <div id="skinRevisionStatus" class="status"></div>`;
   }
 
-  function openSkinRevisionForm() {
-    const form = $('skinRevisionForm');
-    if (form) form.style.display = 'block';
+  function isSkinFinalStatus(status) {
+    return ['완료', '수정완료'].includes(String(status || '').replace(/\s/g, ''));
   }
 
-  function openSkinResultLink() {
+  function openSkinResult(item) {
+    const url = item && (item.resultUrl || item.blogUrl);
+    if (url) window.open(url, '_blank', 'noopener');
+  }
+
+  function toggleSkinRevision() {
     const panel = $('skinRevisionPanel');
-    const url = panel.dataset.completeUrl || '';
-    if (!url) return setPageStatus('skinRevisionStatus', '완료 링크가 아직 등록되지 않았습니다.', 'error');
-    window.open(url, '_blank', 'noopener');
+    panel.classList.toggle('active');
+    if (panel.classList.contains('active')) $('skinRevisionDetails').focus();
   }
 
   async function submitSkinRevision() {
@@ -1197,11 +1182,8 @@
   function closeDrawer() { $('drawerDim').classList.remove('active'); $('drawer').classList.remove('active'); }
   function openSkinRequest() {
     const latest = ((state.appHome && state.appHome.skinRequests) || readSkinRequestsCache())[0];
-    if (latest && ['요청', '진행중', '완료'].includes(latest.status)) {
-      closeDrawer();
-      openPage('skinRequestsPage');
-      return;
-    }
+    if (latest && isSkinFinalStatus(latest.status)) return openSkinResult(latest);
+    if (latest) return;
     openPage('skinSelectPage');
   }
   function toggleSkinPreview(kind) {
@@ -1264,7 +1246,7 @@
       buttons.push(checkbox.dataset.skinSns);
       if (url) links.push(checkbox.dataset.skinSns + ': ' + url);
     });
-    return { buttons: buttons, links: links.join('\n') };
+    return { buttons: buttons.join(', '), links: links.join('\n') };
   }
   function collectSkinMenus() {
     if (state.skinDraft === '2번' && !$('skinMenuEnabled').checked) return '';
@@ -1301,13 +1283,12 @@
     if (setupMethod === '요청' && (!accountId || !accountPassword)) return setPageStatus('skinFormStatus', '아이디와 비밀번호를 입력해주세요.', 'error');
     if (skin === '1번' && !menuUrls) return setPageStatus('skinFormStatus', '하단 메뉴를 최소 1개 입력해주세요.', 'error');
     const referenceFiles = await Promise.all(state.skinReferenceFiles.map(skinFileData));
-    const payload = { action:'submitNotionSkinRequest', name:state.user.name, agency:state.user.agency, skin:skin, phone:$('skinPhone').value.trim(), backgroundChoice:$('skinBackgroundChoice').value, backgroundPhoto:await skinFileData($('skinBackgroundPhoto').files[0]), profilePhoto:await skinFileData($('skinProfilePhoto').files[0]), introduction:$('skinIntroduction').value.trim(), snsButtons:sns.buttons, snsLinks:sns.links, menuOption:$('skinMenuEnabled').checked ? $('skinMenuToggleText').textContent : '미사용', menuUrls:menuUrls, requestDetails:$('skinDetails').value.trim(), reference:skin === '기타' ? $('skinReference').value.trim() : '', referenceFiles:referenceFiles, setupMethod:setupMethod, accountId:accountId, accountPassword:accountPassword };
+    const payload = { name:state.user.name, agency:state.user.agency, skin:skin, phone:$('skinPhone').value.trim(), backgroundChoice:$('skinBackgroundChoice').value, backgroundPhoto:await skinFileData($('skinBackgroundPhoto').files[0]), profilePhoto:await skinFileData($('skinProfilePhoto').files[0]), introduction:$('skinIntroduction').value.trim(), snsButtons:sns.buttons, snsLinks:sns.links, menuOption:$('skinMenuEnabled').checked, menuUrls:menuUrls, requestDetails:$('skinDetails').value.trim(), reference:skin === '기타' ? $('skinReference').value.trim() : '', referenceFiles:referenceFiles, setupMethod:setupMethod, accountId:accountId, accountPassword:accountPassword };
     try {
       $('skinSubmitButton').disabled = true; setPageStatus('skinFormStatus', '요청 중입니다.');
-      const response = await fetch('https://script.google.com/macros/s/AKfycbzzuanI9dypWWvYO37xC_Dqq5DYlwyTzPnvmgHuP8YIf-DM_NkUaHvVkG5HESoZJVKlmQ/exec', { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
-      const result = await response.json(); if (!result.ok) throw new Error(result.error || '요청에 실패했습니다.');
+      const result = await gasAction('submitNotionSkinRequest', payload);
       setPageStatus('skinFormStatus', '접수가 완료되었습니다.', 'ok');
-      state.appHome = { ...(state.appHome || {}), skinRequests:[{ skin:skin, status:'요청', date:new Date().toISOString().slice(0,10), setupMethod: setupMethod }, ...((state.appHome && state.appHome.skinRequests) || [])] };
+      state.appHome = { ...(state.appHome || {}), skinRequests:[{ skin:skin, status:'요청', date:new Date().toISOString().slice(0,10) }, ...((state.appHome && state.appHome.skinRequests) || [])] };
       renderSkinRequests(state.appHome.skinRequests);
       setTimeout(() => openPage('mainPage'), 800);
     } catch (e) { setPageStatus('skinFormStatus', e.message || String(e), 'error'); }
