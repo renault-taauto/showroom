@@ -53,6 +53,8 @@
     .skin-banner{min-height:76px;background:#111827;align-content:center}
     .skin-preview-pc{width:100%;border-radius:10px}
     .skin-preview-mobile{width:38%;margin:0 auto;border-radius:10px}
+    .skin-preview-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .skin-preview-actions button{min-height:40px;border-radius:10px}
     .skin-revision{display:none}
     .skin-revision.active{display:grid}
     .notice-required{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#fff1f0;color:#d92d20;font-size:10px;font-weight:800;flex:0 0 auto}
@@ -183,9 +185,9 @@
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>스킨 제작 요청</h2></div>
       <div class="list">
         <button class="choice" type="button" onclick="toggleSkinPreview('one')">1번 시안 보기</button>
-        <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/1.png"><img class="skin-preview-mobile" src="assets/skin-examples/1-1.png"><button class="primary" type="button" onclick="startSkinRequest('1번')">1번 시안 요청</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div>
+        <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/1.png"><img class="skin-preview-mobile" src="assets/skin-examples/1-1.png"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('1번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div></div>
         <button class="choice" type="button" onclick="toggleSkinPreview('two')">2번 시안 보기</button>
-        <div id="skinPreviewTwo" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/2.png"><img class="skin-preview-mobile" src="assets/skin-examples/2-1.png"><button class="primary" type="button" onclick="startSkinRequest('2번')">2번 시안 요청</button><button class="secondary" type="button" onclick="toggleSkinPreview('two')">접기</button></div>
+        <div id="skinPreviewTwo" class="card" style="display:none"><img class="skin-preview-pc" src="assets/skin-examples/2.png"><img class="skin-preview-mobile" src="assets/skin-examples/2-1.png"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('2번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('two')">접기</button></div></div>
         <button class="choice" type="button" onclick="startSkinRequest('기타')">기타 레퍼런스 요청</button>
       </div>
     </div>
@@ -202,7 +204,7 @@
           <div class="field"><label>SNS 버튼</label><textarea id="skinSns" placeholder="인스타그램: URL&#10;카카오톡: URL"></textarea></div>
           <div class="field"><label id="skinMenuLabel">메뉴</label><textarea id="skinMenu" placeholder="메뉴명: URL"></textarea></div>
         </div>
-        <div id="skinReferenceFields" class="form" style="display:none"><div class="field"><label>기타 레퍼런스</label><textarea id="skinReference"></textarea></div><div class="field"><label>추가 파일</label><input id="skinReferenceFiles" type="file" multiple accept="image/*,.heic,.heif,.pdf"></div></div>
+        <div id="skinReferenceFields" class="form" style="display:none"><div class="field"><label>스킨에 들어갈 내용</label><textarea id="skinReference" placeholder="들어갈 내용, URL, 이미지 등 필요한 자료를 모두 입력하세요."></textarea></div><div class="field"><label>레퍼런스 파일</label><input id="skinReferenceFiles" type="file" multiple accept="image/*,.heic,.heif,.pdf" onchange="addSkinReferenceFiles()"><div id="skinReferenceFileList" class="file-name"></div></div></div>
         <div class="field"><label>기타 요구사항</label><textarea id="skinDetails"></textarea></div>
         <div class="field"><label>설정방법</label><select id="skinSetupMethod" onchange="toggleSkinAccountFields()"><option value="스스로">스스로</option><option value="요청">요청</option></select></div>
         <div id="skinAccountFields" class="form" style="display:none"><div class="field"><label>아이디</label><input id="skinAccountId"></div><div class="field"><label>비밀번호</label><input id="skinAccountPassword" type="password"></div></div>
@@ -352,7 +354,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [], visibleNotices: [], noticePage: 1 };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [] };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -1166,6 +1168,9 @@
   }
   function startSkinRequest(skin) {
     state.skinDraft = skin;
+    state.skinReferenceFiles = [];
+    $('skinReferenceFiles').value = '';
+    $('skinReferenceFileList').textContent = '';
     $('skinFormTitle').textContent = skin + ' 스킨 제작 요청';
     $('skinDesignFields').style.display = skin === '기타' ? 'none' : 'grid';
     $('skinReferenceFields').style.display = skin === '기타' ? 'grid' : 'none';
@@ -1177,13 +1182,23 @@
   function toggleSkinBackgroundFile() { $('skinBackgroundFileField').style.display = $('skinBackgroundChoice').value === '개인 차량 사진' ? 'grid' : 'none'; }
   function toggleSkinAccountFields() { $('skinAccountFields').style.display = $('skinSetupMethod').value === '요청' ? 'grid' : 'none'; }
   function skinFileData(file) { return file ? readFileAsDataUrl(file) : Promise.resolve(''); }
+  function addSkinReferenceFiles() {
+    const input = $('skinReferenceFiles');
+    const existing = new Set(state.skinReferenceFiles.map(file => file.name + ':' + file.size + ':' + file.lastModified));
+    [...input.files].forEach(file => {
+      const key = file.name + ':' + file.size + ':' + file.lastModified;
+      if (!existing.has(key)) state.skinReferenceFiles.push(file);
+    });
+    $('skinReferenceFileList').textContent = state.skinReferenceFiles.map(file => file.name).join(', ');
+    input.value = '';
+  }
   async function submitSkinRequestFromApp() {
     const skin = state.skinDraft || '기타';
     const setupMethod = $('skinSetupMethod').value;
     const accountId = $('skinAccountId').value.trim();
     const accountPassword = $('skinAccountPassword').value;
     if (setupMethod === '요청' && (!accountId || !accountPassword)) return setPageStatus('skinFormStatus', '아이디와 비밀번호를 입력해주세요.', 'error');
-    const referenceFiles = await Promise.all([...$('skinReferenceFiles').files].map(skinFileData));
+    const referenceFiles = await Promise.all(state.skinReferenceFiles.map(skinFileData));
     const payload = { action:'submitNotionSkinRequest', name:state.user.name, agency:state.user.agency, skin:skin, phone:$('skinPhone').value.trim(), backgroundChoice:$('skinBackgroundChoice').value, backgroundPhoto:await skinFileData($('skinBackgroundPhoto').files[0]), profilePhoto:await skinFileData($('skinProfilePhoto').files[0]), introduction:$('skinIntroduction').value.trim(), snsLinks:$('skinSns').value.trim(), menuUrls:$('skinMenu').value.trim(), requestDetails:$('skinDetails').value.trim(), reference:skin === '기타' ? $('skinReference').value.trim() : '', referenceFiles:referenceFiles, setupMethod:setupMethod, accountId:accountId, accountPassword:accountPassword };
     try {
       $('skinSubmitButton').disabled = true; setPageStatus('skinFormStatus', '요청 중입니다.');
