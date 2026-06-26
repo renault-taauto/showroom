@@ -312,7 +312,7 @@
 
     <div id="campaignScorePage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>시책 점수 확인</h2></div>
-      <div class="card"><div id="campaignScoreText" class="notice-content">불러오는 중입니다.</div><button id="campaignApplyButton" class="primary" type="button" style="display:none" onclick="openPage('campaignPage')">신청하기</button></div>
+      <div class="card"><div id="campaignScoreText" class="notice-content">불러오는 중입니다.</div><button id="campaignApplyButton" class="primary" type="button" style="display:none" onclick="openCampaignApplication()">신청하기</button></div>
     </div>
 
     <div id="postsPage" class="page">
@@ -830,6 +830,12 @@
     const isDone = localStorage.getItem(CAMPAIGN_DONE_KEY) === '1';
     $('campaignDone').style.display = isDone ? 'grid' : 'none';
     $('campaignForm').style.display = isDone ? 'none' : 'grid';
+  }
+
+  function openCampaignApplication() {
+    // 점수 화면에서 미참여로 확인된 경우, 오래된 로컬 완료 표시가 신청 폼을 가리지 않게 한다.
+    localStorage.removeItem(CAMPAIGN_DONE_KEY);
+    openPage('campaignPage');
   }
 
   async function loadCampaignScore() {
