@@ -269,7 +269,7 @@
         <div class="field"><label>만족포인트</label><div id="satisfactionChoices" class="choice-grid"></div></div>
         <div class="field"><label>고객과의 히스토리</label><textarea id="customerHistory" placeholder="상담 과정, 선택 이유, 고객 상황 등을 입력하세요."></textarea></div>
         <div class="field"><label>차량 인도 분위기</label><textarea id="deliveryMood" placeholder="출고 당일 분위기, 반응, 전달 포인트를 입력하세요."></textarea></div>
-        <div class="field">
+        <div id="inspectionField" class="field" style="display:none">
           <label>검수 사진</label>
           <div class="file-actions">
             <button class="file-action" type="button" onclick="$('inspectionFiles').click()">갤러리에서 선택</button>
@@ -1387,12 +1387,18 @@
   function updateRequestPhotoGuide() {
     const type = $('requestUploadBlog').value;
     const count = getInspectionFiles().length;
-    if (type === '본인 블로그') {
-      $('inspectionGuide').textContent = '본인 블로그는 사진 없이도 제출할 수 있습니다. 사진을 선택하면 함께 저장됩니다.';
-    } else if (type === '지점 블로그') {
+    const isBranchBlog = type === '지점 블로그';
+    $('inspectionField').style.display = isBranchBlog ? 'grid' : 'none';
+    if (isBranchBlog) {
       $('inspectionGuide').textContent = `지점 블로그는 검수 사진 5장 이상 필수입니다. 현재 ${count}장 선택됨.`;
     } else {
-      $('inspectionGuide').textContent = '업로드 블로그를 선택하면 사진 제출 기준이 표시됩니다.';
+      $('inspectionFiles').value = '';
+      $('inspectionCameraFiles').value = '';
+      $('inspectionFileName').textContent = '';
+      state.previewUrls.forEach(u => URL.revokeObjectURL(u));
+      state.previewUrls = [];
+      $('inspectionPreview').innerHTML = '';
+      $('inspectionGuide').textContent = '';
     }
   }
 
