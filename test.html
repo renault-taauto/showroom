@@ -50,26 +50,6 @@
     .banner{overflow:hidden;border-radius:18px;background:#111827;color:#fff;min-height:118px;display:grid;align-content:end;padding:18px;text-align:left;width:100%}
     .banner-title{font-size:18px;font-weight:700}
     .banner-desc{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px}
-    .skin-banner{min-height:48px;padding:10px 13px;background:#111827;align-content:center}
-    .skin-banner .banner-title{font-size:15px}
-    .skin-home-actions{display:flex;gap:8px;align-items:stretch}
-    .skin-home-actions .skin-banner{flex:1;min-width:0}
-    .skin-final-actions{display:none;width:100%;min-height:48px;background:#35668c;border-radius:12px;overflow:hidden}
-    .skin-final-actions.active{display:grid;grid-template-columns:1fr 1fr 1fr}
-    .skin-final-actions button{min-width:0;border:0;border-left:1px solid rgba(255,255,255,.35);border-radius:0;background:transparent;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
-    .skin-final-actions button:first-child{border-left:0}
-    .skin-preview-pc{width:100%;border-radius:10px}
-    .skin-preview-mobile{width:38%;margin:0 auto;border-radius:10px}
-    .skin-preview-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:2px}
-    .skin-preview-actions button{width:auto;min-height:30px;padding:0;border:0;border-radius:0;background:transparent;font-size:13px;font-weight:700}
-    .skin-preview-actions .primary{color:#111827}
-    .skin-preview-actions .secondary{color:#667085}
-    .skin-revision{display:none;padding:10px;gap:8px}
-    .skin-revision.active{display:grid}
-    .skin-revision-actions{display:flex;justify-content:flex-end;gap:10px}
-    .skin-revision-actions button{width:auto;min-height:32px;padding:0;border:0;border-radius:0;background:transparent;color:#111827;font-size:13px;font-weight:700}
-    .skin-revision-actions button:last-child{color:#667085}
-    .notice-required{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#fff1f0;color:#d92d20;font-size:10px;font-weight:800;flex:0 0 auto}
     .small-btn{min-height:34px;padding:7px 10px;border-radius:10px;background:#eef1f5;color:#111827;font-size:12px}
     .list{display:grid;gap:8px}
     .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none}
@@ -78,15 +58,11 @@
     .list-meta.done{color:#d92d20;font-weight:600}
     .notice-content{font-size:14px;color:#475467;line-height:1.55;white-space:pre-wrap}
     .notice-image{width:100%;border-radius:12px;display:block}
-    .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px}
-    .notice-section .list{gap:1px}
-    .notice-row{width:100%;min-height:32px;background:transparent;padding:2px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:7px}
+    .notice-section{display:grid;gap:4px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:12px}
+    .notice-row{width:100%;background:transparent;padding:3px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:8px}
     .notice-title{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .notice-date{flex:0 0 auto;color:#667085;font-size:12px}
     .notice-pin{color:#d92d20}
-    .notice-pagination{display:flex;justify-content:center;gap:12px;padding-top:5px}
-    .notice-pagination button{width:auto;height:auto;padding:0;border:0;border-radius:0;background:transparent;color:#98a2b3;font-size:13px}
-    .notice-pagination button.active{background:transparent;color:#111827;font-weight:800}
     .month-group{display:grid;gap:8px}
     .month-head{width:100%;min-height:42px;border-radius:12px;background:#eef1f5;color:#344054;padding:0 12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;text-align:left}
     .month-count{font-size:12px;color:#667085;font-weight:500}
@@ -102,9 +78,7 @@
     .drawer-head{display:flex;justify-content:space-between;align-items:center}
     .drawer-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .drawer-menu{display:grid;gap:2px}
-    .drawer-menu button{width:100%;min-height:44px;background:#fff;color:#111827;text-align:left;padding:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
-    .count-badge{display:none;min-width:20px;height:20px;border-radius:999px;background:#d92d20;color:#fff;font-size:12px;font-weight:700;place-items:center;padding:0 6px}
-    .count-badge.active{display:grid}
+    .drawer-menu button{width:100%;min-height:44px;background:#fff;color:#111827;text-align:left;padding:0}
     .page{display:none}
     .page.active{display:grid}
     .file-name{font-size:12px;color:#667085}
@@ -117,26 +91,12 @@
     .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .choice{min-height:42px;border-radius:12px;background:#fff;border:1px solid #d0d5dd;color:#344054}
     .choice.active{background:#111827;border-color:#111827;color:#fff}
-    .check-row{display:flex;align-items:center;gap:9px;font-size:13px;color:#344054}
-    .check-row input{width:18px;min-height:18px;height:18px;margin:0}
-    .skin-control-list{display:grid;gap:7px}
-    .skin-control-row{display:grid;grid-template-columns:120px minmax(0,1fr);align-items:center;gap:8px}
-    .skin-control-row input[type="text"]{min-height:38px;padding:8px 10px}
-    .skin-menu-row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) auto;gap:7px;align-items:center}
-    .skin-menu-row input[type="text"]{min-height:38px;padding:8px 10px}
-    .skin-menu-row .check-row{white-space:nowrap;font-size:12px}
-    .skin-form-head{position:relative;display:block}
-    .skin-form-head .back-btn{position:absolute;z-index:2;top:10px;left:10px;width:30px;height:30px;border:0;border-radius:0;background:transparent;padding:0;font-size:28px;line-height:1;color:#111827}
-    .skin-form-preview{width:100%;height:auto;object-fit:contain;border-radius:8px;display:block}
-    .skin-form-head h2{margin:3px 0 0;padding-left:38px}
     .modal-dim{position:fixed;inset:0;background:rgba(17,24,39,.52);display:none;z-index:30;padding:24px 16px;align-items:center;justify-content:center}
     .modal-dim.active{display:flex}
     .modal{width:min(440px,100%);max-height:84vh;overflow:auto;background:#fff;border-radius:16px;padding:16px;display:grid;gap:12px}
     .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
     .modal-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .modal-body{display:grid;gap:12px}
-    .message-item.unread{border-color:#f04438;background:#fffafa}
-    .message-body{font-size:14px;color:#344054;line-height:1.55;white-space:pre-wrap}
   </style>
 </head>
 <body>
@@ -179,52 +139,14 @@
       </div>
       <button class="banner" type="button" onclick="openPage('campaignPage')">
         <div class="banner-title">영업담당 SNS 활동 시책 참여신청<br>기간 : 6월 8일~7월 31일</div>
-        <div class="banner-desc">최초 1회 참여 신청을 해주셔야 참여가 완료됩니다.</div>
+        <div class="banner-desc">참여할 블로그 유형을 선택하고 신청하세요.</div>
       </button>
-      <div id="skinHomeActions" class="skin-home-actions"><button id="skinRequestBanner" class="banner skin-banner" type="button" onclick="openSkinRequest()"><div id="skinRequestBannerTitle" class="banner-title">블로그 스킨 제작 요청</div></button><div id="skinFinalActions" class="skin-final-actions"><button id="skinResultButton" type="button" onclick="openCurrentSkinResult()">스킨 결과</button><button type="button" onclick="openSkinRevision()">수정사항 보내기</button><button type="button" onclick="acknowledgeSkinResult()">최종 확인 완료</button></div></div>
-      <div id="skinRevisionPanel" class="card form skin-revision"><textarea id="skinRevisionDetails" placeholder="수정사항을 입력하세요."></textarea><div id="skinRevisionStatus" class="status"></div><div class="skin-revision-actions"><button type="button" onclick="submitSkinRevision()">보내기</button></div></div>
-      <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div><div id="noticePagination" class="notice-pagination"></div></div>
+      <div class="notice-section"><h3>공지사항</h3><div id="noticeList" class="list"></div></div>
       <div class="quick-actions">
-        <button type="button" onclick="openPage('requestPage')">출고후기 원고<br>작성 요청</button>
-        <button type="button" onclick="openPage('renaultDraftPage')">르노 차량<br>원고 작성</button>
+        <button type="button" onclick="openPage('requestPage')">블로그 원고<br>제작 요청</button>
+        <button type="button" onclick="openPage('postsPage')">완료된 원고<br>리스트</button>
       </div>
       <div class="card"><div class="section-head"><h3>접수된 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button></div><div id="completedPostList" class="list"></div></div>
-    </div>
-
-    <div id="skinRequestsPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>요청 확인</h2></div>
-      <div id="skinRequestList" class="list"></div>
-    </div>
-
-    <div id="skinSelectPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>스킨 제작 요청</h2></div>
-      <div class="list">
-        <button class="choice" type="button" onclick="toggleSkinPreview('one')">1번 시안 보기</button>
-        <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1.png" alt="1번 PC 시안"><img class="skin-preview-mobile" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1-1.png" alt="1번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('1번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div></div>
-        <button class="choice" type="button" onclick="toggleSkinPreview('two')">2번 시안 보기</button>
-        <div id="skinPreviewTwo" class="card" style="display:none"><img class="skin-preview-pc" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/2.png" alt="2번 PC 시안"><img class="skin-preview-mobile" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/2-1.png" alt="2번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('2번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('two')">접기</button></div></div>
-        <button class="choice" type="button" onclick="startSkinRequest('기타')">기타 레퍼런스 요청</button>
-      </div>
-    </div>
-
-    <div id="skinFormPage" class="page">
-      <div class="back-row skin-form-head"><button class="back-btn" type="button" onclick="openPage('skinSelectPage')" aria-label="뒤로가기">‹</button><h2 id="skinFormTitle">스킨 제작 요청</h2><img id="skinFormPreview" class="skin-form-preview" alt="선택한 스킨 시안" style="display:none"></div>
-      <div class="card form">
-        <div class="field"><label>전화번호</label><input id="skinPhone" inputmode="tel" placeholder="010-0000-0000"></div>
-        <div id="skinDesignFields" class="form">
-          <div class="field"><label>배경 사진</label><select id="skinBackgroundChoice" onchange="toggleSkinBackgroundFile()"><option value="공식 이미지 - 필랑트">공식 이미지 - 필랑트</option><option value="공식 이미지 - 콜레오스">공식 이미지 - 콜레오스</option><option value="공식 이미지 - 아르카나">공식 이미지 - 아르카나</option><option value="개인 차량 사진">개인 차량 사진</option></select></div>
-          <div id="skinBackgroundFileField" class="field" style="display:none"><label>개인 차량 사진</label><input id="skinBackgroundPhoto" type="file" accept="image/*,.heic,.heif"></div>
-          <div id="skinProfileField" class="field" style="display:none"><label>프로필 사진</label><input id="skinProfilePhoto" type="file" accept="image/*,.heic,.heif"></div>
-          <div id="skinIntroField" class="field" style="display:none"><label>소개문구</label><textarea id="skinIntroduction"></textarea></div>
-          <div class="field"><label>SNS 버튼</label><div id="skinSnsRows" class="skin-control-list"></div><div class="hint">최대 4개까지 선택할 수 있습니다.</div></div>
-          <div class="field"><label id="skinMenuLabel">메뉴</label><label id="skinMenuToggleRow" class="check-row"><input id="skinMenuEnabled" type="checkbox" onchange="toggleSkinMenuRows()"><span id="skinMenuToggleText">이모지 사용</span></label><div id="skinMenuRows" class="skin-control-list" style="display:none"></div></div>
-        </div>
-        <div id="skinReferenceFields" class="form" style="display:none"><div class="field"><label>스킨에 들어갈 내용</label><textarea id="skinReference" placeholder="들어갈 내용, URL, 이미지 등 필요한 자료를 모두 입력하세요."></textarea></div><div class="field"><label>레퍼런스 파일</label><input id="skinReferenceFiles" type="file" multiple accept="image/*,.heic,.heif,.pdf" onchange="addSkinReferenceFiles()"><div id="skinReferenceFileList" class="file-name"></div></div></div>
-        <div class="field"><label>기타 요구사항</label><textarea id="skinDetails"></textarea></div>
-        <div class="field"><label>설정방법</label><select id="skinSetupMethod" onchange="toggleSkinAccountFields()"><option value="스스로">스스로</option><option value="요청">요청</option></select></div>
-        <div id="skinAccountFields" class="form" style="display:none"><div class="field"><label>아이디</label><input id="skinAccountId"></div><div class="field"><label>비밀번호</label><input id="skinAccountPassword" type="password"></div></div>
-        <div id="skinFormStatus" class="status"></div><button id="skinSubmitButton" class="primary" type="button" onclick="submitSkinRequestFromApp()">스킨 요청 접수</button>
-      </div>
     </div>
 
     <div id="profilePage" class="page">
@@ -237,16 +159,15 @@
         <div id="blogUrlField" class="field"><label>블로그 URL</label><input id="profileBlogUrl" placeholder="본인 블로그 URL"></div>
         <div id="testDriveUrlField" class="field"><label>시승신청 URL</label><input id="profileTestDriveUrl" placeholder="본인 시승신청 URL"></div>
         <div id="businessCardField" class="field"><label>본인 명함 이미지</label><input id="profileBusinessCardFile" type="file" accept="image/*"><div id="businessCardName" class="file-name"></div></div>
-        <label class="check-row"><input id="profileBranchManager" type="checkbox" onchange="toggleProfileFields()">지점장입니다</label>
         <div id="profileStatus" class="status"></div>
         <button class="primary" type="button" onclick="saveMyInfo()">저장하고 시작</button>
       </div>
     </div>
 
     <div id="requestPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>출고후기 원고 작성 요청</h2></div>
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>블로그 원고 제작 요청</h2></div>
       <div class="card form">
-        <div class="field"><label>업로드 블로그</label><select id="requestUploadBlog" onchange="updateRequestPhotoGuide()"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div class="field"><label>업로드 블로그</label><select id="requestUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
         <div class="field"><label>출고 날짜</label><input id="deliveryDate" type="date"></div>
         <div class="field"><label>모델</label><select id="vehicleModel" onchange="updateVehicleChildren()"><option value="">모델 선택</option></select></div>
         <div class="field"><label>트림</label><select id="vehicleTrim"><option value="">트림 선택</option></select></div>
@@ -264,23 +185,11 @@
           </div>
           <input id="inspectionFiles" type="file" accept="image/*" multiple hidden>
           <input id="inspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple hidden>
-          <div id="inspectionGuide" class="hint"></div>
           <div id="inspectionFileName" class="file-name"></div>
           <div id="inspectionPreview" class="photo-preview"></div>
         </div>
         <div id="requestStatus" class="status"></div>
         <button id="requestSubmitBtn" class="primary" type="button" onclick="requestBlogDraft()">요청하기</button>
-      </div>
-    </div>
-
-    <div id="renaultDraftPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>르노 차량 원고 작성</h2></div>
-      <div class="card form">
-        <div class="field"><label>업로드</label><select id="renaultUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
-        <div class="field"><label>키워드</label><input id="renaultKeyword" placeholder="예: 그랑 콜레오스 하이브리드 장점"></div>
-        <div class="field"><label>요청 사항</label><textarea id="renaultRequestDetails" placeholder="원고에 꼭 들어가야 할 내용이나 방향을 입력하세요."></textarea></div>
-        <div id="renaultDraftStatus" class="status"></div>
-        <button class="primary" type="button" onclick="submitRenaultDraft()">요청하기</button>
       </div>
     </div>
 
@@ -307,11 +216,6 @@
       <div id="uploadContentsList" class="list"></div>
     </div>
 
-    <div id="messagesPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>메시지함</h2></div>
-      <div id="messageList" class="list"></div>
-    </div>
-
     <div id="placeholderPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2 id="placeholderTitle"></h2></div>
       <div class="empty">준비 중입니다.</div>
@@ -328,6 +232,7 @@
     <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
     <button type="button" onclick="openPageFromDrawer('uploadContentsPage')">업로드 콘텐츠</button>
     <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
+    <button type="button" onclick="openPlaceholder('블로그 스킨제작 요청')">블로그 스킨제작 요청</button>
     <button type="button" onclick="logout()">로그아웃</button>
   </div>
 </aside>
@@ -354,8 +259,6 @@
   const MY_POSTS_CACHE_KEY = 'salesMyPostsCache_v1';
   const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
   const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
-  const MESSAGES_CACHE_KEY = 'salesMessagesCache_v1';
-  const SKIN_REQUESTS_CACHE_KEY = 'salesSkinRequestsCache_v1';
 
   const FALLBACK_OPTIONS = {
     vehicles: {
@@ -369,7 +272,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [] };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -516,41 +419,10 @@
     // 캐시 먼저 렌더링
     renderCachedNotices();
     renderCachedCompletedPosts();
-    renderCachedSkinRequests();
-    renderCachedMessages();
-    markTrafficVisit();
     // 새 데이터 로드
     loadNotices();
-    loadMessages();
     loadAppHome();
-    startHomeStatusRefresh();
     window.scrollTo({ top: 0, behavior: 'auto' });
-  }
-
-  function startHomeStatusRefresh() {
-    if (state.homeRefreshTimer) clearInterval(state.homeRefreshTimer);
-    state.homeRefreshTimer = setInterval(() => {
-      if (state.user && document.visibilityState === 'visible' && $('homeScreen').classList.contains('active')) loadAppHome();
-    }, 30000);
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (state.user && document.visibilityState === 'visible' && $('homeScreen').classList.contains('active')) loadAppHome();
-  });
-
-  function markTrafficVisit() {
-    if (!state.user || !state.user.name || !state.user.agency) return;
-    const key = `trafficVisit:${state.user.name}:${state.user.agency}`;
-    try {
-      if (sessionStorage.getItem(key) === '1') return;
-      sessionStorage.setItem(key, '1');
-    } catch {}
-    gasAction('markTrafficVisit', {
-      name: state.user.name,
-      agency: state.user.agency,
-      screen: 'home',
-      userAgent: navigator.userAgent || '',
-    }).catch(err => console.warn('markTrafficVisit failed', err));
   }
 
   async function loadNotices() {
@@ -577,30 +449,12 @@
       renderProfile(state.appHome.profile || {});
       renderCompletedPosts(state.appHome.completedPosts || []);
       saveCompletedPostsCache(state.appHome.completedPosts || []);
-      renderSkinRequests(state.appHome.skinRequests || []);
-      saveSkinRequestsCache(state.appHome.skinRequests || []);
       if (state.appHome.profile && state.appHome.profile.needsProfile) {
         $('profileGuide').style.display = 'block';
         openPage('profilePage');
       }
     } catch (e) {
       renderNotices([{ title: '홈 데이터를 불러오지 못했습니다', date: '', content: e.message || String(e) }]);
-    }
-  }
-
-  async function loadMessages() {
-    if (!state.user) return;
-    try {
-      const messages = await gasAction('getMessages', { name: state.user.name, agency: state.user.agency });
-      const list = Array.isArray(messages) ? messages : [];
-      state.messages = list;
-      saveMessagesCache(list);
-      updateMessageBadge(list);
-      if ($('messagesPage').classList.contains('active')) renderMessages(list);
-    } catch (e) {
-      if ($('messagesPage').classList.contains('active') && !readMessagesCache().length) {
-        renderMessages([{ body: '메시지를 불러오지 못했습니다.\n' + (e.message || String(e)), sentAt: '', read: true }]);
-      }
     }
   }
 
@@ -614,20 +468,15 @@
     $('profileBlogUrl').value = profile.blogUrl || '';
     $('profileTestDriveUrl').value = profile.testDriveUrl || '';
     $('businessCardName').textContent = profile.businessCardImage ? '기존 명함 이미지 등록됨' : '';
-    $('profileBranchManager').checked = !!profile.isBranchManager;
     toggleProfileFields();
-    if (profile.uploadBlog) $('requestUploadBlog').value = profile.uploadBlog;
-    updateRequestPhotoGuide();
+    if (profile.uploadBlog && !isRequestFormDirty()) $('requestUploadBlog').value = profile.uploadBlog;
   }
 
   function toggleProfileFields() {
-    const isBranchManager = $('profileBranchManager').checked;
-    if (isBranchManager) $('profileUploadBlog').value = '지점 블로그';
-    $('profileUploadBlog').disabled = isBranchManager;
     const type = $('profileUploadBlog').value;
     $('blogUrlField').style.display = type === '본인 블로그' ? 'grid' : 'none';
-    $('testDriveUrlField').style.display = type === '지점 블로그' && !isBranchManager ? 'grid' : 'none';
-    $('businessCardField').style.display = type === '지점 블로그' && !isBranchManager ? 'grid' : 'none';
+    $('testDriveUrlField').style.display = type === '지점 블로그' ? 'grid' : 'none';
+    $('businessCardField').style.display = type === '지점 블로그' ? 'grid' : 'none';
   }
 
   async function saveMyInfo() {
@@ -640,7 +489,6 @@
         uploadBlog: $('profileUploadBlog').value.trim(),
         blogUrl: $('profileBlogUrl').value.trim(),
         testDriveUrl: $('profileTestDriveUrl').value.trim(),
-        isBranchManager: $('profileBranchManager').checked,
         businessCardData: fileData, businessCardName: file ? file.name : '',
       });
       setPageStatus('profileStatus', result.message || '저장되었습니다.', 'ok');
@@ -661,15 +509,13 @@
     $('requestSubmitBtn').disabled = true;
     $('requestSubmitBtn').textContent = '제출 중...';
     const uploadBlog = $('requestUploadBlog').value.trim();
-    const needsPhotos = uploadBlog === '지점 블로그';
-    setPageStatus('requestStatus', needsPhotos ? '사진을 확인하는 중입니다.' : '정보를 제출하는 중입니다.');
+    const needsPhotos = uploadBlog !== '본인 블로그';
+    setPageStatus('requestStatus', needsPhotos ? '사진을 업로드하는 중입니다.' : '정보를 제출하는 중입니다.');
 
     try {
       // 1. 사진 Supabase Storage에 업로드
       const files = getInspectionFiles();
-      if (!$('customerHistory').value.trim()) throw new Error('고객과의 히스토리를 입력해주세요.');
-      if (!$('deliveryMood').value.trim()) throw new Error('차량 인도 분위기를 입력해주세요.');
-      if (needsPhotos && files.length < 5) throw new Error('지점 블로그는 검수 사진을 5장 이상 선택해주세요.');
+      if (needsPhotos && !files.length) throw new Error('검수 사진을 1장 이상 선택해주세요.');
       const uploadedUrls = files.length ? await uploadPhotosToStorage(files) : [];
 
       // 2. GAS에 정보 + Storage URL 전달 (swift-function이 백그라운드로 처리)
@@ -780,31 +626,6 @@
     }
   }
 
-  async function submitRenaultDraft() {
-    const uploadBlog = $('renaultUploadBlog').value.trim();
-    const keyword = $('renaultKeyword').value.trim();
-    const requestDetails = $('renaultRequestDetails').value.trim();
-    if (!uploadBlog) return setPageStatus('renaultDraftStatus', '업로드를 선택해주세요.', 'error');
-    if (!keyword) return setPageStatus('renaultDraftStatus', '키워드를 입력해주세요.', 'error');
-    if (!requestDetails) return setPageStatus('renaultDraftStatus', '요청 사항을 입력해주세요.', 'error');
-
-    setPageStatus('renaultDraftStatus', '요청 중입니다.');
-    try {
-      const result = await gasAction('requestRenaultDraft', {
-        name: state.user.name,
-        agency: state.user.agency,
-        uploadBlog,
-        keyword,
-        requestDetails,
-      });
-      setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
-      $('renaultKeyword').value = '';
-      $('renaultRequestDetails').value = '';
-    } catch (e) {
-      setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
-    }
-  }
-
   function showCampaignDone() {
     const isDone = localStorage.getItem(CAMPAIGN_DONE_KEY) === '1';
     $('campaignDone').style.display = isDone ? 'grid' : 'none';
@@ -816,64 +637,25 @@
   // ─────────────────────────────
   function renderNotices(notices) {
     const box = $('noticeList');
-    const pager = $('noticePagination');
-    const all = [...(notices || [])].sort((a, b) => {
-      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-      return String(b.date || '').localeCompare(String(a.date || ''));
-    });
-    if (!all.length) {
-      box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
-      pager.innerHTML = '';
-      state.visibleNotices = [];
-      return;
-    }
-    const pageSize = 5;
-    const pageCount = Math.ceil(all.length / pageSize);
-    state.noticePage = Math.max(1, Math.min(state.noticePage, pageCount));
-    const start = (state.noticePage - 1) * pageSize;
-    state.visibleNotices = all.slice(start, start + pageSize);
-    box.innerHTML = state.visibleNotices.map((item, i) => {
-      const required = item.pinned ? '<span class="notice-required">필독</span>' : '';
-      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${esc(item.title)}</span>${required}<span class="notice-date">${esc(item.date || '')}</span></button>`;
+    if (!notices || !notices.length) return box.innerHTML = '<div class="empty">등록된 공지사항이 없습니다.</div>';
+    box.innerHTML = notices.map((item, i) => {
+      const pin = item.pinned ? '<span class="notice-pin">●</span> ' : '';
+      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${pin}${esc(item.title)}</span><span class="notice-date">${esc(item.date || '')}</span></button>`;
     }).join('');
-    pager.innerHTML = Array.from({ length: pageCount }, (_, index) => {
-      const page = index + 1;
-      return `<button class="${page === state.noticePage ? 'active' : ''}" type="button" onclick="setNoticePage(${page})">${page}</button>`;
-    }).join('');
-  }
-
-  function setNoticePage(page) {
-    state.noticePage = page;
-    renderNotices((state.appHome && state.appHome.notices) || []);
   }
 
   function renderCachedNotices() {
     const cached = readNoticeCache();
-    if (cached && cached.length) {
-      if (!state.appHome) state.appHome = {};
-      state.appHome.notices = cached;
-      renderNotices(cached);
-    }
+    if (cached && cached.length) renderNotices(cached);
   }
 
   function openNoticeModal(index) {
-    const notice = state.visibleNotices[index];
+    const notice = state.appHome && state.appHome.notices && state.appHome.notices[index];
     if (!notice) return;
     $('noticeModalTitle').textContent = notice.title || '';
     $('noticeModalDate').textContent = notice.date || '';
     $('noticeModalBody').innerHTML = renderNoticeBody(notice);
     $('noticeModalDim').classList.add('active');
-    markNoticeViewed(notice);
-  }
-
-  function markNoticeViewed(notice) {
-    if (!notice || !notice.id || !state.user) return;
-    gasAction('markNoticeViewed', {
-      noticeId: notice.id,
-      title: notice.title || '',
-      name: state.user.name,
-      agency: state.user.agency,
-    }).catch(err => console.warn('markNoticeViewed failed', err));
   }
 
   function closeNoticeModal() { $('noticeModalDim').classList.remove('active'); }
@@ -892,119 +674,6 @@
   function saveNoticeCache(notices) { try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(notices || [])); } catch {} }
   function readNoticeCache() { try { return JSON.parse(localStorage.getItem(NOTICE_CACHE_KEY) || '[]'); } catch { return []; } }
 
-  function saveSkinRequestsCache(items) { try { localStorage.setItem(SKIN_REQUESTS_CACHE_KEY, JSON.stringify(items || [])); } catch {} }
-  function readSkinRequestsCache() { try { return JSON.parse(localStorage.getItem(SKIN_REQUESTS_CACHE_KEY) || '[]'); } catch { return []; } }
-  function renderCachedSkinRequests() {
-    const cached = readSkinRequestsCache();
-    if (cached.length) renderSkinRequests(cached);
-  }
-
-  function renderSkinRequests(items) {
-    const list = Array.isArray(items) ? items : [];
-    const box = $('skinRequestList');
-    updateSkinRequestHome(list);
-    if (!list.length) {
-      box.innerHTML = '<div class="empty">스킨 요청 내역이 없습니다.</div>';
-      return;
-    }
-    box.innerHTML = list.map(item => {
-      const links = [
-        item.resultUrl ? `<a href="${esc(item.resultUrl)}" target="_blank" rel="noopener" style="font-size:12px;text-decoration:underline">결과물 보기</a>` : '',
-        item.blogUrl ? `<a href="${esc(item.blogUrl)}" target="_blank" rel="noopener" style="font-size:12px;text-decoration:underline">블로그 보기</a>` : '',
-      ].join('');
-      return `<div class="list-item"><div class="list-title">${esc(item.skin || '스킨 요청')} · ${esc(item.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${item.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(item.status || '요청')}</div><div style="display:flex;gap:8px">${links}</div></div></div>`;
-    }).join('');
-  }
-
-  function updateSkinRequestHome(items) {
-    const latest = (items || [])[0];
-    const banner = $('skinRequestBanner');
-    const title = $('skinRequestBannerTitle');
-    const revision = $('skinRevisionPanel');
-    const actions = $('skinHomeActions');
-    const finalActions = $('skinFinalActions');
-    banner.disabled = false;
-    banner.style.display = 'block';
-    actions.style.display = 'flex';
-    finalActions.classList.remove('active');
-    revision.classList.remove('active');
-    revision.dataset.pageId = '';
-    if (!latest) {
-      title.textContent = '스킨 제작 요청';
-      return;
-    }
-    if (isSkinFinalStatus(latest.status)) {
-      if (isSkinResultAcknowledged(latest)) {
-        actions.style.display = 'none';
-        return;
-      }
-      banner.style.display = 'none';
-      $('skinResultButton').textContent = latest.status === '수정완료' ? '스킨 수정 완료' : '스킨 결과';
-      $('skinResultButton').disabled = !(latest.resultUrl || latest.blogUrl);
-      finalActions.classList.add('active');
-      revision.dataset.pageId = latest.pageId || '';
-      return;
-    }
-    title.textContent = '블로그 스킨 요청 완료';
-    banner.disabled = true;
-  }
-
-  function isSkinFinalStatus(status) {
-    return ['완료', '수정완료'].includes(String(status || '').replace(/\s/g, ''));
-  }
-
-  function openSkinResult(item) {
-    const url = item && (item.resultUrl || item.blogUrl);
-    if (url) window.open(url, '_blank', 'noopener');
-  }
-
-  function openCurrentSkinResult() {
-    const latest = ((state.appHome && state.appHome.skinRequests) || readSkinRequestsCache())[0];
-    openSkinResult(latest);
-  }
-
-  function openSkinRevision() {
-    $('skinRevisionPanel').classList.add('active');
-    $('skinRevisionDetails').focus();
-  }
-
-  function skinResultAcknowledgementKey(item) {
-    return `skinResultAcknowledged:${state.user.name}:${state.user.agency}:${item.pageId || item.date || ''}`;
-  }
-
-  function isSkinResultAcknowledged(item) {
-    try { return localStorage.getItem(skinResultAcknowledgementKey(item)) === '1'; } catch { return false; }
-  }
-
-  function acknowledgeSkinResult() {
-    const latest = ((state.appHome && state.appHome.skinRequests) || readSkinRequestsCache())[0];
-    if (!latest) return;
-    if (!confirm('최종 확인을 완료하시겠습니까?\n취소를 누르면 계속 결과 확인과 수정사항 요청을 할 수 있습니다.')) return;
-    try { localStorage.setItem(skinResultAcknowledgementKey(latest), '1'); } catch {}
-    $('skinRevisionPanel').classList.remove('active');
-    updateSkinRequestHome((state.appHome && state.appHome.skinRequests) || [latest]);
-    alert('스킨 결과 확인이 완료되었습니다.\n추후 스킨 수정 요청은 이메일로 문의해주세요.');
-  }
-
-  async function submitSkinRevision() {
-    const panel = $('skinRevisionPanel');
-    const details = $('skinRevisionDetails').value.trim();
-    if (!details) return setPageStatus('skinRevisionStatus', '수정사항을 입력해주세요.', 'error');
-    try {
-      setPageStatus('skinRevisionStatus', '요청 중입니다.');
-      const result = await gasAction('submitSkinRevision', {
-        name: state.user.name,
-        agency: state.user.agency,
-        pageId: panel.dataset.pageId || '',
-        details: details,
-      });
-      $('skinRevisionDetails').value = '';
-      setPageStatus('skinRevisionStatus', result.message || '수정사항 요청이 접수되었습니다.', 'ok');
-    } catch (e) {
-      setPageStatus('skinRevisionStatus', e.message || String(e), 'error');
-    }
-  }
-
   function saveCompletedPostsCache(posts) { try { localStorage.setItem(COMPLETED_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readCompletedPostsCache() { try { return JSON.parse(localStorage.getItem(COMPLETED_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
   function renderCachedCompletedPosts() { const cached = readCompletedPostsCache(); if (cached && cached.length) renderCompletedPosts(cached); }
@@ -1015,15 +684,6 @@
 
   function saveUploadContentsCache(posts) { try { localStorage.setItem(UPLOAD_CONTENTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readUploadContentsCache() { try { return JSON.parse(localStorage.getItem(UPLOAD_CONTENTS_CACHE_KEY) || '[]'); } catch { return []; } }
-
-  function saveMessagesCache(messages) { try { localStorage.setItem(MESSAGES_CACHE_KEY, JSON.stringify(messages || [])); } catch {} }
-  function readMessagesCache() { try { return JSON.parse(localStorage.getItem(MESSAGES_CACHE_KEY) || '[]'); } catch { return []; } }
-  function renderCachedMessages() {
-    const cached = readMessagesCache();
-    state.messages = cached;
-    updateMessageBadge(cached);
-    if ($('messagesPage').classList.contains('active')) renderMessages(cached);
-  }
 
   // ─────────────────────────────
   // 원고 리스트
@@ -1046,13 +706,8 @@
     const groups = groupPostsByMonth(posts);
     box.innerHTML = Object.keys(groups).map((month, index) => {
       const items = groups[month].map(p => {
-        const checkAttr = p.status === '완료' && p.pageId ? ` onclick="markCompletedPostChecked('${esc(p.pageId)}')"` : '';
-        const googleLink = p.googleUrl ? `<a href="${esc(p.googleUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">구글원고</a>` : '';
-        const uploadLink = p.uploadUrl ? `<a href="${esc(p.uploadUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">업로드보기</a>` : '';
-        const draftLink = p.draftUrl ? `<a href="${esc(p.draftUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
-        const fallbackLink = !googleLink && !uploadLink && !draftLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
-        const type = p.type ? `<span class="list-meta">${esc(p.type)} · </span>` : '';
-        return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${type}${esc(p.status || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${googleLink}${uploadLink}${draftLink}${fallbackLink}</div></div></div>`;
+        const link = p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${esc(p.status || '')}</div>${link}</div></div>`;
       }).join('');
       const collapsed = index === 0 ? '' : ' collapsed';
       const symbol = index === 0 ? '▾' : '▸';
@@ -1091,12 +746,6 @@
     state.appHome = { ...(state.appHome || {}), completedPosts: next };
   }
 
-  function markCompletedPostChecked(pageId) {
-    if (!pageId || !state.user) return;
-    gasAction('markCompletionChecked', { name: state.user.name, agency: state.user.agency, pageId })
-      .catch(err => console.warn('markCompletionChecked failed', err));
-  }
-
   function renderUploadContents(posts) {
     const box = $('uploadContentsList');
     if (!posts || !posts.length) return box.innerHTML = '<div class="empty">업로드된 콘텐츠가 없습니다.</div>';
@@ -1107,66 +756,71 @@
     }).join('');
   }
 
-  function renderMessages(messages) {
-    const box = $('messageList');
-    const list = Array.isArray(messages) ? messages : [];
-    updateMessageBadge(list);
-    if (!list.length) return box.innerHTML = '<div class="empty">도착한 메시지가 없습니다.</div>';
-    box.innerHTML = list.map(message => `<button class="list-item message-item ${message.read ? '' : 'unread'}" type="button" onclick="readMessage('${esc(message.id || '')}')">
-      <div class="list-title">${message.read ? '읽은 메시지' : '새 메시지'}</div>
-      <div class="message-body">${esc(message.body || '')}</div>
-      <div class="list-meta">${esc(message.sentAt || '')}${message.readAt ? ' · 읽음 ' + esc(message.readAt) : ''}</div>
-    </button>`).join('');
-  }
-
-  function updateMessageBadge(messages) {
-    const count = (messages || []).filter(message => !message.read).length;
-    const badge = $('messageUnreadBadge');
-    if (!badge) return;
-    badge.textContent = count > 99 ? '99+' : String(count);
-    badge.classList.toggle('active', count > 0);
-  }
-
-  async function readMessage(messageId) {
-    const message = (state.messages || []).find(item => item.id === messageId);
-    if (!message || message.read) return;
-    message.read = true;
-    message.readAt = '방금';
-    renderMessages(state.messages);
-    saveMessagesCache(state.messages);
-    try {
-      await gasAction('markMessageRead', { name: state.user.name, agency: state.user.agency, messageId });
-      loadMessages();
-    } catch (e) {
-      loadMessages();
-    }
-  }
-
   // ─────────────────────────────
   // 차량 옵션
   // ─────────────────────────────
+  function getRequestFormSnapshot() {
+    return {
+      uploadBlog: $('requestUploadBlog').value,
+      deliveryDate: $('deliveryDate').value,
+      vehicleModel: $('vehicleModel').value,
+      vehicleTrim: $('vehicleTrim').value,
+      vehicleColor: $('vehicleColor').value,
+      vehicleWheel: $('vehicleWheel').value,
+      visitRoutes: getActiveChoices('visitRouteChoices'),
+      satisfactionPoints: getActiveChoices('satisfactionChoices'),
+      customerHistory: $('customerHistory').value,
+      deliveryMood: $('deliveryMood').value,
+    };
+  }
+
+  function isRequestFormDirty() {
+    const snapshot = getRequestFormSnapshot();
+    return !!(
+      snapshot.uploadBlog ||
+      snapshot.deliveryDate ||
+      snapshot.vehicleModel ||
+      snapshot.vehicleTrim ||
+      snapshot.vehicleColor ||
+      snapshot.vehicleWheel ||
+      snapshot.visitRoutes.length ||
+      snapshot.satisfactionPoints.length ||
+      snapshot.customerHistory.trim() ||
+      snapshot.deliveryMood.trim() ||
+      getInspectionFiles().length
+    );
+  }
+
   function setupRequestOptions(options) {
+    const snapshot = getRequestFormSnapshot();
     state.options = options || FALLBACK_OPTIONS;
     const vehicles = state.options.vehicles || FALLBACK_OPTIONS.vehicles;
     $('vehicleModel').innerHTML = '<option value="">모델 선택</option>' + Object.keys(vehicles).map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
-    renderChoices('visitRouteChoices', state.options.visitRoutes || FALLBACK_OPTIONS.visitRoutes);
-    renderChoices('satisfactionChoices', state.options.satisfactionPoints || FALLBACK_OPTIONS.satisfactionPoints);
-    updateVehicleChildren();
+    if (snapshot.vehicleModel && vehicles[snapshot.vehicleModel]) $('vehicleModel').value = snapshot.vehicleModel;
+    renderChoices('visitRouteChoices', state.options.visitRoutes || FALLBACK_OPTIONS.visitRoutes, snapshot.visitRoutes);
+    renderChoices('satisfactionChoices', state.options.satisfactionPoints || FALLBACK_OPTIONS.satisfactionPoints, snapshot.satisfactionPoints);
+    updateVehicleChildren(snapshot);
   }
 
-  function updateVehicleChildren() {
+  function updateVehicleChildren(snapshot) {
+    snapshot = snapshot || {};
     const vehicle = (state.options.vehicles || FALLBACK_OPTIONS.vehicles)[$('vehicleModel').value] || { trims: [], colors: [], wheels: [] };
-    setSelectOptions('vehicleTrim', '트림 선택', vehicle.trims);
-    setSelectOptions('vehicleColor', '색상 선택', vehicle.colors);
-    setSelectOptions('vehicleWheel', '휠 선택', vehicle.wheels);
+    setSelectOptions('vehicleTrim', '트림 선택', vehicle.trims, snapshot.vehicleTrim || $('vehicleTrim').value);
+    setSelectOptions('vehicleColor', '색상 선택', vehicle.colors, snapshot.vehicleColor || $('vehicleColor').value);
+    setSelectOptions('vehicleWheel', '휠 선택', vehicle.wheels, snapshot.vehicleWheel || $('vehicleWheel').value);
   }
 
-  function setSelectOptions(id, placeholder, items) {
+  function setSelectOptions(id, placeholder, items, selectedValue) {
     $(id).innerHTML = `<option value="">${placeholder}</option>` + (items || []).map(item => `<option value="${esc(item)}">${esc(item)}</option>`).join('');
+    if (selectedValue && (items || []).indexOf(selectedValue) !== -1) $(id).value = selectedValue;
   }
 
-  function renderChoices(id, items) {
-    $(id).innerHTML = (items || []).map(item => `<button type="button" class="choice" data-value="${esc(item)}" onclick="toggleChoice(this)">${esc(item)}</button>`).join('');
+  function renderChoices(id, items, activeValues) {
+    activeValues = activeValues || [];
+    $(id).innerHTML = (items || []).map(item => {
+      const active = activeValues.indexOf(item) !== -1 ? ' active' : '';
+      return `<button type="button" class="choice${active}" data-value="${esc(item)}" onclick="toggleChoice(this)">${esc(item)}</button>`;
+    }).join('');
   }
 
   function toggleChoice(btn) { btn.classList.toggle('active'); }
@@ -1182,7 +836,6 @@
   function updateInspectionUI() {
     const files = getInspectionFiles();
     $('inspectionFileName').textContent = files.length ? `총 ${files.length}개 선택됨` : '';
-    updateRequestPhotoGuide();
     state.previewUrls.forEach(u => URL.revokeObjectURL(u));
     state.previewUrls = [];
     $('inspectionPreview').innerHTML = files.map(file => {
@@ -1190,18 +843,6 @@
       state.previewUrls.push(url);
       return `<div class="photo-thumb"><img src="${url}" alt=""><span>${esc(file.name)}</span></div>`;
     }).join('');
-  }
-
-  function updateRequestPhotoGuide() {
-    const type = $('requestUploadBlog').value;
-    const count = getInspectionFiles().length;
-    if (type === '본인 블로그') {
-      $('inspectionGuide').textContent = '본인 블로그는 사진 없이도 제출할 수 있습니다. 사진을 선택하면 함께 저장됩니다.';
-    } else if (type === '지점 블로그') {
-      $('inspectionGuide').textContent = `지점 블로그는 검수 사진 5장 이상 필수입니다. 현재 ${count}장 선택됨.`;
-    } else {
-      $('inspectionGuide').textContent = '업로드 블로그를 선택하면 사진 제출 기준이 표시됩니다.';
-    }
   }
 
   function clearRequestForm() {
@@ -1213,7 +854,6 @@
     $('inspectionFiles').value = '';
     $('inspectionCameraFiles').value = '';
     $('inspectionFileName').textContent = '';
-    updateRequestPhotoGuide();
     state.previewUrls.forEach(u => URL.revokeObjectURL(u));
     state.previewUrls = [];
     $('inspectionPreview').innerHTML = '';
@@ -1225,125 +865,6 @@
   // ─────────────────────────────
   function openDrawer()  { $('drawerDim').classList.add('active'); $('drawer').classList.add('active'); }
   function closeDrawer() { $('drawerDim').classList.remove('active'); $('drawer').classList.remove('active'); }
-  function openSkinRequest() {
-    const latest = ((state.appHome && state.appHome.skinRequests) || readSkinRequestsCache())[0];
-    if (latest && isSkinFinalStatus(latest.status)) {
-      openSkinResult(latest);
-      $('skinRevisionPanel').classList.add('active');
-      $('skinRevisionDetails').focus();
-      return;
-    }
-    if (latest) return;
-    openPage('skinSelectPage');
-  }
-  function toggleSkinPreview(kind) {
-    const one = $('skinPreviewOne'); const two = $('skinPreviewTwo');
-    const target = kind === 'one' ? one : two;
-    const wasOpen = target.style.display !== 'none';
-    one.style.display = 'none'; two.style.display = 'none';
-    if (!wasOpen) target.style.display = 'grid';
-  }
-  function startSkinRequest(skin) {
-    state.skinDraft = skin;
-    state.skinReferenceFiles = [];
-    $('skinReferenceFiles').value = '';
-    $('skinReferenceFileList').textContent = '';
-    const presetSkin = skin === '1번' || skin === '2번';
-    $('skinFormTitle').textContent = skin + ' 스킨 제작 요청';
-    $('skinFormTitle').style.display = presetSkin ? 'none' : 'block';
-    const previewSource = presetSkin ? $(skin === '1번' ? 'skinPreviewOne' : 'skinPreviewTwo').querySelector('.skin-preview-pc').src : '';
-    $('skinFormPreview').src = previewSource;
-    $('skinFormPreview').style.display = presetSkin ? 'block' : 'none';
-    $('skinDesignFields').style.display = skin === '기타' ? 'none' : 'grid';
-    $('skinReferenceFields').style.display = skin === '기타' ? 'grid' : 'none';
-    $('skinProfileField').style.display = skin === '2번' ? 'grid' : 'none';
-    $('skinIntroField').style.display = skin === '2번' ? 'grid' : 'none';
-    $('skinMenuLabel').textContent = skin === '2번' ? '상단 메뉴' : '하단 메뉴 (필수)';
-    $('skinMenuToggleText').textContent = skin === '2번' ? '상단 메뉴 사용' : '이모지 사용';
-    $('skinMenuEnabled').checked = false;
-    renderSkinControls();
-    openPage('skinFormPage');
-  }
-  function renderSkinControls() {
-    const snsOptions = ['시승신청', '리틀리/링크트리', '카카오톡', '유튜브', '인스타그램', '기타'];
-    $('skinSnsRows').innerHTML = snsOptions.map((name, index) => `<div class="skin-control-row"><label class="check-row"><input type="checkbox" data-skin-sns="${name}" onchange="toggleSkinSnsInput(this)"><span>${name}</span></label><input id="skinSnsUrl${index}" type="text" placeholder="URL 입력" disabled></div>`).join('');
-    const menuCount = state.skinDraft === '2번' ? 5 : 3;
-    $('skinMenuRows').innerHTML = Array.from({ length: menuCount }, (_, index) => `<div class="skin-menu-row"><input id="skinMenuName${index}" type="text" placeholder="메뉴명"><input id="skinMenuUrl${index}" type="text" placeholder="URL 입력"><label class="check-row"><input id="skinMenuBlog${index}" type="checkbox"><span>블로그</span></label></div>`).join('');
-    toggleSkinMenuRows();
-  }
-  function toggleSkinSnsInput(checkbox) {
-    const selected = [...document.querySelectorAll('[data-skin-sns]:checked')];
-    if (selected.length > 4) {
-      checkbox.checked = false;
-      setPageStatus('skinFormStatus', 'SNS 버튼은 최대 4개까지 선택할 수 있습니다.', 'error');
-      return;
-    }
-    const index = [...document.querySelectorAll('[data-skin-sns]')].indexOf(checkbox);
-    const input = $('skinSnsUrl' + index);
-    input.disabled = !checkbox.checked;
-    if (!checkbox.checked) input.value = '';
-  }
-  function toggleSkinMenuRows() {
-    const menuRequired = state.skinDraft === '1번';
-    $('skinMenuRows').style.display = menuRequired || $('skinMenuEnabled').checked ? 'grid' : 'none';
-  }
-  function collectSkinSns() {
-    const buttons = [];
-    const links = [];
-    [...document.querySelectorAll('[data-skin-sns]:checked')].forEach((checkbox, index) => {
-      const position = [...document.querySelectorAll('[data-skin-sns]')].indexOf(checkbox);
-      const url = $('skinSnsUrl' + position).value.trim();
-      buttons.push(checkbox.dataset.skinSns);
-      if (url) links.push(checkbox.dataset.skinSns + ': ' + url);
-    });
-    return { buttons: buttons, links: links };
-  }
-  function collectSkinMenus() {
-    if (state.skinDraft === '2번' && !$('skinMenuEnabled').checked) return '';
-    const rows = [];
-    const count = state.skinDraft === '2번' ? 5 : 3;
-    for (let index = 0; index < count; index += 1) {
-      const name = $('skinMenuName' + index).value.trim();
-      const url = $('skinMenuUrl' + index).value.trim();
-      const blog = $('skinMenuBlog' + index).checked;
-      if (name && (url || blog)) rows.push(`${name}: ${blog ? '블로그 메뉴' : url}`);
-    }
-    return rows.join('\n');
-  }
-  function toggleSkinBackgroundFile() { $('skinBackgroundFileField').style.display = $('skinBackgroundChoice').value === '개인 차량 사진' ? 'grid' : 'none'; }
-  function toggleSkinAccountFields() { $('skinAccountFields').style.display = $('skinSetupMethod').value === '요청' ? 'grid' : 'none'; }
-  function skinFileData(file) { return file ? readFileAsDataUrl(file) : Promise.resolve(''); }
-  function addSkinReferenceFiles() {
-    const input = $('skinReferenceFiles');
-    const existing = new Set(state.skinReferenceFiles.map(file => file.name + ':' + file.size + ':' + file.lastModified));
-    [...input.files].forEach(file => {
-      const key = file.name + ':' + file.size + ':' + file.lastModified;
-      if (!existing.has(key)) state.skinReferenceFiles.push(file);
-    });
-    $('skinReferenceFileList').textContent = state.skinReferenceFiles.map(file => file.name).join(', ');
-    input.value = '';
-  }
-  async function submitSkinRequestFromApp() {
-    const skin = state.skinDraft || '기타';
-    const setupMethod = $('skinSetupMethod').value;
-    const accountId = $('skinAccountId').value.trim();
-    const accountPassword = $('skinAccountPassword').value;
-    const sns = collectSkinSns();
-    const menuUrls = collectSkinMenus();
-    if (setupMethod === '요청' && (!accountId || !accountPassword)) return setPageStatus('skinFormStatus', '아이디와 비밀번호를 입력해주세요.', 'error');
-    if (skin === '1번' && !menuUrls) return setPageStatus('skinFormStatus', '하단 메뉴를 최소 1개 입력해주세요.', 'error');
-    const referenceFiles = await Promise.all(state.skinReferenceFiles.map(skinFileData));
-    const payload = { name:state.user.name, agency:state.user.agency, skin:skin, phone:$('skinPhone').value.trim(), backgroundChoice:$('skinBackgroundChoice').value, backgroundPhoto:await skinFileData($('skinBackgroundPhoto').files[0]), profilePhoto:await skinFileData($('skinProfilePhoto').files[0]), introduction:$('skinIntroduction').value.trim(), snsButtons:sns.buttons, snsLinks:sns.links, menuOption:$('skinMenuEnabled').checked, menuUrls:menuUrls, requestDetails:$('skinDetails').value.trim(), reference:skin === '기타' ? $('skinReference').value.trim() : '', referenceFiles:referenceFiles, setupMethod:setupMethod, accountId:accountId, accountPassword:accountPassword };
-    try {
-      $('skinSubmitButton').disabled = true; setPageStatus('skinFormStatus', '요청 중입니다.');
-      const result = await gasAction('submitNotionSkinRequest', payload);
-      setPageStatus('skinFormStatus', '접수가 완료되었습니다.', 'ok');
-      state.appHome = { ...(state.appHome || {}), skinRequests:[{ skin:skin, status:'요청', date:new Date().toISOString().slice(0,10) }, ...((state.appHome && state.appHome.skinRequests) || [])] };
-      renderSkinRequests(state.appHome.skinRequests);
-      setTimeout(() => openPage('mainPage'), 800);
-    } catch (e) { setPageStatus('skinFormStatus', e.message || String(e), 'error'); }
-    finally { $('skinSubmitButton').disabled = false; }
-  }
   function openPageFromDrawer(pageId) { closeDrawer(); openPage(pageId); }
   function openPlaceholder(title) { closeDrawer(); $('placeholderTitle').textContent = title; openPage('placeholderPage'); }
 
@@ -1351,28 +872,8 @@
     document.querySelectorAll('#homeScreen .page').forEach(p => p.classList.remove('active'));
     $(pageId).classList.add('active');
 
-    if (pageId === 'renaultDraftPage') {
-      const profile = (state.appHome && state.appHome.profile) || {};
-      if (!$('renaultUploadBlog').value) $('renaultUploadBlog').value = profile.uploadBlog || '';
-      setPageStatus('renaultDraftStatus', '');
-    }
-
     if (pageId === 'campaignPage') {
       showCampaignDone();
-    }
-
-    if (pageId === 'skinRequestsPage') {
-      renderCachedSkinRequests();
-      gasAction('getMySkinRequests', { name: state.user.name, agency: state.user.agency })
-        .then(items => {
-          const list = Array.isArray(items) ? items : [];
-          renderSkinRequests(list);
-          saveSkinRequestsCache(list);
-          state.appHome = { ...(state.appHome || {}), skinRequests: list };
-        })
-        .catch(e => {
-          if (!readSkinRequestsCache().length) renderSkinRequests([]);
-        });
     }
 
     if (pageId === 'postsPage') {
@@ -1402,11 +903,6 @@
         .catch(e => {
           if (!cached.length) renderUploadContents([{ title: '업로드 콘텐츠를 불러오지 못했습니다', status: e.message }]);
         });
-    }
-
-    if (pageId === 'messagesPage') {
-      renderCachedMessages();
-      loadMessages();
     }
 
     window.scrollTo({ top: 0, behavior: 'auto' });
