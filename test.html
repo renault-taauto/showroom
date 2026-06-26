@@ -580,13 +580,17 @@
   }
 
   async function loadAppHome() {
+    const previousPosts = [
+      ...((state.appHome && state.appHome.completedPosts) || []),
+      ...(readCompletedPostsCache() || []),
+    ];
+    const localPendingPosts = previousPosts.filter(p => p && p.localPending);
     try {
       const data = await gasAction('getAppHome', { name: state.user.name, agency: state.user.agency });
       state.appHome = { ...(state.appHome || {}), ...(data || {}) };
       state.options = state.appHome.options || FALLBACK_OPTIONS;
       setupRequestOptions(state.options);
       renderProfile(state.appHome.profile || {});
-      const localPendingPosts = (((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache()) || []).filter(p => p && p.localPending);
       const serverCompletedPosts = state.appHome.completedPosts || [];
       const mergedCompletedPosts = mergeLocalPendingPosts(localPendingPosts, serverCompletedPosts).slice(0, 5);
       state.appHome.completedPosts = mergedCompletedPosts;
@@ -689,7 +693,7 @@
 
       // 2. GAS에 정보 + Storage URL 전달 (swift-function이 백그라운드로 처리)
       setPageStatus('requestStatus', '정보를 제출하는 중입니다.');
-      await gasAction('requestBlogDraft', {
+      const result = await gasAction('requestBlogDraft', {
         name: state.user.name, agency: state.user.agency,
         uploadBlog,
         deliveryDate: $('deliveryDate').value,
@@ -706,8 +710,9 @@
 
       setPageStatus('requestStatus', '블로그 원고 제작 요청이 접수되었습니다.', 'ok');
       addRequestToHomeList({
-        title: [$('vehicleModel').value, $('vehicleTrim').value, $('vehicleColor').value].filter(Boolean).join(' ') || '블로그 원고 요청',
-        date: $('deliveryDate').value,
+        pageId: result.pageId || '',
+        title: result.title || [$('vehicleModel').value, $('vehicleTrim').value, $('vehicleColor').value].filter(Boolean).join(' ') || '블로그 원고 요청',
+        date: result.date || $('deliveryDate').value,
         status: '접수',
         url: '',
         localPending: true,
@@ -1177,15 +1182,19 @@
   function mergeLocalPendingPosts(localPendingPosts, serverPosts) {
     const result = [];
     (localPendingPosts || []).forEach(item => {
-      if (item && !hasSimilarPost_(serverPosts, item)) result.push(item);
+      if (item && !hasSimilarPost_(serverPosts, item) && !hasSimilarPost_(result, item)) result.push(item);
     });
     return result.concat(serverPosts || []);
   }
 
   function hasSimilarPost_(posts, item) {
+    const targetId = String(item && item.pageId || '');
     const targetTitle = normalizeText_(item && item.title);
     const targetDate = normalizeText_(item && item.date);
-    return (posts || []).some(post => normalizeText_(post && post.title) === targetTitle && normalizeText_(post && post.date) === targetDate);
+    return (posts || []).some(post => {
+      if (targetId && String(post && post.pageId || '') === targetId) return true;
+      return normalizeText_(post && post.title) === targetTitle && normalizeText_(post && post.date) === targetDate;
+    });
   }
 
   function normalizeText_(value) {
