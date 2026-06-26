@@ -575,8 +575,12 @@
       state.options = state.appHome.options || FALLBACK_OPTIONS;
       setupRequestOptions(state.options);
       renderProfile(state.appHome.profile || {});
-      renderCompletedPosts(state.appHome.completedPosts || []);
-      saveCompletedPostsCache(state.appHome.completedPosts || []);
+      const localPendingPosts = (((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache()) || []).filter(p => p && p.localPending);
+      const serverCompletedPosts = state.appHome.completedPosts || [];
+      const mergedCompletedPosts = mergeLocalPendingPosts(localPendingPosts, serverCompletedPosts).slice(0, 5);
+      state.appHome.completedPosts = mergedCompletedPosts;
+      renderCompletedPosts(mergedCompletedPosts);
+      saveCompletedPostsCache(mergedCompletedPosts);
       renderSkinRequests(state.appHome.skinRequests || []);
       saveSkinRequestsCache(state.appHome.skinRequests || []);
       if (state.appHome.profile && state.appHome.profile.needsProfile) {
@@ -616,7 +620,7 @@
     $('businessCardName').textContent = profile.businessCardImage ? '기존 명함 이미지 등록됨' : '';
     $('profileBranchManager').checked = !!profile.isBranchManager;
     toggleProfileFields();
-    if (profile.uploadBlog) $('requestUploadBlog').value = profile.uploadBlog;
+    if (profile.uploadBlog && !isRequestFormDirty()) $('requestUploadBlog').value = profile.uploadBlog;
     updateRequestPhotoGuide();
   }
 
@@ -695,6 +699,7 @@
         date: $('deliveryDate').value,
         status: '접수',
         url: '',
+        localPending: true,
       });
       clearRequestForm();
       openPage('mainPage');
@@ -1091,6 +1096,24 @@
     state.appHome = { ...(state.appHome || {}), completedPosts: next };
   }
 
+  function mergeLocalPendingPosts(localPendingPosts, serverPosts) {
+    const result = [];
+    (localPendingPosts || []).forEach(item => {
+      if (item && !hasSimilarPost_(serverPosts, item)) result.push(item);
+    });
+    return result.concat(serverPosts || []);
+  }
+
+  function hasSimilarPost_(posts, item) {
+    const targetTitle = normalizeText_(item && item.title);
+    const targetDate = normalizeText_(item && item.date);
+    return (posts || []).some(post => normalizeText_(post && post.title) === targetTitle && normalizeText_(post && post.date) === targetDate);
+  }
+
+  function normalizeText_(value) {
+    return String(value || '').replace(/\s+/g, '').toLowerCase();
+  }
+
   function markCompletedPostChecked(pageId) {
     if (!pageId || !state.user) return;
     gasAction('markCompletionChecked', { name: state.user.name, agency: state.user.agency, pageId })
@@ -1145,28 +1168,68 @@
   // ─────────────────────────────
   // 차량 옵션
   // ─────────────────────────────
+  function getRequestFormSnapshot() {
+    return {
+      uploadBlog: $('requestUploadBlog').value,
+      deliveryDate: $('deliveryDate').value,
+      vehicleModel: $('vehicleModel').value,
+      vehicleTrim: $('vehicleTrim').value,
+      vehicleColor: $('vehicleColor').value,
+      vehicleWheel: $('vehicleWheel').value,
+      visitRoutes: getActiveChoices('visitRouteChoices'),
+      satisfactionPoints: getActiveChoices('satisfactionChoices'),
+      customerHistory: $('customerHistory').value,
+      deliveryMood: $('deliveryMood').value,
+    };
+  }
+
+  function isRequestFormDirty() {
+    const snapshot = getRequestFormSnapshot();
+    return !!(
+      snapshot.uploadBlog ||
+      snapshot.deliveryDate ||
+      snapshot.vehicleModel ||
+      snapshot.vehicleTrim ||
+      snapshot.vehicleColor ||
+      snapshot.vehicleWheel ||
+      snapshot.visitRoutes.length ||
+      snapshot.satisfactionPoints.length ||
+      snapshot.customerHistory.trim() ||
+      snapshot.deliveryMood.trim() ||
+      getInspectionFiles().length
+    );
+  }
+
   function setupRequestOptions(options) {
+    const snapshot = getRequestFormSnapshot();
     state.options = options || FALLBACK_OPTIONS;
     const vehicles = state.options.vehicles || FALLBACK_OPTIONS.vehicles;
     $('vehicleModel').innerHTML = '<option value="">모델 선택</option>' + Object.keys(vehicles).map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
-    renderChoices('visitRouteChoices', state.options.visitRoutes || FALLBACK_OPTIONS.visitRoutes);
-    renderChoices('satisfactionChoices', state.options.satisfactionPoints || FALLBACK_OPTIONS.satisfactionPoints);
-    updateVehicleChildren();
+    if (snapshot.vehicleModel && vehicles[snapshot.vehicleModel]) $('vehicleModel').value = snapshot.vehicleModel;
+    renderChoices('visitRouteChoices', state.options.visitRoutes || FALLBACK_OPTIONS.visitRoutes, snapshot.visitRoutes);
+    renderChoices('satisfactionChoices', state.options.satisfactionPoints || FALLBACK_OPTIONS.satisfactionPoints, snapshot.satisfactionPoints);
+    updateVehicleChildren(snapshot);
   }
 
-  function updateVehicleChildren() {
+  function updateVehicleChildren(snapshot) {
+    snapshot = snapshot || {};
     const vehicle = (state.options.vehicles || FALLBACK_OPTIONS.vehicles)[$('vehicleModel').value] || { trims: [], colors: [], wheels: [] };
-    setSelectOptions('vehicleTrim', '트림 선택', vehicle.trims);
-    setSelectOptions('vehicleColor', '색상 선택', vehicle.colors);
-    setSelectOptions('vehicleWheel', '휠 선택', vehicle.wheels);
+    setSelectOptions('vehicleTrim', '트림 선택', vehicle.trims, snapshot.vehicleTrim || $('vehicleTrim').value);
+    setSelectOptions('vehicleColor', '색상 선택', vehicle.colors, snapshot.vehicleColor || $('vehicleColor').value);
+    setSelectOptions('vehicleWheel', '휠 선택', vehicle.wheels, snapshot.vehicleWheel || $('vehicleWheel').value);
   }
 
-  function setSelectOptions(id, placeholder, items) {
+  function setSelectOptions(id, placeholder, items, selectedValue) {
     $(id).innerHTML = `<option value="">${placeholder}</option>` + (items || []).map(item => `<option value="${esc(item)}">${esc(item)}</option>`).join('');
+    if (selectedValue && (items || []).indexOf(selectedValue) !== -1) $(id).value = selectedValue;
   }
 
-  function renderChoices(id, items) {
-    $(id).innerHTML = (items || []).map(item => `<button type="button" class="choice" data-value="${esc(item)}" onclick="toggleChoice(this)">${esc(item)}</button>`).join('');
+  function renderChoices(id, items, activeValues) {
+    activeValues = activeValues || [];
+    $(id).innerHTML = (items || []).map(item => {
+      const active = activeValues.indexOf(item) !== -1 ? ' active' : '';
+      return `<button type="button" class="choice${active}" data-value="${esc(item)}" onclick="toggleChoice(this)">${esc(item)}</button>`;
+    }).join('');
   }
 
   function toggleChoice(btn) { btn.classList.toggle('active'); }
