@@ -78,6 +78,18 @@
     .list-meta.done{color:#d92d20;font-weight:600}
     .notice-content{font-size:14px;color:#475467;line-height:1.55;white-space:pre-wrap}
     .notice-image{width:100%;border-radius:12px;display:block}
+    .notice-list{margin:0;padding-left:20px;color:#475467;font-size:14px;line-height:1.55}
+    .notice-list li{margin:4px 0}
+    .notice-table-wrap{width:100%;overflow-x:auto;border:1px solid #eaecf0;border-radius:12px}
+    .notice-table{width:100%;border-collapse:collapse;min-width:320px;background:#fff;font-size:13px;color:#475467}
+    .notice-table th,.notice-table td{border:1px solid #eaecf0;padding:8px 9px;text-align:left;vertical-align:top;white-space:pre-wrap}
+    .notice-table th{background:#f9fafb;color:#344054;font-weight:700}
+    .notice-heading{margin:4px 0;color:#111827;font-weight:800;line-height:1.35}
+    .notice-heading.h1{font-size:18px}.notice-heading.h2{font-size:16px}.notice-heading.h3{font-size:15px}
+    .notice-quote{border-left:3px solid #d0d5dd;padding:6px 0 6px 10px;color:#475467;font-size:14px;line-height:1.55;white-space:pre-wrap}
+    .notice-todo{display:flex;gap:8px;align-items:flex-start;color:#475467;font-size:14px;line-height:1.55}
+    .notice-todo input{width:16px;min-height:16px;margin-top:2px;pointer-events:none}
+    .notice-link{color:#111827;text-decoration:underline;font-size:14px;word-break:break-all}
     .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px}
     .notice-section .list{gap:1px}
     .notice-row{width:100%;min-height:32px;background:transparent;padding:2px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:7px}
@@ -103,6 +115,7 @@
     .drawer-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .drawer-menu{display:grid;gap:2px}
     .drawer-menu button{width:100%;min-height:44px;background:#fff;color:#111827;text-align:left;padding:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .completed-action{display:flex;align-items:center;gap:6px}
     .count-badge{display:none;min-width:20px;height:20px;border-radius:999px;background:#d92d20;color:#fff;font-size:12px;font-weight:700;place-items:center;padding:0 6px}
     .count-badge.active{display:grid}
     .page{display:none}
@@ -188,7 +201,7 @@
         <button type="button" onclick="openPage('requestPage')">출고후기 원고<br>작성 요청</button>
         <button type="button" onclick="openPage('renaultDraftPage')">르노 차량<br>원고 작성</button>
       </div>
-      <div class="card"><div class="section-head"><h3>접수된 리스트</h3><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button></div><div id="completedPostList" class="list"></div></div>
+      <div class="card"><div class="section-head"><h3>접수된 리스트</h3><div class="completed-action"><button class="small-btn" type="button" onclick="openPage('postsPage')">완료보기</button><span id="completedBadge" class="count-badge"></span></div></div><div id="completedPostList" class="list"></div></div>
     </div>
 
     <div id="skinRequestsPage" class="page">
@@ -297,6 +310,11 @@
       </div>
     </div>
 
+    <div id="campaignScorePage" class="page">
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>시책 점수 확인</h2></div>
+      <div class="card"><div id="campaignScoreText" class="notice-content">불러오는 중입니다.</div><button id="campaignApplyButton" class="primary" type="button" style="display:none" onclick="openPage('campaignPage')">신청하기</button></div>
+    </div>
+
     <div id="postsPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>나의 원고 리스트</h2></div>
       <div id="myPostList" class="list"></div>
@@ -305,11 +323,6 @@
     <div id="uploadContentsPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>업로드 콘텐츠</h2></div>
       <div id="uploadContentsList" class="list"></div>
-    </div>
-
-    <div id="messagesPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>메시지함</h2></div>
-      <div id="messageList" class="list"></div>
     </div>
 
     <div id="placeholderPage" class="page">
@@ -327,7 +340,7 @@
     <button type="button" onclick="openPageFromDrawer('profilePage')">내 정보</button>
     <button type="button" onclick="openPageFromDrawer('postsPage')">나의 원고 리스트</button>
     <button type="button" onclick="openPageFromDrawer('uploadContentsPage')">업로드 콘텐츠</button>
-    <button type="button" onclick="openPlaceholder('시책 점수 확인')">시책 점수 확인</button>
+    <button type="button" onclick="openPageFromDrawer('campaignScorePage')">시책 점수 확인</button>
     <button type="button" onclick="logout()">로그아웃</button>
   </div>
 </aside>
@@ -517,11 +530,8 @@
     renderCachedNotices();
     renderCachedCompletedPosts();
     renderCachedSkinRequests();
-    renderCachedMessages();
-    markTrafficVisit();
     // 새 데이터 로드
     loadNotices();
-    loadMessages();
     loadAppHome();
     startHomeStatusRefresh();
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -531,16 +541,17 @@
     if (state.homeRefreshTimer) clearInterval(state.homeRefreshTimer);
     state.homeRefreshTimer = setInterval(() => {
       if (state.user && document.visibilityState === 'visible' && $('homeScreen').classList.contains('active')) loadAppHome();
-    }, 30000);
+    }, 10000);
   }
 
   document.addEventListener('visibilitychange', () => {
     if (state.user && document.visibilityState === 'visible' && $('homeScreen').classList.contains('active')) loadAppHome();
   });
 
-  function markTrafficVisit() {
+  function markTrafficVisit(screen) {
     if (!state.user || !state.user.name || !state.user.agency) return;
-    const key = `trafficVisit:${state.user.name}:${state.user.agency}`;
+    const screenName = screen || 'mainPage';
+    const key = `trafficVisit:${state.user.name}:${state.user.agency}:${screenName}`;
     try {
       if (sessionStorage.getItem(key) === '1') return;
       sessionStorage.setItem(key, '1');
@@ -548,7 +559,7 @@
     gasAction('markTrafficVisit', {
       name: state.user.name,
       agency: state.user.agency,
-      screen: 'home',
+      screen: screenName,
       userAgent: navigator.userAgent || '',
     }).catch(err => console.warn('markTrafficVisit failed', err));
   }
@@ -702,6 +713,7 @@
         localPending: true,
       });
       clearRequestForm();
+      alert('완료됐습니다.');
       openPage('mainPage');
       loadAppHome();
     } catch (e) {
@@ -780,6 +792,8 @@
       // 완료 상태 저장
       localStorage.setItem(CAMPAIGN_DONE_KEY, '1');
       showCampaignDone();
+      alert('완료됐습니다.');
+      openPage('mainPage');
     } catch (e) {
       setPageStatus('campaignStatus', e.message || String(e), 'error');
     }
@@ -805,6 +819,8 @@
       setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
       $('renaultKeyword').value = '';
       $('renaultRequestDetails').value = '';
+      alert('완료됐습니다.');
+      openPage('mainPage');
     } catch (e) {
       setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
     }
@@ -814,6 +830,22 @@
     const isDone = localStorage.getItem(CAMPAIGN_DONE_KEY) === '1';
     $('campaignDone').style.display = isDone ? 'grid' : 'none';
     $('campaignForm').style.display = isDone ? 'none' : 'grid';
+  }
+
+  async function loadCampaignScore() {
+    $('campaignScoreText').textContent = '불러오는 중입니다.';
+    $('campaignApplyButton').style.display = 'none';
+    try {
+      const result = await gasAction('getCampaignScore', { name: state.user.name, agency: state.user.agency });
+      if (!result || !result.participates) {
+        $('campaignScoreText').textContent = '시책 참여신청을 해주세요';
+        $('campaignApplyButton').style.display = 'block';
+        return;
+      }
+      $('campaignScoreText').textContent = result.scoreText || '표시할 시책 점수가 없습니다.';
+    } catch (e) {
+      $('campaignScoreText').textContent = e.message || String(e);
+    }
   }
 
   // ─────────────────────────────
@@ -887,11 +919,50 @@
     const blocks = Array.isArray(notice.blocks) ? notice.blocks : [];
     if (!blocks.length && notice.content) return `<div class="notice-content">${esc(notice.content)}</div>`;
     if (!blocks.length) return '<div class="empty">공지 내용이 없습니다.</div>';
-    return blocks.map(block => {
-      if (block.type === 'image' && block.url) return `<div><img class="notice-image" src="${esc(block.url)}" alt="">${block.caption ? `<div class="list-meta">${esc(block.caption)}</div>` : ''}</div>`;
-      if (block.type === 'divider') return '<hr>';
-      return `<div class="notice-content">${esc(block.text || '')}</div>`;
+    let html = '';
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i] || {};
+      if (block.type === 'bulleted_list_item' || block.type === 'numbered_list_item') {
+        const listType = block.type === 'numbered_list_item' ? 'ol' : 'ul';
+        const listItems = [];
+        while (i < blocks.length && blocks[i] && blocks[i].type === block.type) {
+          listItems.push(`<li>${esc(blocks[i].text || '')}</li>`);
+          i++;
+        }
+        i--;
+        html += `<${listType} class="notice-list">${listItems.join('')}</${listType}>`;
+      } else {
+        html += renderNoticeBlock(block);
+      }
+    }
+    return html;
+  }
+
+  function renderNoticeBlock(block) {
+    if (block.type === 'image' && block.url) return `<div><img class="notice-image" src="${esc(block.url)}" alt="">${block.caption ? `<div class="list-meta">${esc(block.caption)}</div>` : ''}</div>`;
+    if (block.type === 'divider') return '<hr>';
+    if (block.type === 'table') return renderNoticeTable(block);
+    if (block.type === 'heading_1') return `<div class="notice-heading h1">${esc(block.text || '')}</div>`;
+    if (block.type === 'heading_2') return `<div class="notice-heading h2">${esc(block.text || '')}</div>`;
+    if (block.type === 'heading_3') return `<div class="notice-heading h3">${esc(block.text || '')}</div>`;
+    if (block.type === 'quote' || block.type === 'callout') return `<div class="notice-quote">${esc(block.text || '')}</div>`;
+    if (block.type === 'to_do') return `<label class="notice-todo"><input type="checkbox" ${block.checked ? 'checked' : ''} disabled><span>${esc(block.text || '')}</span></label>`;
+    if (block.type === 'link' && block.url) return `<a class="notice-link" href="${esc(block.url)}" target="_blank" rel="noopener">${esc(block.text || block.url)}</a>`;
+    return `<div class="notice-content">${esc(block.text || '')}</div>`;
+  }
+
+  function renderNoticeTable(block) {
+    const rows = Array.isArray(block.rows) ? block.rows : [];
+    if (!rows.length) return '';
+    const body = rows.map((row, rowIndex) => {
+      const cells = (row || []).map((cell, colIndex) => {
+        const header = (block.hasColumnHeader && rowIndex === 0) || (block.hasRowHeader && colIndex === 0);
+        const tag = header ? 'th' : 'td';
+        return `<${tag}>${esc(cell || '')}</${tag}>`;
+      }).join('');
+      return `<tr>${cells}</tr>`;
     }).join('');
+    return `<div class="notice-table-wrap"><table class="notice-table">${body}</table></div>`;
   }
 
   function saveNoticeCache(notices) { try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(notices || [])); } catch {} }
@@ -1012,7 +1083,7 @@
 
   function saveCompletedPostsCache(posts) { try { localStorage.setItem(COMPLETED_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readCompletedPostsCache() { try { return JSON.parse(localStorage.getItem(COMPLETED_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
-  function renderCachedCompletedPosts() { const cached = readCompletedPostsCache(); if (cached && cached.length) renderCompletedPosts(cached); }
+  function renderCachedCompletedPosts() { const cached = readCompletedPostsCache(); if (cached && cached.length) renderCompletedPosts(cached); else updateCompletedBadge([]); }
 
   function saveMyPostsCache(posts) { try { localStorage.setItem(MY_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readMyPostsCache() { try { return JSON.parse(localStorage.getItem(MY_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
@@ -1035,6 +1106,7 @@
   // ─────────────────────────────
   function renderCompletedPosts(posts) {
     const box = $('completedPostList');
+    updateCompletedBadge(posts);
     const activePosts = (posts || []).filter(p => p.status !== '완료');
     if (!activePosts.length) return box.innerHTML = '<div class="empty">접수된 내역이 없습니다.</div>';
     box.innerHTML = activePosts.map(p => {
@@ -1051,11 +1123,11 @@
     const groups = groupPostsByMonth(posts);
     box.innerHTML = Object.keys(groups).map((month, index) => {
       const items = groups[month].map(p => {
-        const checkAttr = p.status === '완료' && p.pageId ? ` onclick="markCompletedPostChecked('${esc(p.pageId)}')"` : '';
-        const googleLink = p.googleUrl ? `<a href="${esc(p.googleUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">구글원고</a>` : '';
-        const uploadLink = p.uploadUrl ? `<a href="${esc(p.uploadUrl)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">업로드보기</a>` : '';
-        const draftLink = p.draftUrl ? `<a href="${esc(p.draftUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
-        const fallbackLink = !googleLink && !uploadLink && !draftLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener"${checkAttr} style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        const checkAttr = label => p.status === '완료' && p.pageId ? ` onclick="markCompletedPostChecked('${esc(p.pageId)}', '${label}')"` : '';
+        const googleLink = p.googleUrl ? `<a href="${esc(p.googleUrl)}" target="_blank" rel="noopener"${checkAttr('구글원고')} style="font-size:12px;color:#111827;text-decoration:underline">구글원고</a>` : '';
+        const uploadLink = p.uploadUrl ? `<a href="${esc(p.uploadUrl)}" target="_blank" rel="noopener"${checkAttr('업로드보기')} style="font-size:12px;color:#111827;text-decoration:underline">업로드보기</a>` : '';
+        const draftLink = p.draftUrl ? `<a href="${esc(p.draftUrl)}" target="_blank" rel="noopener"${checkAttr('원고보기')} style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
+        const fallbackLink = !googleLink && !uploadLink && !draftLink && p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener"${checkAttr('원고보기')} style="font-size:12px;color:#111827;text-decoration:underline">원고보기</a>` : '';
         const type = p.type ? `<span class="list-meta">${esc(p.type)} · </span>` : '';
         return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div class="${p.status === '완료' ? 'list-meta done' : 'list-meta'}">${type}${esc(p.status || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${googleLink}${uploadLink}${draftLink}${fallbackLink}</div></div></div>`;
       }).join('');
@@ -1114,10 +1186,33 @@
     return String(value || '').replace(/\s+/g, '').toLowerCase();
   }
 
-  function markCompletedPostChecked(pageId) {
+  function markCompletedPostChecked(pageId, viewType) {
     if (!pageId || !state.user) return;
-    gasAction('markCompletionChecked', { name: state.user.name, agency: state.user.agency, pageId })
+    clearCompletedPostLocally(pageId);
+    gasAction('markCompletionChecked', { name: state.user.name, agency: state.user.agency, pageId, viewType: viewType || '원고보기' })
       .catch(err => console.warn('markCompletionChecked failed', err));
+  }
+
+  function getUncheckedCompletedCount(posts) {
+    return (posts || []).filter(p => p.status === '완료' && !p.completedChecked && !p.completedCheckedAt).length;
+  }
+
+  function updateCompletedBadge(posts) {
+    const badge = $('completedBadge');
+    if (!badge) return;
+    const count = getUncheckedCompletedCount(posts);
+    badge.textContent = count > 99 ? '99+' : String(count);
+    badge.classList.toggle('active', count > 0);
+  }
+
+  function clearCompletedPostLocally(pageId) {
+    const current = ((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache() || []).map(post => {
+      if (post.pageId === pageId) return { ...post, completedChecked: true, completedCheckedAt: new Date().toISOString() };
+      return post;
+    });
+    state.appHome = { ...(state.appHome || {}), completedPosts: current };
+    saveCompletedPostsCache(current);
+    renderCompletedPosts(current);
   }
 
   function renderUploadContents(posts) {
@@ -1403,7 +1498,8 @@
       setPageStatus('skinFormStatus', '접수가 완료되었습니다.', 'ok');
       state.appHome = { ...(state.appHome || {}), skinRequests:[{ skin:skin, status:'요청', date:new Date().toISOString().slice(0,10) }, ...((state.appHome && state.appHome.skinRequests) || [])] };
       renderSkinRequests(state.appHome.skinRequests);
-      setTimeout(() => openPage('mainPage'), 800);
+      alert('완료됐습니다.');
+      openPage('mainPage');
     } catch (e) { setPageStatus('skinFormStatus', e.message || String(e), 'error'); }
     finally { $('skinSubmitButton').disabled = false; }
   }
@@ -1413,6 +1509,7 @@
   function openPage(pageId) {
     document.querySelectorAll('#homeScreen .page').forEach(p => p.classList.remove('active'));
     $(pageId).classList.add('active');
+    markTrafficVisit(pageId);
 
     if (pageId === 'renaultDraftPage') {
       const profile = (state.appHome && state.appHome.profile) || {};
@@ -1422,6 +1519,10 @@
 
     if (pageId === 'campaignPage') {
       showCampaignDone();
+    }
+
+    if (pageId === 'campaignScorePage') {
+      loadCampaignScore();
     }
 
     if (pageId === 'skinRequestsPage') {
