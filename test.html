@@ -269,7 +269,7 @@
         <div class="field"><label>만족포인트</label><div id="satisfactionChoices" class="choice-grid"></div></div>
         <div class="field"><label>고객과의 히스토리</label><textarea id="customerHistory" placeholder="상담 과정, 선택 이유, 고객 상황 등을 입력하세요."></textarea></div>
         <div class="field"><label>차량 인도 분위기</label><textarea id="deliveryMood" placeholder="출고 당일 분위기, 반응, 전달 포인트를 입력하세요."></textarea></div>
-        <div id="inspectionField" class="field" style="display:none">
+        <div class="field">
           <label>검수 사진</label>
           <div class="file-actions">
             <button class="file-action" type="button" onclick="$('inspectionFiles').click()">갤러리에서 선택</button>
@@ -289,9 +289,10 @@
     <div id="renaultDraftPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>르노 차량 원고 작성</h2></div>
       <div class="card form">
-        <div class="field"><label>업로드</label><select id="renaultUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div class="field"><label>업로드</label><select id="renaultUploadBlog" onchange="toggleRenaultPhotoField()"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
         <div class="field"><label>키워드</label><input id="renaultKeyword" placeholder="예: 그랑 콜레오스 하이브리드 장점"></div>
         <div class="field"><label>요청 사항</label><textarea id="renaultRequestDetails" placeholder="원고에 꼭 들어가야 할 내용이나 방향을 입력하세요."></textarea></div>
+        <div id="renaultPhotoField" class="field" style="display:none"><label>대리점내 사진</label><div class="file-actions"><button class="file-action" type="button" onclick="$(&quot;renaultInspectionFiles&quot;).click()">갤러리에서 선택</button><button class="file-action" type="button" onclick="$(&quot;renaultInspectionCameraFiles&quot;).click()">카메라 촬영</button></div><input id="renaultInspectionFiles" type="file" accept="image/*" multiple hidden onchange="updateRenaultPhotoCount()"><input id="renaultInspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple hidden onchange="updateRenaultPhotoCount()"><div id="renaultPhotoCount" class="file-name"></div></div>
         <div id="renaultDraftStatus" class="status"></div>
         <button class="primary" type="button" onclick="submitRenaultDraft()">요청하기</button>
       </div>
@@ -820,12 +821,14 @@
 
     setPageStatus('renaultDraftStatus', '요청 중입니다.');
     try {
+      const inspectionFiles = uploadBlog === '지점 블로그' ? await uploadRenaultPhotosToStorage(getRenaultInspectionFiles()) : [];
       const result = await gasAction('requestRenaultDraft', {
         name: state.user.name,
         agency: state.user.agency,
         uploadBlog,
         keyword,
         requestDetails,
+        inspectionFiles,
       });
       setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
       $('renaultKeyword').value = '';
@@ -835,6 +838,36 @@
     } catch (e) {
       setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
     }
+  }
+
+  function getRenaultInspectionFiles() {
+    return [...Array.from($('renaultInspectionFiles').files || []), ...Array.from($('renaultInspectionCameraFiles').files || [])];
+  }
+
+  function toggleRenaultPhotoField() {
+    const isBranchBlog = $('renaultUploadBlog').value === '지점 블로그';
+    $('renaultPhotoField').style.display = isBranchBlog ? 'grid' : 'none';
+    if (!isBranchBlog) {
+      $('renaultInspectionFiles').value = '';
+      $('renaultInspectionCameraFiles').value = '';
+      $('renaultPhotoCount').textContent = '';
+    }
+  }
+
+  function updateRenaultPhotoCount() {
+    const count = getRenaultInspectionFiles().length;
+    $('renaultPhotoCount').textContent = count ? `총 ${count}개 선택됨` : '';
+  }
+
+  async function uploadRenaultPhotosToStorage(files) {
+    const urls = [];
+    for (let i = 0; i < files.length; i++) {
+      setPageStatus('renaultDraftStatus', `사진 업로드 중 (${i + 1}/${files.length})`);
+      const blob = await compressImage(files[i]);
+      const path = `renault-requests/${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      urls.push(await uploadToStorage(path, blob));
+    }
+    return urls;
   }
 
   function showCampaignDone() {
@@ -1387,18 +1420,12 @@
   function updateRequestPhotoGuide() {
     const type = $('requestUploadBlog').value;
     const count = getInspectionFiles().length;
-    const isBranchBlog = type === '지점 블로그';
-    $('inspectionField').style.display = isBranchBlog ? 'grid' : 'none';
-    if (isBranchBlog) {
+    if (type === '본인 블로그') {
+      $('inspectionGuide').textContent = '본인 블로그는 사진 없이도 제출할 수 있습니다. 사진을 선택하면 함께 저장됩니다.';
+    } else if (type === '지점 블로그') {
       $('inspectionGuide').textContent = `지점 블로그는 검수 사진 5장 이상 필수입니다. 현재 ${count}장 선택됨.`;
     } else {
-      $('inspectionFiles').value = '';
-      $('inspectionCameraFiles').value = '';
-      $('inspectionFileName').textContent = '';
-      state.previewUrls.forEach(u => URL.revokeObjectURL(u));
-      state.previewUrls = [];
-      $('inspectionPreview').innerHTML = '';
-      $('inspectionGuide').textContent = '';
+      $('inspectionGuide').textContent = '업로드 블로그를 선택하면 사진 제출 기준이 표시됩니다.';
     }
   }
 
