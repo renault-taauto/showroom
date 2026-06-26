@@ -1193,7 +1193,11 @@
     const targetDate = normalizeText_(item && item.date);
     return (posts || []).some(post => {
       if (targetId && String(post && post.pageId || '') === targetId) return true;
-      return normalizeText_(post && post.title) === targetTitle && normalizeText_(post && post.date) === targetDate;
+      const postTitle = normalizeText_(post && post.title);
+      const postDate = normalizeText_(post && post.date);
+      const titleMatches = !!targetTitle && !!postTitle && (postTitle === targetTitle || postTitle.includes(targetTitle) || targetTitle.includes(postTitle));
+      const dateMatches = !targetDate || !postDate || postDate === targetDate;
+      return titleMatches && dateMatches;
     });
   }
 
