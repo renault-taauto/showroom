@@ -681,19 +681,16 @@
     $('requestSubmitBtn').textContent = '제출 중...';
     const uploadBlog = $('requestUploadBlog').value.trim();
     const needsPhotos = uploadBlog === '지점 블로그';
+    let localId = '';
     setPageStatus('requestStatus', needsPhotos ? '사진을 확인하는 중입니다.' : '정보를 제출하는 중입니다.');
 
     try {
-      // 1. 사진 Supabase Storage에 업로드
       const files = getInspectionFiles();
       if (!$('customerHistory').value.trim()) throw new Error('고객과의 히스토리를 입력해주세요.');
       if (!$('deliveryMood').value.trim()) throw new Error('차량 인도 분위기를 입력해주세요.');
       if (needsPhotos && files.length < 5) throw new Error('지점 블로그는 검수 사진을 5장 이상 선택해주세요.');
-      const uploadedUrls = files.length ? await uploadPhotosToStorage(files) : [];
 
-      // 2. GAS에 정보 + Storage URL 전달 (swift-function이 백그라운드로 처리)
-      setPageStatus('requestStatus', '정보를 제출하는 중입니다.');
-      const result = await gasAction('requestBlogDraft', {
+      const request = {
         name: state.user.name, agency: state.user.agency,
         uploadBlog,
         deliveryDate: $('deliveryDate').value,
@@ -705,14 +702,12 @@
         satisfactionPoints: getActiveChoices('satisfactionChoices'),
         customerHistory: $('customerHistory').value.trim(),
         deliveryMood: $('deliveryMood').value.trim(),
-        inspectionFiles: uploadedUrls,
-      });
-
-      setPageStatus('requestStatus', '블로그 원고 제작 요청이 접수되었습니다.', 'ok');
+      };
+      localId = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       addRequestToHomeList({
-        pageId: result.pageId || '',
-        title: result.title || [$('vehicleModel').value, $('vehicleTrim').value, $('vehicleColor').value].filter(Boolean).join(' ') || '블로그 원고 요청',
-        date: result.date || $('deliveryDate').value,
+        localId,
+        title: [request.vehicleModel, request.trim, request.color].filter(Boolean).join(' ') || '블로그 원고 요청',
+        date: request.deliveryDate,
         status: '접수',
         url: '',
         localPending: true,
@@ -720,9 +715,20 @@
       clearRequestForm();
       alert('완료됐습니다.');
       openPage('mainPage');
+
+      const uploadedUrls = files.length ? await uploadPhotosToStorage(files) : [];
+      const result = await gasAction('requestBlogDraft', { ...request, inspectionFiles: uploadedUrls });
+      const serverPatch = { pageId: result.pageId || '' };
+      if (result.title) serverPatch.title = result.title;
+      if (result.date) serverPatch.date = result.date;
+      updatePendingHomePost(localId, serverPatch);
       loadAppHome();
     } catch (e) {
-      setPageStatus('requestStatus', e.message || String(e), 'error');
+      if ($('mainPage').classList.contains('active')) {
+        updatePendingHomePost(localId, { status: '연동 확인 필요' });
+      } else {
+        setPageStatus('requestStatus', e.message || String(e), 'error');
+      }
     } finally {
       state.requestSubmitting = false;
       $('requestSubmitBtn').disabled = false;
@@ -1177,6 +1183,15 @@
     renderCompletedPosts(next);
     saveCompletedPostsCache(next);
     state.appHome = { ...(state.appHome || {}), completedPosts: next };
+  }
+
+  function updatePendingHomePost(localId, patch) {
+    const current = ((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache() || []).map(post => {
+      return post && post.localId === localId ? { ...post, ...patch } : post;
+    });
+    state.appHome = { ...(state.appHome || {}), completedPosts: current };
+    saveCompletedPostsCache(current);
+    renderCompletedPosts(current);
   }
 
   function mergeLocalPendingPosts(localPendingPosts, serverPosts) {
