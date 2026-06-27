@@ -830,9 +830,21 @@
         requestDetails,
         inspectionFiles,
       });
+      addRequestToHomeList({
+        pageId: result.pageId || '',
+        type: '르노 차량 원고',
+        title: keyword || '르노 차량 원고',
+        date: new Date().toISOString().slice(0, 10),
+        status: '접수',
+        url: result.pageUrl || '',
+        localPending: true,
+      });
       setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
       $('renaultKeyword').value = '';
       $('renaultRequestDetails').value = '';
+      $('renaultInspectionFiles').value = '';
+      $('renaultInspectionCameraFiles').value = '';
+      $('renaultPhotoCount').textContent = '';
       alert('완료됐습니다.');
       openPage('mainPage');
     } catch (e) {
