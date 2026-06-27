@@ -289,9 +289,10 @@
     <div id="renaultDraftPage" class="page">
       <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>르노 차량 원고 작성</h2></div>
       <div class="card form">
-        <div class="field"><label>업로드</label><select id="renaultUploadBlog"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
+        <div class="field"><label>업로드</label><select id="renaultUploadBlog" onchange="toggleRenaultPhotoField()"><option value="">선택</option><option value="본인 블로그">본인 블로그</option><option value="지점 블로그">지점 블로그</option></select></div>
         <div class="field"><label>키워드</label><input id="renaultKeyword" placeholder="예: 그랑 콜레오스 하이브리드 장점"></div>
         <div class="field"><label>요청 사항</label><textarea id="renaultRequestDetails" placeholder="원고에 꼭 들어가야 할 내용이나 방향을 입력하세요."></textarea></div>
+        <div id="renaultPhotoField" class="field" style="display:none"><label>대리점내 사진</label><div class="file-actions"><button class="file-action" type="button" onclick="$(&quot;renaultInspectionFiles&quot;).click()">갤러리에서 선택</button><button class="file-action" type="button" onclick="$(&quot;renaultInspectionCameraFiles&quot;).click()">카메라 촬영</button></div><input id="renaultInspectionFiles" type="file" accept="image/*" multiple hidden onchange="addRenaultPhotoFiles(this)"><input id="renaultInspectionCameraFiles" type="file" accept="image/*" capture="environment" multiple hidden onchange="addRenaultPhotoFiles(this)"><div id="renaultPhotoCount" class="file-name"></div><div id="renaultPhotoPreview" class="photo-preview"></div></div>
         <div id="renaultDraftStatus" class="status"></div>
         <button class="primary" type="button" onclick="submitRenaultDraft()">요청하기</button>
       </div>
@@ -382,7 +383,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], renaultPreviewUrls: [], renaultPhotoFiles: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -820,21 +821,103 @@
 
     setPageStatus('renaultDraftStatus', '요청 중입니다.');
     try {
+      const inspectionFiles = uploadBlog === '지점 블로그' ? await uploadRenaultPhotosToStorage(getRenaultInspectionFiles()) : [];
       const result = await gasAction('requestRenaultDraft', {
         name: state.user.name,
         agency: state.user.agency,
         uploadBlog,
         keyword,
         requestDetails,
+        inspectionFiles,
+      });
+      addRequestToHomeList({
+        pageId: result.pageId || '',
+        type: '르노 차량 원고',
+        title: keyword || '르노 차량 원고',
+        date: new Date().toISOString().slice(0, 10),
+        status: '접수',
+        url: result.pageUrl || '',
+        localPending: true,
       });
       setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
       $('renaultKeyword').value = '';
       $('renaultRequestDetails').value = '';
+      $('renaultInspectionFiles').value = '';
+      $('renaultInspectionCameraFiles').value = '';
+      state.renaultPhotoFiles = [];
+      $('renaultPhotoCount').textContent = '';
+      clearRenaultPhotoPreview();
       alert('완료됐습니다.');
       openPage('mainPage');
     } catch (e) {
       setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
     }
+  }
+
+  function getRenaultInspectionFiles() {
+    return state.renaultPhotoFiles || [];
+  }
+
+  function addRenaultPhotoFiles(input) {
+    const files = Array.from(input.files || []);
+    if (files.length) state.renaultPhotoFiles = getRenaultInspectionFiles().concat(files);
+    input.value = '';
+    updateRenaultPhotoUI();
+  }
+
+  function toggleRenaultPhotoField() {
+    const isBranchBlog = $('renaultUploadBlog').value === '지점 블로그';
+    $('renaultPhotoField').style.display = isBranchBlog ? 'grid' : 'none';
+    if (!isBranchBlog) {
+      $('renaultInspectionFiles').value = '';
+      $('renaultInspectionCameraFiles').value = '';
+      state.renaultPhotoFiles = [];
+      $('renaultPhotoCount').textContent = '';
+      clearRenaultPhotoPreview();
+    }
+  }
+
+  function updateRenaultPhotoUI() {
+    const count = getRenaultInspectionFiles().length;
+    $('renaultPhotoCount').textContent = count ? `총 ${count}개 선택됨` : '';
+    renderRenaultPhotoPreview();
+  }
+
+  function clearRenaultPhotoPreview() {
+    state.renaultPreviewUrls.forEach(u => URL.revokeObjectURL(u));
+    state.renaultPreviewUrls = [];
+    $('renaultPhotoPreview').innerHTML = '';
+  }
+
+  function renderRenaultPhotoPreview() {
+    const files = getRenaultInspectionFiles();
+    clearRenaultPhotoPreview();
+    $('renaultPhotoPreview').innerHTML = files.map(file => {
+      const url = URL.createObjectURL(file);
+      state.renaultPreviewUrls.push(url);
+      return `<div class="photo-thumb"><img src="${url}" alt=""><span>${esc(file.name)}</span></div>`;
+    }).join('');
+  }
+
+  async function uploadRenaultPhotosToStorage(files) {
+    const urls = [];
+    for (let i = 0; i < files.length; i++) {
+      setPageStatus('renaultDraftStatus', `사진 업로드 중 (${i + 1}/${files.length})`);
+      const file = files[i];
+      const path = `renault-requests/${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 8)}${getImageExtension(file)}`;
+      urls.push(await uploadToStorage(path, file));
+    }
+    return urls;
+  }
+
+  function getImageExtension(file) {
+    const name = String(file && file.name || '').toLowerCase();
+    const match = name.match(/\.(jpe?g|png|webp|gif|heic|heif)$/);
+    if (match) return `.${match[1]}`;
+    if (file && file.type === 'image/png') return '.png';
+    if (file && file.type === 'image/webp') return '.webp';
+    if (file && file.type === 'image/gif') return '.gif';
+    return '.jpg';
   }
 
   function showCampaignDone() {
