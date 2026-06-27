@@ -210,7 +210,7 @@
     </div>
 
     <div id="skinSelectPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>스킨 제작 요청</h2></div>
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>블로그 스킨 제작 요청</h2></div>
       <div class="list">
         <button class="choice" type="button" onclick="toggleSkinPreview('one')">1번 시안 보기</button>
         <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1.png" alt="1번 PC 시안"><img class="skin-preview-mobile" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1-1.png" alt="1번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('1번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div></div>
@@ -221,7 +221,7 @@
     </div>
 
     <div id="skinFormPage" class="page">
-      <div class="back-row skin-form-head"><button class="back-btn" type="button" onclick="openPage('skinSelectPage')" aria-label="뒤로가기">‹</button><h2 id="skinFormTitle">스킨 제작 요청</h2><img id="skinFormPreview" class="skin-form-preview" alt="선택한 스킨 시안" style="display:none"></div>
+      <div class="back-row skin-form-head"><button class="back-btn" type="button" onclick="openPage('skinSelectPage')" aria-label="뒤로가기">‹</button><h2 id="skinFormTitle">블로그 스킨 제작 요청</h2><img id="skinFormPreview" class="skin-form-preview" alt="선택한 스킨 시안" style="display:none"></div>
       <div class="card form">
         <div class="field"><label>전화번호</label><input id="skinPhone" inputmode="tel" placeholder="010-0000-0000"></div>
         <div id="skinDesignFields" class="form">
@@ -815,31 +815,25 @@
     const uploadBlog = $('renaultUploadBlog').value.trim();
     const keyword = $('renaultKeyword').value.trim();
     const requestDetails = $('renaultRequestDetails').value.trim();
+    const selectedFiles = getRenaultInspectionFiles().slice();
+    let localId = '';
     if (!uploadBlog) return setPageStatus('renaultDraftStatus', '업로드를 선택해주세요.', 'error');
     if (!keyword) return setPageStatus('renaultDraftStatus', '키워드를 입력해주세요.', 'error');
     if (!requestDetails) return setPageStatus('renaultDraftStatus', '요청 사항을 입력해주세요.', 'error');
 
     setPageStatus('renaultDraftStatus', '요청 중입니다.');
     try {
-      const inspectionFiles = uploadBlog === '지점 블로그' ? await uploadRenaultPhotosToStorage(getRenaultInspectionFiles()) : [];
-      const result = await gasAction('requestRenaultDraft', {
-        name: state.user.name,
-        agency: state.user.agency,
-        uploadBlog,
-        keyword,
-        requestDetails,
-        inspectionFiles,
-      });
+      localId = `pending-renault-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       addRequestToHomeList({
-        pageId: result.pageId || '',
+        localId,
         type: '르노 차량 원고',
         title: keyword || '르노 차량 원고',
         date: new Date().toISOString().slice(0, 10),
         status: '접수',
-        url: result.pageUrl || '',
+        url: '',
         localPending: true,
       });
-      setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
+      setPageStatus('renaultDraftStatus', '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
       $('renaultKeyword').value = '';
       $('renaultRequestDetails').value = '';
       $('renaultInspectionFiles').value = '';
@@ -849,8 +843,24 @@
       clearRenaultPhotoPreview();
       alert('완료됐습니다.');
       openPage('mainPage');
+
+      const inspectionFiles = uploadBlog === '지점 블로그' ? await uploadRenaultPhotosToStorage(selectedFiles) : [];
+      const result = await gasAction('requestRenaultDraft', {
+        name: state.user.name,
+        agency: state.user.agency,
+        uploadBlog,
+        keyword,
+        requestDetails,
+        inspectionFiles,
+      });
+      updatePendingHomePost(localId, { pageId: result.pageId || '', url: result.pageUrl || '' });
+      loadAppHome();
     } catch (e) {
-      setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
+      if (localId && $('mainPage').classList.contains('active')) {
+        updatePendingHomePost(localId, { status: '연동 확인 필요' });
+      } else {
+        setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
+      }
     }
   }
 
@@ -1105,8 +1115,8 @@
     finalActions.classList.remove('active');
     revision.classList.remove('active');
     revision.dataset.pageId = '';
+    title.textContent = '블로그 스킨 제작 요청';
     if (!latest) {
-      title.textContent = '스킨 제작 요청';
       return;
     }
     if (isSkinFinalStatus(latest.status)) {
@@ -1121,7 +1131,6 @@
       revision.dataset.pageId = latest.pageId || '';
       return;
     }
-    title.textContent = '블로그 스킨 요청 완료';
     banner.disabled = true;
   }
 
@@ -1532,7 +1541,7 @@
     $('skinReferenceFiles').value = '';
     $('skinReferenceFileList').textContent = '';
     const presetSkin = skin === '1번' || skin === '2번';
-    $('skinFormTitle').textContent = skin + ' 스킨 제작 요청';
+    $('skinFormTitle').textContent = '블로그 스킨 제작 요청';
     $('skinFormTitle').style.display = presetSkin ? 'none' : 'block';
     const previewSource = presetSkin ? $(skin === '1번' ? 'skinPreviewOne' : 'skinPreviewTwo').querySelector('.skin-preview-pc').src : '';
     $('skinFormPreview').src = previewSource;
