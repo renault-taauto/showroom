@@ -383,7 +383,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], renaultPreviewUrls: [], renaultPhotoFiles: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], inspectionPhotoFiles: [], renaultPreviewUrls: [], renaultPhotoFiles: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -393,8 +393,8 @@
     $('profileBusinessCardFile').addEventListener('change', () => {
       $('businessCardName').textContent = $('profileBusinessCardFile').files[0]?.name || '';
     });
-    $('inspectionFiles').addEventListener('change', updateInspectionUI);
-    $('inspectionCameraFiles').addEventListener('change', updateInspectionUI);
+    $('inspectionFiles').addEventListener('change', event => addInspectionPhotoFiles(event.target));
+    $('inspectionCameraFiles').addEventListener('change', event => addInspectionPhotoFiles(event.target));
     setupRequestOptions(FALLBACK_OPTIONS);
     const saved = readSession();
     if (saved && saved.name) { state.user = saved; showHome(); }
@@ -1451,7 +1451,14 @@
   // 사진 UI
   // ─────────────────────────────
   function getInspectionFiles() {
-    return [...Array.from($('inspectionFiles').files || []), ...Array.from($('inspectionCameraFiles').files || [])];
+    return state.inspectionPhotoFiles || [];
+  }
+
+  function addInspectionPhotoFiles(input) {
+    const files = Array.from(input.files || []);
+    if (files.length) state.inspectionPhotoFiles = getInspectionFiles().concat(files);
+    input.value = '';
+    updateInspectionUI();
   }
 
   function updateInspectionUI() {
@@ -1487,6 +1494,7 @@
     $('deliveryMood').value = '';
     $('inspectionFiles').value = '';
     $('inspectionCameraFiles').value = '';
+    state.inspectionPhotoFiles = [];
     $('inspectionFileName').textContent = '';
     updateRequestPhotoGuide();
     state.previewUrls.forEach(u => URL.revokeObjectURL(u));
