@@ -2,17 +2,17 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <title>티에이오토 영업담당 로그인</title>
   <style>
     *{box-sizing:border-box}
-    html,body{width:100%;min-height:100%;margin:0}
-    body{background:#eef1f5;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
+    html,body{width:100%;min-height:100%;margin:0;overflow-x:hidden;-webkit-text-size-adjust:100%;touch-action:manipulation}
+    body{background:#eef1f5;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif;display:flex;justify-content:center}
     button,input,select,textarea{font:inherit}
     button{border:0;cursor:pointer}
     a{color:inherit}
-    .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff}
+    .app{width:min(480px,calc(100% - 24px));min-height:100vh;margin:0 auto;background:#fff}
     .screen{display:none;min-height:100vh}
     .screen.active{display:flex}
     .auth{flex-direction:column;justify-content:center;gap:22px;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
@@ -390,6 +390,7 @@
   // 초기화
   // ─────────────────────────────
   (function init() {
+    preventMobileZoom();
     $('profileBusinessCardFile').addEventListener('change', () => {
       $('businessCardName').textContent = $('profileBusinessCardFile').files[0]?.name || '';
     });
@@ -400,6 +401,21 @@
     if (saved && saved.name) { state.user = saved; showHome(); }
     loadAgencies();
   })();
+
+  function preventMobileZoom() {
+    document.addEventListener('gesturestart', event => event.preventDefault());
+    document.addEventListener('gesturechange', event => event.preventDefault());
+    document.addEventListener('gestureend', event => event.preventDefault());
+    document.addEventListener('touchmove', event => {
+      if (event.touches && event.touches.length > 1) event.preventDefault();
+    }, { passive: false });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', event => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) event.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+  }
 
   async function loadAgencies() {
     try {
