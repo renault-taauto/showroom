@@ -1648,6 +1648,7 @@
     if (pageId === 'renaultDraftPage') {
       const profile = (state.appHome && state.appHome.profile) || {};
       if (!$('renaultUploadBlog').value) $('renaultUploadBlog').value = profile.uploadBlog || '';
+      toggleRenaultPhotoField();
       setPageStatus('renaultDraftStatus', '');
     }
 
