@@ -92,9 +92,10 @@
     .notice-link{color:#111827;text-decoration:underline;font-size:14px;word-break:break-all}
     .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px;min-width:0;max-width:100%}
     .notice-section .list{gap:1px}
-    .notice-row{width:100%;min-height:32px;background:transparent;padding:2px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:7px}
-    .notice-title{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .notice-date{flex:0 0 auto;color:#667085;font-size:12px}
+    .notice-row{width:100%;min-height:32px;background:transparent;padding:4px 0;text-align:left;color:#111827;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 8px;min-width:0;max-width:100%}
+    .notice-title{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .notice-meta{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;max-width:100%}
+    .notice-date{min-width:0;color:#667085;font-size:12px;white-space:nowrap}
     .notice-pin{color:#d92d20}
     .notice-pagination{display:flex;justify-content:center;gap:12px;padding-top:5px}
     .notice-pagination button{width:auto;height:auto;padding:0;border:0;border-radius:0;background:transparent;color:#98a2b3;font-size:13px}
@@ -150,6 +151,10 @@
     .modal-body{display:grid;gap:12px}
     .message-item.unread{border-color:#f04438;background:#fffafa}
     .message-body{font-size:14px;color:#344054;line-height:1.55;white-space:pre-wrap}
+    @media (max-width:380px){
+      .notice-row{grid-template-columns:1fr}
+      .notice-meta{justify-content:flex-start}
+    }
   </style>
 </head>
 <body>
@@ -997,7 +1002,7 @@
     state.visibleNotices = all.slice(start, start + pageSize);
     box.innerHTML = state.visibleNotices.map((item, i) => {
       const required = item.pinned ? '<span class="notice-required">필독</span>' : '';
-      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${esc(item.title)}</span>${required}<span class="notice-date">${esc(item.date || '')}</span></button>`;
+      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${esc(item.title)}</span><span class="notice-meta">${required}<span class="notice-date">${esc(item.date || '')}</span></span></button>`;
     }).join('');
     pager.innerHTML = Array.from({ length: pageCount }, (_, index) => {
       const page = index + 1;
