@@ -7,17 +7,17 @@
   <title>티에이오토 영업담당 로그인</title>
   <style>
     *{box-sizing:border-box}
-    html,body{width:100%;min-height:100%;margin:0;overflow-x:hidden;-webkit-text-size-adjust:100%;touch-action:manipulation}
-    body{background:#eef1f5;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+    html,body{width:100%;max-width:100vw;min-height:100%;margin:0;overflow-x:hidden;-webkit-text-size-adjust:100%;touch-action:manipulation}
+    body{background:#eef1f5;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
     button,input,select,textarea{font:inherit}
     button{border:0;cursor:pointer}
     a{color:inherit}
-    .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff}
-    .screen{display:none;min-height:100vh}
+    .app{width:100vw;max-width:min(480px,100vw);min-height:100vh;margin:0 auto;background:#fff;overflow-x:hidden}
+    .screen{display:none;width:100%;max-width:100%;min-height:100vh;overflow-x:hidden}
     .screen.active{display:flex}
     .auth{flex-direction:column;justify-content:center;gap:22px;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
     .home{flex-direction:column;gap:16px;background:#f6f7f9;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
-    .brand,.panel,.form,.page{display:grid;gap:14px}
+    .brand,.panel,.form,.page{display:grid;gap:14px;min-width:0;max-width:100%}
     .mark{width:48px;height:48px;border-radius:14px;background:#111827;color:#fff;display:grid;place-items:center;font-size:21px;font-weight:700}
     h1{margin:0;font-size:26px}
     h2{margin:0;font-size:20px}
@@ -41,13 +41,13 @@
     .status.ok{color:#067647}
     .status.warn{color:#b54708}
     .hint{font-size:12px;color:#98a2b3}
-    .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:10px;background:#fff}
+    .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:10px;background:#fff;min-width:0;max-width:100%}
     .app-top,.section-head,.back-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .user-title{display:grid;gap:3px}
     .menu-btn,.back-btn{width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid #eaecf0;display:grid;place-items:center}
     .menu-icon{width:20px;height:14px;display:grid;gap:4px}
     .menu-icon span{display:block;height:2px;border-radius:99px;background:#111827}
-    .banner{overflow:hidden;border-radius:18px;background:#111827;color:#fff;min-height:118px;display:grid;align-content:end;padding:18px;text-align:left;width:100%}
+    .banner{overflow:hidden;border-radius:18px;background:#111827;color:#fff;min-height:118px;display:grid;align-content:end;padding:18px;text-align:left;width:100%;max-width:100%;min-width:0}
     .banner-title{font-size:18px;font-weight:700}
     .banner-desc{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px}
     .skin-banner{min-height:48px;padding:10px 13px;background:#111827;align-content:center}
@@ -71,8 +71,8 @@
     .skin-revision-actions button:last-child{color:#667085}
     .notice-required{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#fff1f0;color:#d92d20;font-size:10px;font-weight:800;flex:0 0 auto}
     .small-btn{min-height:34px;padding:7px 10px;border-radius:10px;background:#eef1f5;color:#111827;font-size:12px}
-    .list{display:grid;gap:8px}
-    .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none}
+    .list{display:grid;gap:8px;min-width:0;max-width:100%}
+    .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none;min-width:0;max-width:100%}
     .list-title{font-size:14px;color:#111827}
     .list-meta{font-size:12px;color:#667085}
     .list-meta.done{color:#d92d20;font-weight:600}
@@ -90,7 +90,7 @@
     .notice-todo{display:flex;gap:8px;align-items:flex-start;color:#475467;font-size:14px;line-height:1.55}
     .notice-todo input{width:16px;min-height:16px;margin-top:2px;pointer-events:none}
     .notice-link{color:#111827;text-decoration:underline;font-size:14px;word-break:break-all}
-    .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px}
+    .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px;min-width:0;max-width:100%}
     .notice-section .list{gap:1px}
     .notice-row{width:100%;min-height:32px;background:transparent;padding:2px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:7px}
     .notice-title{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -105,7 +105,7 @@
     .month-items{display:grid;gap:8px}
     .month-group.collapsed .month-items{display:none}
     .empty{padding:18px;border-radius:14px;background:#fff;border:1px dashed #d0d5dd;color:#98a2b3;text-align:center;font-size:13px}
-    .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .quick-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;min-width:0;max-width:100%}
     .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;color:#111827}
     .drawer-dim{position:fixed;inset:0;background:rgba(17,24,39,.42);display:none;z-index:20}
     .drawer-dim.active{display:block}
