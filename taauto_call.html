@@ -2,7 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>티에이오토 대리점 안내</title>
 <style>
   * { box-sizing: border-box; }
 
@@ -203,17 +204,21 @@
     if (el) el.classList.toggle('open');
   }
 
+  // 여기에 GAS 웹 앱 배포 URL을 넣으세요 (배포 > 새 배포 > 웹 앱)
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsuk2HoylKPJD3_VQlrApOlZXlev1oHwFttQ6KRe4b75mZVXicuc4mcoLUUxAfbJeSLA/exec';
+
   function loadData() {
-    google.script.run
-      .withSuccessHandler(function(data) {
+    fetch(WEB_APP_URL)
+      .then(res => res.json())
+      .then(data => {
         render(data);
         document.getElementById('updatedAt').textContent =
           '마지막 업데이트: ' + new Date().toLocaleTimeString('ko-KR');
       })
-      .withFailureHandler(function(err) {
+      .catch(err => {
         console.error(err);
-      })
-      .getBranchData();
+        document.getElementById('updatedAt').textContent = '업데이트 실패';
+      });
   }
 
   loadData();
