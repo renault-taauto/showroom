@@ -621,7 +621,7 @@
       setupRequestOptions(state.options);
       renderProfile(state.appHome.profile || {});
       const serverCompletedPosts = state.appHome.completedPosts || [];
-      const mergedCompletedPosts = mergeLocalPendingPosts(localPendingPosts, serverCompletedPosts).slice(0, 5);
+      const mergedCompletedPosts = mergeLocalPendingPosts(localPendingPosts, serverCompletedPosts);
       state.appHome.completedPosts = mergedCompletedPosts;
       renderCompletedPosts(mergedCompletedPosts);
       saveCompletedPostsCache(mergedCompletedPosts);
@@ -1299,7 +1299,7 @@
 
   function addRequestToHomeList(item) {
     const current = readCompletedPostsCache().filter(p => p.status !== '완료');
-    const next = [item, ...current].slice(0, 5);
+    const next = [item, ...current];
     renderCompletedPosts(next);
     saveCompletedPostsCache(next);
     state.appHome = { ...(state.appHome || {}), completedPosts: next };
