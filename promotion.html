@@ -267,13 +267,27 @@
 <div class="modal-overlay" id="smsModal">
   <div class="modal">
     <div class="modal-title" id="modalTitle">문자 보내기</div>
-    <div class="modal-sub">입력 후 문자 앱이 열립니다. 전송은 직접 해주세요.</div>
 
     <label>이름</label>
     <input type="text" id="smsName" placeholder="예: 홍길동">
 
     <label>관심 차종</label>
-    <input type="text" id="smsCar" placeholder="예: 그랑콜레오스, 아르카나">
+    <select id="smsCar">
+      <option value="">선택하세요</option>
+      <option>필랑트</option>
+      <option>그랑 콜레오스</option>
+      <option>아르카나</option>
+    </select>
+
+    <label>연령대</label>
+    <select id="smsAge">
+      <option value="">선택하세요</option>
+      <option>20대</option>
+      <option>30대</option>
+      <option>40대</option>
+      <option>50대</option>
+      <option>60대 이후</option>
+    </select>
 
     <label>연락 가능 시간대</label>
     <select id="smsTime">
@@ -287,7 +301,7 @@
 
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">취소</button>
-      <button class="modal-confirm" onclick="sendSms()">문자 앱 열기</button>
+      <button class="modal-confirm" onclick="sendSms()">문자 보내기</button>
     </div>
   </div>
 </div>
@@ -370,6 +384,7 @@
     document.getElementById('modalTitle').textContent = branch + ' · ' + name + ' 담당';
     document.getElementById('smsName').value = '';
     document.getElementById('smsCar').value = '';
+    document.getElementById('smsAge').value = '';
     document.getElementById('smsTime').value = '';
     document.getElementById('smsModal').classList.add('show');
   }
@@ -380,17 +395,20 @@
 
   function sendSms() {
     const name = document.getElementById('smsName').value.trim();
-    const car = document.getElementById('smsCar').value.trim();
+    const car  = document.getElementById('smsCar').value;
+    const age  = document.getElementById('smsAge').value;
     const time = document.getElementById('smsTime').value;
 
     if (!name) { alert('이름을 입력해주세요.'); return; }
-    if (!car)  { alert('관심 차종을 입력해주세요.'); return; }
+    if (!car)  { alert('관심 차종을 선택해주세요.'); return; }
+    if (!age)  { alert('연령대를 선택해주세요.'); return; }
     if (!time) { alert('연락 가능 시간대를 선택해주세요.'); return; }
 
     const body =
       `안녕하세요, ${name}입니다.\n` +
       `신한캐피탈 프로모션을 보고 연락드립니다.\n` +
       `관심 차종: ${car}\n` +
+      `연령대: ${age}\n` +
       `연락 가능 시간: ${time}\n` +
       `상담 부탁드립니다.`;
 
@@ -404,8 +422,11 @@
   });
 
   function loadData() {
-    fetch(WEB_APP_URL)
-      .then(res => res.json())
+    fetch(WEB_APP_URL, { redirect: 'follow' })
+      .then(res => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
       .then(data => {
         render(data);
         document.getElementById('updatedAt').textContent =
@@ -413,6 +434,8 @@
       })
       .catch(err => {
         console.error(err);
+        document.getElementById('container').innerHTML =
+          '<div class="empty-state">데이터를 불러오지 못했습니다.<br>잠시 후 다시 시도합니다.</div>';
         document.getElementById('updatedAt').textContent = '업데이트 실패';
       });
   }
