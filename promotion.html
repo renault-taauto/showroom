@@ -115,7 +115,7 @@
     font-size: 13px;
     font-weight: 700;
     color: #111;
-    text-align: center;
+    text-align: left;
     margin-bottom: 6px;
   }
 
@@ -257,9 +257,7 @@
   <p>전화번호를 누르시면 바로 연결됩니다.</p>
 </header>
 
-<div class="container" id="container">
-  <div class="empty-state">불러오는 중...</div>
-</div>
+<div class="container" id="container"></div>
 
 <div class="updated-at" id="updatedAt"></div>
 
@@ -286,7 +284,7 @@
       <option>30대</option>
       <option>40대</option>
       <option>50대</option>
-      <option>60대 이후</option>
+      <option>60대 이상</option>
     </select>
 
     <label>연락 가능 시간대</label>
@@ -381,7 +379,7 @@
   function openModal(phone, branch, name) {
     currentPhone = phone;
     currentBranch = branch;
-    document.getElementById('modalTitle').textContent = branch + ' · ' + name + ' 담당';
+    document.getElementById('modalTitle').textContent = branch + ' · ' + name + ' 지점장';
     document.getElementById('smsName').value = '';
     document.getElementById('smsCar').value = '';
     document.getElementById('smsAge').value = '';
@@ -422,20 +420,29 @@
   });
 
   function loadData() {
+    // 캐시 먼저 렌더링
+    const cached = localStorage.getItem('branchData');
+    if (cached) {
+      try { render(JSON.parse(cached)); } catch(e) {}
+    }
+
     fetch(WEB_APP_URL, { redirect: 'follow' })
       .then(res => {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
       })
       .then(data => {
+        localStorage.setItem('branchData', JSON.stringify(data));
         render(data);
         document.getElementById('updatedAt').textContent =
           '마지막 업데이트: ' + new Date().toLocaleTimeString('ko-KR');
       })
       .catch(err => {
         console.error(err);
-        document.getElementById('container').innerHTML =
-          '<div class="empty-state">데이터를 불러오지 못했습니다.<br>잠시 후 다시 시도합니다.</div>';
+        if (!cached) {
+          document.getElementById('container').innerHTML =
+            '<div class="empty-state">데이터를 불러오지 못했습니다.<br>잠시 후 다시 시도합니다.</div>';
+        }
         document.getElementById('updatedAt').textContent = '업데이트 실패';
       });
   }
