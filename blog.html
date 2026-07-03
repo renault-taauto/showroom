@@ -527,6 +527,13 @@
     return data.data;
   }
 
+  function withTimeout(promise, ms, message) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(message || '요청 시간이 초과되었습니다.')), ms)),
+    ]);
+  }
+
   async function fetchWithRetry(url, options, retries = 2) {
     let lastError;
     for (let i = 0; i <= retries; i++) {
@@ -955,7 +962,11 @@
     $('campaignScoreText').textContent = '불러오는 중입니다.';
     $('campaignApplyButton').style.display = 'none';
     try {
-      const result = await gasAction('getCampaignScore', { name: state.user.name, agency: state.user.agency });
+      const result = await withTimeout(
+        gasAction('getCampaignScore', { name: state.user.name, agency: state.user.agency }),
+        18000,
+        '시책 점수 응답이 지연되고 있습니다. 잠시 후 다시 확인해주세요.'
+      );
       if (!result || !result.participates) {
         $('campaignScoreText').textContent = '시책 참여신청을 해주세요';
         $('campaignApplyButton').style.display = 'block';
