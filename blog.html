@@ -149,8 +149,6 @@
     .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
     .modal-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .modal-body{display:grid;gap:12px}
-    .message-item.unread{border-color:#f04438;background:#fffafa}
-    .message-body{font-size:14px;color:#344054;line-height:1.55;white-space:pre-wrap}
     @media (max-width:380px){
       .notice-row{gap:5px}
       .notice-title{font-size:13px}
@@ -380,7 +378,6 @@
   const MY_POSTS_CACHE_KEY = 'salesMyPostsCache_v1';
   const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
   const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
-  const MESSAGES_CACHE_KEY = 'salesMessagesCache_v1';
   const SKIN_REQUESTS_CACHE_KEY = 'salesSkinRequestsCache_v1';
 
   const FALLBACK_OPTIONS = {
@@ -395,7 +392,7 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], inspectionPhotoFiles: [], renaultPreviewUrls: [], renaultPhotoFiles: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], inspectionPhotoFiles: [], renaultPreviewUrls: [], renaultPhotoFiles: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
@@ -633,22 +630,6 @@
       }
     } catch (e) {
       renderNotices([{ title: '홈 데이터를 불러오지 못했습니다', date: '', content: e.message || String(e) }]);
-    }
-  }
-
-  async function loadMessages() {
-    if (!state.user) return;
-    try {
-      const messages = await gasAction('getMessages', { name: state.user.name, agency: state.user.agency });
-      const list = Array.isArray(messages) ? messages : [];
-      state.messages = list;
-      saveMessagesCache(list);
-      updateMessageBadge(list);
-      if ($('messagesPage').classList.contains('active')) renderMessages(list);
-    } catch (e) {
-      if ($('messagesPage').classList.contains('active') && !readMessagesCache().length) {
-        renderMessages([{ body: '메시지를 불러오지 못했습니다.\n' + (e.message || String(e)), sentAt: '', read: true }]);
-      }
     }
   }
 
@@ -1229,15 +1210,6 @@
   function saveUploadContentsCache(posts) { try { localStorage.setItem(UPLOAD_CONTENTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readUploadContentsCache() { try { return JSON.parse(localStorage.getItem(UPLOAD_CONTENTS_CACHE_KEY) || '[]'); } catch { return []; } }
 
-  function saveMessagesCache(messages) { try { localStorage.setItem(MESSAGES_CACHE_KEY, JSON.stringify(messages || [])); } catch {} }
-  function readMessagesCache() { try { return JSON.parse(localStorage.getItem(MESSAGES_CACHE_KEY) || '[]'); } catch { return []; } }
-  function renderCachedMessages() {
-    const cached = readMessagesCache();
-    state.messages = cached;
-    updateMessageBadge(cached);
-    if ($('messagesPage').classList.contains('active')) renderMessages(cached);
-  }
-
   // ─────────────────────────────
   // 원고 리스트
   // ─────────────────────────────
@@ -1377,41 +1349,6 @@
       const meta = p.status && !p.url ? `<div class="list-meta">${esc(p.status)}</div>` : '';
       return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">${label}</a>` : meta}</div>`;
     }).join('');
-  }
-
-  function renderMessages(messages) {
-    const box = $('messageList');
-    const list = Array.isArray(messages) ? messages : [];
-    updateMessageBadge(list);
-    if (!list.length) return box.innerHTML = '<div class="empty">도착한 메시지가 없습니다.</div>';
-    box.innerHTML = list.map(message => `<button class="list-item message-item ${message.read ? '' : 'unread'}" type="button" onclick="readMessage('${esc(message.id || '')}')">
-      <div class="list-title">${message.read ? '읽은 메시지' : '새 메시지'}</div>
-      <div class="message-body">${esc(message.body || '')}</div>
-      <div class="list-meta">${esc(message.sentAt || '')}${message.readAt ? ' · 읽음 ' + esc(message.readAt) : ''}</div>
-    </button>`).join('');
-  }
-
-  function updateMessageBadge(messages) {
-    const count = (messages || []).filter(message => !message.read).length;
-    const badge = $('messageUnreadBadge');
-    if (!badge) return;
-    badge.textContent = count > 99 ? '99+' : String(count);
-    badge.classList.toggle('active', count > 0);
-  }
-
-  async function readMessage(messageId) {
-    const message = (state.messages || []).find(item => item.id === messageId);
-    if (!message || message.read) return;
-    message.read = true;
-    message.readAt = '방금';
-    renderMessages(state.messages);
-    saveMessagesCache(state.messages);
-    try {
-      await gasAction('markMessageRead', { name: state.user.name, agency: state.user.agency, messageId });
-      loadMessages();
-    } catch (e) {
-      loadMessages();
-    }
   }
 
   // ─────────────────────────────
@@ -1729,11 +1666,6 @@
         .catch(e => {
           if (!cached.length) renderUploadContents([{ title: '업로드 콘텐츠를 불러오지 못했습니다', status: e.message }]);
         });
-    }
-
-    if (pageId === 'messagesPage') {
-      renderCachedMessages();
-      loadMessages();
     }
 
     window.scrollTo({ top: 0, behavior: 'auto' });
