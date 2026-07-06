@@ -26,12 +26,13 @@
   /* 이미지 내 "프로모션 상담 및 문의" 버튼 위에 투명 클릭 영역 */
   .promo-overlay {
     position: absolute;
-    top: 63%;
-    left: 20%;
-    width: 60%;
-    height: 5%;
+    top: 56.8%;
+    left: 26.6%;
+    width: 44.8%;
+    height: 4.2%;
     cursor: pointer;
     display: block;
+    border-radius: 999px;
   }
 
   header {
@@ -263,9 +264,9 @@
 
 <!-- 상단 배너 이미지 -->
 <div class="top-banner">
-  <img src="https://raw.githubusercontent.com/renault-taauto/showroom/main/2.image/2.1.png"
+  <img src="https://raw.githubusercontent.com/renault-taauto/showroom/main/2.image/0706_2.png"
        alt="신한캐피탈 프로모션">
-  <a class="promo-overlay" onclick="document.getElementById('dealership').scrollIntoView({behavior:'smooth'})"></a>
+  <a class="promo-overlay" href="#dealership" aria-label="프로모션 상담 및 문의"></a>
 </div>
 
 <header>
@@ -324,11 +325,58 @@
 
 <script>
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsuk2HoylKPJD3_VQlrApOlZXlev1oHwFttQ6KRe4b75mZVXicuc4mcoLUUxAfbJeSLA/exec';
+  const CAMPAIGN = 'renault_2026_07_employee_promotion';
 
   const CATEGORY_ORDER = ['서울', '인천', '경기북부', '경기 남/동부', '강원'];
   let openCategories = new Set();
   let currentPhone = '';
   let currentBranch = '';
+  let currentBranchMeta = null;
+
+  const sessionId = getSessionId();
+
+  function getSessionId() {
+    const key = 'promotionTrafficSessionId';
+    let value = sessionStorage.getItem(key);
+    if (!value) {
+      value = Date.now().toString(36) + Math.random().toString(36).slice(2);
+      sessionStorage.setItem(key, value);
+    }
+    return value;
+  }
+
+  function sendTraffic(event, data) {
+    const payload = Object.assign({
+      action: 'trackTraffic',
+      campaign: CAMPAIGN,
+      event: event,
+      page: location.href,
+      referrer: document.referrer || '',
+      sessionId: sessionId,
+      userAgent: navigator.userAgent || ''
+    }, data || {});
+
+    const body = JSON.stringify(payload);
+
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(WEB_APP_URL, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
+      return;
+    }
+
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      keepalive: true,
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: body
+    }).catch(function() {});
+  }
+
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, function(char) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char];
+    });
+  }
 
   function render(data) {
     const container = document.getElementById('container');
@@ -352,22 +400,29 @@
       const isOpen = openCategories.has(cat);
       const branches = grouped[cat];
 
-      html += `<div class="category ${isOpen ? 'open' : ''}" data-category="${cat}">`;
-      html += `<button class="category-toggle" onclick="toggleCategory('${cat}')">${cat} <span class="arrow">▼</span></button>`;
+      html += `<div class="category ${isOpen ? 'open' : ''}" data-category="${escapeHtml(cat)}">`;
+      html += `<button class="category-toggle" onclick="toggleCategory('${escapeHtml(cat)}')">${escapeHtml(cat)} <span class="arrow">▼</span></button>`;
       html += `<div class="branch-grid">`;
 
       branches.forEach(b => {
-        const tel = b.phone.replace(/[^0-9]/g, '');
+        const tel = String(b.phone || '').replace(/[^0-9]/g, '');
         const phoneFormatted = formatPhone(tel);
+        const meta = encodeURIComponent(JSON.stringify({
+          category: b.category,
+          branch: b.branch,
+          name: b.name,
+          phone: tel
+        }));
+
         html += `
           <div class="branch-card">
-            <div class="branch-name">${b.branch}</div>
-            <div class="branch-person">${b.name}</div>
-            <div class="branch-location">${b.location}</div>
-            <div class="branch-phone-text">${phoneFormatted}</div>
+            <div class="branch-name">${escapeHtml(b.branch)}</div>
+            <div class="branch-person">${escapeHtml(b.name)}</div>
+            <div class="branch-location">${escapeHtml(b.location)}</div>
+            <div class="branch-phone-text">${escapeHtml(phoneFormatted)}</div>
             <div class="branch-actions">
-              <a class="btn-call" href="tel:${tel}">전화걸기</a>
-              <button class="btn-sms" onclick="openModal('${tel}', '${b.branch}', '${b.name}')">문자보내기</button>
+              <a class="btn-call" href="tel:${tel}" data-branch-meta="${meta}">전화걸기</a>
+              <button class="btn-sms" data-branch-meta="${meta}">문자보내기</button>
             </div>
           </div>`;
       });
@@ -376,6 +431,14 @@
     });
 
     container.innerHTML = html;
+  }
+
+  function readMeta(el) {
+    try {
+      return JSON.parse(decodeURIComponent(el.getAttribute('data-branch-meta') || ''));
+    } catch(e) {
+      return {};
+    }
   }
 
   function formatPhone(num) {
@@ -392,17 +455,28 @@
     }
     const el = document.querySelector(`.category[data-category="${cat}"]`);
     if (el) el.classList.toggle('open');
+
+    sendTraffic('category_toggle', {
+      buttonType: 'category',
+      category: cat,
+      branch: '',
+      name: '',
+      phone: ''
+    });
   }
 
-  function openModal(phone, branch, name) {
+  function openModal(phone, branch, name, category) {
     currentPhone = phone;
     currentBranch = branch;
+    currentBranchMeta = { category: category || '', branch: branch || '', name: name || '', phone: phone || '' };
     document.getElementById('modalTitle').textContent = branch + ' · ' + name + ' 지점장';
     document.getElementById('smsName').value = '';
     document.getElementById('smsCar').value = '';
     document.getElementById('smsAge').value = '';
     document.getElementById('smsTime').value = '';
     document.getElementById('smsModal').classList.add('show');
+
+    sendTraffic('button_click', Object.assign({ buttonType: 'sms_open' }, currentBranchMeta));
   }
 
   function closeModal() {
@@ -428,9 +502,41 @@
       `연락 가능 시간: ${time}\n` +
       `상담 부탁드립니다.`;
 
+    sendTraffic('button_click', Object.assign({
+      buttonType: 'sms_send',
+      customerName: name,
+      car: car,
+      age: age,
+      contactTime: time
+    }, currentBranchMeta || {}));
+
     window.location.href = `sms:${currentPhone}?body=${encodeURIComponent(body)}`;
     closeModal();
   }
+
+  document.querySelector('.promo-overlay').addEventListener('click', function() {
+    sendTraffic('button_click', {
+      buttonType: 'promo_scroll',
+      category: '',
+      branch: '',
+      name: '',
+      phone: ''
+    });
+  });
+
+  document.getElementById('container').addEventListener('click', function(e) {
+    const callBtn = e.target.closest('.btn-call');
+    if (callBtn) {
+      sendTraffic('button_click', Object.assign({ buttonType: 'call' }, readMeta(callBtn)));
+      return;
+    }
+
+    const smsBtn = e.target.closest('.btn-sms');
+    if (smsBtn) {
+      const meta = readMeta(smsBtn);
+      openModal(meta.phone, meta.branch, meta.name, meta.category);
+    }
+  });
 
   // 모달 바깥 터치 시 닫기
   document.getElementById('smsModal').addEventListener('click', function(e) {
@@ -465,6 +571,7 @@
       });
   }
 
+  sendTraffic('page_view', { buttonType: '', category: '', branch: '', name: '', phone: '' });
   loadData();
   setInterval(loadData, 10000);
 </script>
