@@ -2,22 +2,22 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <title>티에이오토 영업담당 로그인</title>
   <style>
     *{box-sizing:border-box}
-    html,body{width:100%;min-height:100%;margin:0}
+    html,body{width:100%;max-width:100vw;min-height:100%;margin:0;overflow-x:hidden;-webkit-text-size-adjust:100%;touch-action:manipulation}
     body{background:#eef1f5;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
     button,input,select,textarea{font:inherit}
     button{border:0;cursor:pointer}
     a{color:inherit}
-    .app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff}
-    .screen{display:none;min-height:100vh}
+    .app{width:100vw;max-width:min(480px,100vw);min-height:100vh;margin:0 auto;background:#fff;overflow-x:hidden}
+    .screen{display:none;width:100%;max-width:100%;min-height:100vh;overflow-x:hidden}
     .screen.active{display:flex}
     .auth{flex-direction:column;justify-content:center;gap:22px;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
     .home{flex-direction:column;gap:16px;background:#f6f7f9;padding:calc(env(safe-area-inset-top) + 22px) 18px 28px}
-    .brand,.panel,.form,.page{display:grid;gap:14px}
+    .brand,.panel,.form,.page{display:grid;gap:14px;min-width:0;max-width:100%}
     .mark{width:48px;height:48px;border-radius:14px;background:#111827;color:#fff;display:grid;place-items:center;font-size:21px;font-weight:700}
     h1{margin:0;font-size:26px}
     h2{margin:0;font-size:20px}
@@ -41,13 +41,13 @@
     .status.ok{color:#067647}
     .status.warn{color:#b54708}
     .hint{font-size:12px;color:#98a2b3}
-    .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:10px;background:#fff}
+    .card{border:1px solid #eaecf0;border-radius:14px;padding:14px;display:grid;gap:10px;background:#fff;min-width:0;max-width:100%}
     .app-top,.section-head,.back-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .user-title{display:grid;gap:3px}
     .menu-btn,.back-btn{width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid #eaecf0;display:grid;place-items:center}
     .menu-icon{width:20px;height:14px;display:grid;gap:4px}
     .menu-icon span{display:block;height:2px;border-radius:99px;background:#111827}
-    .banner{overflow:hidden;border-radius:18px;background:#111827;color:#fff;min-height:118px;display:grid;align-content:end;padding:18px;text-align:left;width:100%}
+    .banner{overflow:hidden;border-radius:18px;background:#111827;color:#fff;min-height:118px;display:grid;align-content:end;padding:18px;text-align:left;width:100%;max-width:100%;min-width:0}
     .banner-title{font-size:18px;font-weight:700}
     .banner-desc{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px}
     .skin-banner{min-height:48px;padding:10px 13px;background:#111827;align-content:center}
@@ -71,8 +71,8 @@
     .skin-revision-actions button:last-child{color:#667085}
     .notice-required{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#fff1f0;color:#d92d20;font-size:10px;font-weight:800;flex:0 0 auto}
     .small-btn{min-height:34px;padding:7px 10px;border-radius:10px;background:#eef1f5;color:#111827;font-size:12px}
-    .list{display:grid;gap:8px}
-    .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none}
+    .list{display:grid;gap:8px;min-width:0;max-width:100%}
+    .list-item{background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:13px;display:grid;gap:5px;text-decoration:none;min-width:0;max-width:100%}
     .list-title{font-size:14px;color:#111827}
     .list-meta{font-size:12px;color:#667085}
     .list-meta.done{color:#d92d20;font-weight:600}
@@ -90,11 +90,12 @@
     .notice-todo{display:flex;gap:8px;align-items:flex-start;color:#475467;font-size:14px;line-height:1.55}
     .notice-todo input{width:16px;min-height:16px;margin-top:2px;pointer-events:none}
     .notice-link{color:#111827;text-decoration:underline;font-size:14px;word-break:break-all}
-    .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px}
+    .notice-section{display:grid;gap:2px;background:#fff;border:1px solid #eaecf0;border-radius:14px;padding:10px 12px;min-width:0;max-width:100%}
     .notice-section .list{gap:1px}
-    .notice-row{width:100%;min-height:32px;background:transparent;padding:2px 0;text-align:left;color:#111827;display:flex;align-items:center;gap:7px}
-    .notice-title{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .notice-date{flex:0 0 auto;color:#667085;font-size:12px}
+    .notice-row{width:100%;min-height:32px;background:transparent;padding:2px 0;text-align:left;color:#111827;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:7px;min-width:0;max-width:100%}
+    .notice-title{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .notice-meta{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;max-width:100%}
+    .notice-date{min-width:0;color:#667085;font-size:12px;white-space:nowrap}
     .notice-pin{color:#d92d20}
     .notice-pagination{display:flex;justify-content:center;gap:12px;padding-top:5px}
     .notice-pagination button{width:auto;height:auto;padding:0;border:0;border-radius:0;background:transparent;color:#98a2b3;font-size:13px}
@@ -105,7 +106,7 @@
     .month-items{display:grid;gap:8px}
     .month-group.collapsed .month-items{display:none}
     .empty{padding:18px;border-radius:14px;background:#fff;border:1px dashed #d0d5dd;color:#98a2b3;text-align:center;font-size:13px}
-    .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .quick-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;min-width:0;max-width:100%}
     .quick-actions button{min-height:68px;border-radius:18px;background:#fff;border:1px solid #eaecf0;text-align:left;padding:14px;color:#111827}
     .drawer-dim{position:fixed;inset:0;background:rgba(17,24,39,.42);display:none;z-index:20}
     .drawer-dim.active{display:block}
@@ -148,8 +149,17 @@
     .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
     .modal-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .modal-body{display:grid;gap:12px}
-    .message-item.unread{border-color:#f04438;background:#fffafa}
-    .message-body{font-size:14px;color:#344054;line-height:1.55;white-space:pre-wrap}
+    @media (max-width:380px){
+      .notice-row{gap:5px}
+      .notice-title{font-size:13px}
+      .notice-date{font-size:11px}
+      .notice-required{width:24px;height:24px;font-size:9px}
+    }
+    @media (max-width:340px){
+      .notice-title{font-size:12px}
+      .notice-date{font-size:10px}
+      .notice-required{width:22px;height:22px;font-size:8px}
+    }
   </style>
 </head>
 <body>
@@ -210,7 +220,7 @@
     </div>
 
     <div id="skinSelectPage" class="page">
-      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>스킨 제작 요청</h2></div>
+      <div class="back-row"><button class="back-btn" type="button" onclick="openPage('mainPage')">‹</button><h2>블로그 스킨 제작 요청</h2></div>
       <div class="list">
         <button class="choice" type="button" onclick="toggleSkinPreview('one')">1번 시안 보기</button>
         <div id="skinPreviewOne" class="card" style="display:none"><img class="skin-preview-pc" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1.png" alt="1번 PC 시안"><img class="skin-preview-mobile" src="https://raw.githubusercontent.com/renault-taauto/showroom/main/assets/skin-examples/1-1.png" alt="1번 모바일 시안"><div class="skin-preview-actions"><button class="primary" type="button" onclick="startSkinRequest('1번')">요청하기</button><button class="secondary" type="button" onclick="toggleSkinPreview('one')">접기</button></div></div>
@@ -221,7 +231,7 @@
     </div>
 
     <div id="skinFormPage" class="page">
-      <div class="back-row skin-form-head"><button class="back-btn" type="button" onclick="openPage('skinSelectPage')" aria-label="뒤로가기">‹</button><h2 id="skinFormTitle">스킨 제작 요청</h2><img id="skinFormPreview" class="skin-form-preview" alt="선택한 스킨 시안" style="display:none"></div>
+      <div class="back-row skin-form-head"><button class="back-btn" type="button" onclick="openPage('skinSelectPage')" aria-label="뒤로가기">‹</button><h2 id="skinFormTitle">블로그 스킨 제작 요청</h2><img id="skinFormPreview" class="skin-form-preview" alt="선택한 스킨 시안" style="display:none"></div>
       <div class="card form">
         <div class="field"><label>전화번호</label><input id="skinPhone" inputmode="tel" placeholder="010-0000-0000"></div>
         <div id="skinDesignFields" class="form">
@@ -365,10 +375,10 @@
   const SESSION_KEY = 'salesLoginSession_v3';
   const NOTICE_CACHE_KEY = 'salesNoticeCache_v1';
   const COMPLETED_POSTS_CACHE_KEY = 'salesCompletedPostsCache_v1';
+  const PENDING_POSTS_CACHE_KEY = 'salesPendingPosts_v1';
   const MY_POSTS_CACHE_KEY = 'salesMyPostsCache_v1';
   const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
   const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
-  const MESSAGES_CACHE_KEY = 'salesMessagesCache_v1';
   const SKIN_REQUESTS_CACHE_KEY = 'salesSkinRequestsCache_v1';
 
   const FALLBACK_OPTIONS = {
@@ -383,23 +393,39 @@
     satisfactionPoints: ['디자인','연비','승차감','정숙성','실내 공간','옵션 구성','가격','프로모션','기존 르노 만족 경험'],
   };
 
-  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], renaultPreviewUrls: [], renaultPhotoFiles: [], messages: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
+  const state = { mode: 'login', loading: false, requestSubmitting: false, user: null, appHome: null, options: FALLBACK_OPTIONS, previewUrls: [], inspectionPhotoFiles: [], renaultPreviewUrls: [], renaultPhotoFiles: [], visibleNotices: [], noticePage: 1, skinReferenceFiles: [], homeRefreshTimer: null };
   const $ = id => document.getElementById(id);
 
   // ─────────────────────────────
   // 초기화
   // ─────────────────────────────
   (function init() {
+    preventMobileZoom();
     $('profileBusinessCardFile').addEventListener('change', () => {
       $('businessCardName').textContent = $('profileBusinessCardFile').files[0]?.name || '';
     });
-    $('inspectionFiles').addEventListener('change', updateInspectionUI);
-    $('inspectionCameraFiles').addEventListener('change', updateInspectionUI);
+    $('inspectionFiles').addEventListener('change', event => addInspectionPhotoFiles(event.target));
+    $('inspectionCameraFiles').addEventListener('change', event => addInspectionPhotoFiles(event.target));
     setupRequestOptions(FALLBACK_OPTIONS);
     const saved = readSession();
     if (saved && saved.name) { state.user = saved; showHome(); }
     loadAgencies();
   })();
+
+  function preventMobileZoom() {
+    document.addEventListener('gesturestart', event => event.preventDefault());
+    document.addEventListener('gesturechange', event => event.preventDefault());
+    document.addEventListener('gestureend', event => event.preventDefault());
+    document.addEventListener('touchmove', event => {
+      if (event.touches && event.touches.length > 1) event.preventDefault();
+    }, { passive: false });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', event => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) event.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+  }
 
   async function loadAgencies() {
     try {
@@ -502,6 +528,13 @@
     return data.data;
   }
 
+  function withTimeout(promise, ms, message) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(message || '요청 시간이 초과되었습니다.')), ms)),
+    ]);
+  }
+
   async function fetchWithRetry(url, options, retries = 2) {
     let lastError;
     for (let i = 0; i <= retries; i++) {
@@ -581,11 +614,6 @@
   }
 
   async function loadAppHome() {
-    const previousPosts = [
-      ...((state.appHome && state.appHome.completedPosts) || []),
-      ...(readCompletedPostsCache() || []),
-    ];
-    const localPendingPosts = previousPosts.filter(p => p && p.localPending);
     try {
       const data = await gasAction('getAppHome', { name: state.user.name, agency: state.user.agency });
       state.appHome = { ...(state.appHome || {}), ...(data || {}) };
@@ -593,7 +621,9 @@
       setupRequestOptions(state.options);
       renderProfile(state.appHome.profile || {});
       const serverCompletedPosts = state.appHome.completedPosts || [];
-      const mergedCompletedPosts = mergeLocalPendingPosts(localPendingPosts, serverCompletedPosts).slice(0, 5);
+      const localPendingPosts = readPendingPostsCache();
+      const mergedCompletedPosts = mergeLocalPendingPosts(localPendingPosts, serverCompletedPosts);
+      savePendingPostsCache(localPendingPosts.filter(p => p && !hasSimilarPost_(serverCompletedPosts, p)));
       state.appHome.completedPosts = mergedCompletedPosts;
       renderCompletedPosts(mergedCompletedPosts);
       saveCompletedPostsCache(mergedCompletedPosts);
@@ -605,22 +635,6 @@
       }
     } catch (e) {
       renderNotices([{ title: '홈 데이터를 불러오지 못했습니다', date: '', content: e.message || String(e) }]);
-    }
-  }
-
-  async function loadMessages() {
-    if (!state.user) return;
-    try {
-      const messages = await gasAction('getMessages', { name: state.user.name, agency: state.user.agency });
-      const list = Array.isArray(messages) ? messages : [];
-      state.messages = list;
-      saveMessagesCache(list);
-      updateMessageBadge(list);
-      if ($('messagesPage').classList.contains('active')) renderMessages(list);
-    } catch (e) {
-      if ($('messagesPage').classList.contains('active') && !readMessagesCache().length) {
-        renderMessages([{ body: '메시지를 불러오지 못했습니다.\n' + (e.message || String(e)), sentAt: '', read: true }]);
-      }
     }
   }
 
@@ -815,31 +829,25 @@
     const uploadBlog = $('renaultUploadBlog').value.trim();
     const keyword = $('renaultKeyword').value.trim();
     const requestDetails = $('renaultRequestDetails').value.trim();
+    const selectedFiles = getRenaultInspectionFiles().slice();
+    let localId = '';
     if (!uploadBlog) return setPageStatus('renaultDraftStatus', '업로드를 선택해주세요.', 'error');
     if (!keyword) return setPageStatus('renaultDraftStatus', '키워드를 입력해주세요.', 'error');
     if (!requestDetails) return setPageStatus('renaultDraftStatus', '요청 사항을 입력해주세요.', 'error');
 
     setPageStatus('renaultDraftStatus', '요청 중입니다.');
     try {
-      const inspectionFiles = uploadBlog === '지점 블로그' ? await uploadRenaultPhotosToStorage(getRenaultInspectionFiles()) : [];
-      const result = await gasAction('requestRenaultDraft', {
-        name: state.user.name,
-        agency: state.user.agency,
-        uploadBlog,
-        keyword,
-        requestDetails,
-        inspectionFiles,
-      });
+      localId = `pending-renault-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       addRequestToHomeList({
-        pageId: result.pageId || '',
+        localId,
         type: '르노 차량 원고',
         title: keyword || '르노 차량 원고',
         date: new Date().toISOString().slice(0, 10),
         status: '접수',
-        url: result.pageUrl || '',
+        url: '',
         localPending: true,
       });
-      setPageStatus('renaultDraftStatus', result.message || '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
+      setPageStatus('renaultDraftStatus', '르노 차량 원고 작성 요청이 접수되었습니다.', 'ok');
       $('renaultKeyword').value = '';
       $('renaultRequestDetails').value = '';
       $('renaultInspectionFiles').value = '';
@@ -849,8 +857,24 @@
       clearRenaultPhotoPreview();
       alert('완료됐습니다.');
       openPage('mainPage');
+
+      const inspectionFiles = uploadBlog === '지점 블로그' ? await uploadRenaultPhotosToStorage(selectedFiles) : [];
+      const result = await gasAction('requestRenaultDraft', {
+        name: state.user.name,
+        agency: state.user.agency,
+        uploadBlog,
+        keyword,
+        requestDetails,
+        inspectionFiles,
+      });
+      updatePendingHomePost(localId, { pageId: result.pageId || '', url: result.pageUrl || '' });
+      loadAppHome();
     } catch (e) {
-      setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
+      if (localId && $('mainPage').classList.contains('active')) {
+        updatePendingHomePost(localId, { status: '연동 확인 필요' });
+      } else {
+        setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
+      }
     }
   }
 
@@ -936,7 +960,11 @@
     $('campaignScoreText').textContent = '불러오는 중입니다.';
     $('campaignApplyButton').style.display = 'none';
     try {
-      const result = await gasAction('getCampaignScore', { name: state.user.name, agency: state.user.agency });
+      const result = await withTimeout(
+        gasAction('getCampaignScore', { name: state.user.name, agency: state.user.agency }),
+        18000,
+        '시책 점수 응답이 지연되고 있습니다. 잠시 후 다시 확인해주세요.'
+      );
       if (!result || !result.participates) {
         $('campaignScoreText').textContent = '시책 참여신청을 해주세요';
         $('campaignApplyButton').style.display = 'block';
@@ -971,7 +999,7 @@
     state.visibleNotices = all.slice(start, start + pageSize);
     box.innerHTML = state.visibleNotices.map((item, i) => {
       const required = item.pinned ? '<span class="notice-required">필독</span>' : '';
-      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${esc(item.title)}</span>${required}<span class="notice-date">${esc(item.date || '')}</span></button>`;
+      return `<button class="notice-row" type="button" onclick="openNoticeModal(${i})"><span class="notice-title">${esc(item.title)}</span><span class="notice-meta">${required}<span class="notice-date">${esc(item.date || '')}</span></span></button>`;
     }).join('');
     pager.innerHTML = Array.from({ length: pageCount }, (_, index) => {
       const page = index + 1;
@@ -1105,8 +1133,8 @@
     finalActions.classList.remove('active');
     revision.classList.remove('active');
     revision.dataset.pageId = '';
+    title.textContent = '블로그 스킨 제작 요청';
     if (!latest) {
-      title.textContent = '스킨 제작 요청';
       return;
     }
     if (isSkinFinalStatus(latest.status)) {
@@ -1121,7 +1149,6 @@
       revision.dataset.pageId = latest.pageId || '';
       return;
     }
-    title.textContent = '블로그 스킨 요청 완료';
     banner.disabled = true;
   }
 
@@ -1183,7 +1210,13 @@
 
   function saveCompletedPostsCache(posts) { try { localStorage.setItem(COMPLETED_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readCompletedPostsCache() { try { return JSON.parse(localStorage.getItem(COMPLETED_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
-  function renderCachedCompletedPosts() { const cached = readCompletedPostsCache(); if (cached && cached.length) renderCompletedPosts(cached); else updateCompletedBadge([]); }
+  function renderCachedCompletedPosts() {
+    const cached = mergeLocalPendingPosts(readPendingPostsCache(), readCompletedPostsCache());
+    if (cached && cached.length) renderCompletedPosts(cached); else updateCompletedBadge([]);
+  }
+
+  function savePendingPostsCache(posts) { try { localStorage.setItem(PENDING_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
+  function readPendingPostsCache() { try { return JSON.parse(localStorage.getItem(PENDING_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
 
   function saveMyPostsCache(posts) { try { localStorage.setItem(MY_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readMyPostsCache() { try { return JSON.parse(localStorage.getItem(MY_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
@@ -1191,15 +1224,6 @@
 
   function saveUploadContentsCache(posts) { try { localStorage.setItem(UPLOAD_CONTENTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readUploadContentsCache() { try { return JSON.parse(localStorage.getItem(UPLOAD_CONTENTS_CACHE_KEY) || '[]'); } catch { return []; } }
-
-  function saveMessagesCache(messages) { try { localStorage.setItem(MESSAGES_CACHE_KEY, JSON.stringify(messages || [])); } catch {} }
-  function readMessagesCache() { try { return JSON.parse(localStorage.getItem(MESSAGES_CACHE_KEY) || '[]'); } catch { return []; } }
-  function renderCachedMessages() {
-    const cached = readMessagesCache();
-    state.messages = cached;
-    updateMessageBadge(cached);
-    if ($('messagesPage').classList.contains('active')) renderMessages(cached);
-  }
 
   // ─────────────────────────────
   // 원고 리스트
@@ -1261,20 +1285,27 @@
   }
 
   function addRequestToHomeList(item) {
+    const pending = [item, ...readPendingPostsCache().filter(p => p && p.localId !== item.localId)];
+    savePendingPostsCache(pending);
     const current = readCompletedPostsCache().filter(p => p.status !== '완료');
-    const next = [item, ...current].slice(0, 5);
+    const next = mergeLocalPendingPosts(pending, current);
     renderCompletedPosts(next);
     saveCompletedPostsCache(next);
     state.appHome = { ...(state.appHome || {}), completedPosts: next };
   }
 
   function updatePendingHomePost(localId, patch) {
-    const current = ((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache() || []).map(post => {
+    const pending = readPendingPostsCache().map(post => {
       return post && post.localId === localId ? { ...post, ...patch } : post;
     });
-    state.appHome = { ...(state.appHome || {}), completedPosts: current };
-    saveCompletedPostsCache(current);
-    renderCompletedPosts(current);
+    savePendingPostsCache(pending);
+    const current = ((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache() || [])
+      .filter(post => !(post && post.localId === localId))
+      .filter(post => !(post && post.localPending));
+    const next = mergeLocalPendingPosts(pending, current);
+    state.appHome = { ...(state.appHome || {}), completedPosts: next };
+    saveCompletedPostsCache(next);
+    renderCompletedPosts(next);
   }
 
   function mergeLocalPendingPosts(localPendingPosts, serverPosts) {
@@ -1340,41 +1371,6 @@
       const meta = p.status && !p.url ? `<div class="list-meta">${esc(p.status)}</div>` : '';
       return `<div class="list-item"><div class="list-title">${esc(p.title || '제목 없음')} - ${esc(p.date || '')}</div>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:12px;color:#111827;text-decoration:underline">${label}</a>` : meta}</div>`;
     }).join('');
-  }
-
-  function renderMessages(messages) {
-    const box = $('messageList');
-    const list = Array.isArray(messages) ? messages : [];
-    updateMessageBadge(list);
-    if (!list.length) return box.innerHTML = '<div class="empty">도착한 메시지가 없습니다.</div>';
-    box.innerHTML = list.map(message => `<button class="list-item message-item ${message.read ? '' : 'unread'}" type="button" onclick="readMessage('${esc(message.id || '')}')">
-      <div class="list-title">${message.read ? '읽은 메시지' : '새 메시지'}</div>
-      <div class="message-body">${esc(message.body || '')}</div>
-      <div class="list-meta">${esc(message.sentAt || '')}${message.readAt ? ' · 읽음 ' + esc(message.readAt) : ''}</div>
-    </button>`).join('');
-  }
-
-  function updateMessageBadge(messages) {
-    const count = (messages || []).filter(message => !message.read).length;
-    const badge = $('messageUnreadBadge');
-    if (!badge) return;
-    badge.textContent = count > 99 ? '99+' : String(count);
-    badge.classList.toggle('active', count > 0);
-  }
-
-  async function readMessage(messageId) {
-    const message = (state.messages || []).find(item => item.id === messageId);
-    if (!message || message.read) return;
-    message.read = true;
-    message.readAt = '방금';
-    renderMessages(state.messages);
-    saveMessagesCache(state.messages);
-    try {
-      await gasAction('markMessageRead', { name: state.user.name, agency: state.user.agency, messageId });
-      loadMessages();
-    } catch (e) {
-      loadMessages();
-    }
   }
 
   // ─────────────────────────────
@@ -1451,7 +1447,14 @@
   // 사진 UI
   // ─────────────────────────────
   function getInspectionFiles() {
-    return [...Array.from($('inspectionFiles').files || []), ...Array.from($('inspectionCameraFiles').files || [])];
+    return state.inspectionPhotoFiles || [];
+  }
+
+  function addInspectionPhotoFiles(input) {
+    const files = Array.from(input.files || []);
+    if (files.length) state.inspectionPhotoFiles = getInspectionFiles().concat(files);
+    input.value = '';
+    updateInspectionUI();
   }
 
   function updateInspectionUI() {
@@ -1487,6 +1490,7 @@
     $('deliveryMood').value = '';
     $('inspectionFiles').value = '';
     $('inspectionCameraFiles').value = '';
+    state.inspectionPhotoFiles = [];
     $('inspectionFileName').textContent = '';
     updateRequestPhotoGuide();
     state.previewUrls.forEach(u => URL.revokeObjectURL(u));
@@ -1524,7 +1528,7 @@
     $('skinReferenceFiles').value = '';
     $('skinReferenceFileList').textContent = '';
     const presetSkin = skin === '1번' || skin === '2번';
-    $('skinFormTitle').textContent = skin + ' 스킨 제작 요청';
+    $('skinFormTitle').textContent = '블로그 스킨 제작 요청';
     $('skinFormTitle').style.display = presetSkin ? 'none' : 'block';
     const previewSource = presetSkin ? $(skin === '1번' ? 'skinPreviewOne' : 'skinPreviewTwo').querySelector('.skin-preview-pc').src : '';
     $('skinFormPreview').src = previewSource;
@@ -1631,6 +1635,7 @@
     if (pageId === 'renaultDraftPage') {
       const profile = (state.appHome && state.appHome.profile) || {};
       if (!$('renaultUploadBlog').value) $('renaultUploadBlog').value = profile.uploadBlog || '';
+      toggleRenaultPhotoField();
       setPageStatus('renaultDraftStatus', '');
     }
 
@@ -1683,11 +1688,6 @@
         .catch(e => {
           if (!cached.length) renderUploadContents([{ title: '업로드 콘텐츠를 불러오지 못했습니다', status: e.message }]);
         });
-    }
-
-    if (pageId === 'messagesPage') {
-      renderCachedMessages();
-      loadMessages();
     }
 
     window.scrollTo({ top: 0, behavior: 'auto' });
