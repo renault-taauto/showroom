@@ -375,6 +375,7 @@
   const SESSION_KEY = 'salesLoginSession_v3';
   const NOTICE_CACHE_KEY = 'salesNoticeCache_v1';
   const COMPLETED_POSTS_CACHE_KEY = 'salesCompletedPostsCache_v1';
+  const PENDING_POSTS_CACHE_KEY = 'salesPendingPosts_v1';
   const MY_POSTS_CACHE_KEY = 'salesMyPostsCache_v1';
   const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
   const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
@@ -613,11 +614,6 @@
   }
 
   async function loadAppHome() {
-    const previousPosts = [
-      ...((state.appHome && state.appHome.completedPosts) || []),
-      ...(readCompletedPostsCache() || []),
-    ];
-    const localPendingPosts = previousPosts.filter(p => p && p.localPending);
     try {
       const data = await gasAction('getAppHome', { name: state.user.name, agency: state.user.agency });
       state.appHome = { ...(state.appHome || {}), ...(data || {}) };
@@ -625,7 +621,9 @@
       setupRequestOptions(state.options);
       renderProfile(state.appHome.profile || {});
       const serverCompletedPosts = state.appHome.completedPosts || [];
+      const localPendingPosts = readPendingPostsCache();
       const mergedCompletedPosts = mergeLocalPendingPosts(localPendingPosts, serverCompletedPosts);
+      savePendingPostsCache(localPendingPosts.filter(p => p && !hasSimilarPost_(serverCompletedPosts, p)));
       state.appHome.completedPosts = mergedCompletedPosts;
       renderCompletedPosts(mergedCompletedPosts);
       saveCompletedPostsCache(mergedCompletedPosts);
@@ -1212,7 +1210,13 @@
 
   function saveCompletedPostsCache(posts) { try { localStorage.setItem(COMPLETED_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readCompletedPostsCache() { try { return JSON.parse(localStorage.getItem(COMPLETED_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
-  function renderCachedCompletedPosts() { const cached = readCompletedPostsCache(); if (cached && cached.length) renderCompletedPosts(cached); else updateCompletedBadge([]); }
+  function renderCachedCompletedPosts() {
+    const cached = mergeLocalPendingPosts(readPendingPostsCache(), readCompletedPostsCache());
+    if (cached && cached.length) renderCompletedPosts(cached); else updateCompletedBadge([]);
+  }
+
+  function savePendingPostsCache(posts) { try { localStorage.setItem(PENDING_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
+  function readPendingPostsCache() { try { return JSON.parse(localStorage.getItem(PENDING_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
 
   function saveMyPostsCache(posts) { try { localStorage.setItem(MY_POSTS_CACHE_KEY, JSON.stringify(posts || [])); } catch {} }
   function readMyPostsCache() { try { return JSON.parse(localStorage.getItem(MY_POSTS_CACHE_KEY) || '[]'); } catch { return []; } }
@@ -1281,20 +1285,27 @@
   }
 
   function addRequestToHomeList(item) {
+    const pending = [item, ...readPendingPostsCache().filter(p => p && p.localId !== item.localId)];
+    savePendingPostsCache(pending);
     const current = readCompletedPostsCache().filter(p => p.status !== '완료');
-    const next = [item, ...current];
+    const next = mergeLocalPendingPosts(pending, current);
     renderCompletedPosts(next);
     saveCompletedPostsCache(next);
     state.appHome = { ...(state.appHome || {}), completedPosts: next };
   }
 
   function updatePendingHomePost(localId, patch) {
-    const current = ((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache() || []).map(post => {
+    const pending = readPendingPostsCache().map(post => {
       return post && post.localId === localId ? { ...post, ...patch } : post;
     });
-    state.appHome = { ...(state.appHome || {}), completedPosts: current };
-    saveCompletedPostsCache(current);
-    renderCompletedPosts(current);
+    savePendingPostsCache(pending);
+    const current = ((state.appHome && state.appHome.completedPosts) || readCompletedPostsCache() || [])
+      .filter(post => !(post && post.localId === localId))
+      .filter(post => !(post && post.localPending));
+    const next = mergeLocalPendingPosts(pending, current);
+    state.appHome = { ...(state.appHome || {}), completedPosts: next };
+    saveCompletedPostsCache(next);
+    renderCompletedPosts(next);
   }
 
   function mergeLocalPendingPosts(localPendingPosts, serverPosts) {
