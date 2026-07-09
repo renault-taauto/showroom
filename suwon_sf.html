@@ -113,6 +113,98 @@
     .sms {
       background: #efefef;
       color: #111;
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 20;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 14px 14px 0 0;
+      padding: 20px 18px 28px;
+    }
+
+    .modal-title {
+      margin: 0 0 4px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .modal-sub {
+      margin: 0 0 16px;
+      color: #777;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .field {
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .field span {
+      display: block;
+      margin-bottom: 5px;
+      color: #444;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #fff;
+      color: #111;
+      font: inherit;
+      font-size: 15px;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .modal-button {
+      min-height: 46px;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .modal-cancel {
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #111;
+    }
+
+    .modal-confirm {
+      border: 0;
+      background: #111;
+      color: #fff;
     }
 
     @media (max-width: 360px) {
@@ -154,8 +246,116 @@
 
     <nav class="actions" aria-label="연락하기">
       <a class="action-link call" href="tel:01031611761">전화걸기</a>
-      <a class="action-link sms" href="sms:01031611761?body=%EB%84%A4%EC%9D%B4%EB%B2%84%20%EB%B8%94%EB%A1%9C%EA%B7%B8%20%EB%B3%B4%EA%B3%A0%20%EC%97%B0%EB%9D%BD%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4.">문자보내기</a>
+      <button class="action-link sms" type="button" onclick="openSmsModal()">문자보내기</button>
     </nav>
   </main>
+
+  <div class="modal-overlay" id="smsModal">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="smsTitle">
+      <h2 class="modal-title" id="smsTitle">문자 보내기</h2>
+      <p class="modal-sub">선택한 내용이 문자에 함께 입력됩니다.</p>
+
+      <label class="field">
+        <span>이름</span>
+        <input type="text" id="smsName" placeholder="성함을 입력해주세요">
+      </label>
+
+      <label class="field">
+        <span>관심 차종</span>
+        <select id="smsCar">
+          <option value="">선택해주세요</option>
+          <option>그랑 콜레오스</option>
+          <option>아르카나</option>
+          <option>QM6</option>
+          <option>상담 후 결정</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>연령대</span>
+        <select id="smsAge">
+          <option value="">선택해주세요</option>
+          <option>20대</option>
+          <option>30대</option>
+          <option>40대</option>
+          <option>50대</option>
+          <option>60대 이상</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>연락 가능 시간대</span>
+        <select id="smsTime">
+          <option value="">선택해주세요</option>
+          <option>오전 (10시-12시)</option>
+          <option>점심 (12시-14시)</option>
+          <option>오후 (14시-18시)</option>
+          <option>저녁 (18시-20시)</option>
+          <option>언제든지 가능</option>
+        </select>
+      </label>
+
+      <div class="modal-actions">
+        <button class="modal-button modal-cancel" type="button" onclick="closeSmsModal()">취소</button>
+        <button class="modal-button modal-confirm" type="button" onclick="sendSms()">문자 보내기</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const phoneNumber = '01031611761';
+
+    function openSmsModal() {
+      document.getElementById('smsModal').classList.add('show');
+      document.getElementById('smsName').focus();
+    }
+
+    function closeSmsModal() {
+      document.getElementById('smsModal').classList.remove('show');
+    }
+
+    function sendSms() {
+      const name = document.getElementById('smsName').value.trim();
+      const car = document.getElementById('smsCar').value;
+      const age = document.getElementById('smsAge').value;
+      const time = document.getElementById('smsTime').value;
+
+      if (!name) {
+        alert('이름을 입력해주세요.');
+        return;
+      }
+
+      if (!car) {
+        alert('관심 차종을 선택해주세요.');
+        return;
+      }
+
+      if (!age) {
+        alert('연령대를 선택해주세요.');
+        return;
+      }
+
+      if (!time) {
+        alert('연락 가능 시간대를 선택해주세요.');
+        return;
+      }
+
+      const body =
+        '안녕하세요. 네이버 블로그 보고 연락드립니다.\n' +
+        '이름: ' + name + '\n' +
+        '관심 차종: ' + car + '\n' +
+        '연령대: ' + age + '\n' +
+        '연락 가능 시간대: ' + time;
+
+      window.location.href = 'sms:' + phoneNumber + '?body=' + encodeURIComponent(body);
+      closeSmsModal();
+    }
+
+    document.getElementById('smsModal').addEventListener('click', function(event) {
+      if (event.target === this) {
+        closeSmsModal();
+      }
+    });
+  </script>
 </body>
 </html>
