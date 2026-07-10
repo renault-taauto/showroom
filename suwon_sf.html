@@ -207,6 +207,29 @@
       color: #fff;
     }
 
+    .modal-confirm:disabled {
+      background: #cfcfcf;
+      color: #777;
+      cursor: not-allowed;
+    }
+
+    .privacy-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 2px 0 14px;
+      color: #555;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .privacy-check input {
+      width: 16px;
+      height: 16px;
+      margin: 1px 0 0;
+      flex: 0 0 auto;
+    }
+
     @media (max-width: 360px) {
       .info {
         padding: 22px 16px 16px;
@@ -245,7 +268,7 @@
     </section>
 
     <nav class="actions" aria-label="연락하기">
-      <a class="action-link call" href="tel:01031611761">전화걸기</a>
+      <a class="action-link call" href="tel:01031611761" onclick="trackCall()">전화걸기</a>
       <button class="action-link sms" type="button" onclick="openSmsModal()">문자보내기</button>
     </nav>
   </main>
@@ -267,7 +290,6 @@
           <option>필랑트</option>
           <option>그랑 콜레오스</option>
           <option>아르카나</option>
-          <option>상담 후 결정</option>
         </select>
       </label>
 
@@ -295,18 +317,79 @@
         </select>
       </label>
 
+      <label class="privacy-check">
+        <input type="checkbox" id="privacyAgree" onchange="updateSmsButton()">
+        <span>개인정보 수집·이용에 동의합니다. (필수)</span>
+      </label>
+
       <div class="modal-actions">
         <button class="modal-button modal-cancel" type="button" onclick="closeSmsModal()">취소</button>
-        <button class="modal-button modal-confirm" type="button" onclick="sendSms()">문자 보내기</button>
+        <button class="modal-button modal-confirm" id="sendSmsButton" type="button" onclick="sendSms()" disabled>문자 보내기</button>
       </div>
     </section>
   </div>
 
   <script>
     const phoneNumber = '01031611761';
+    const WEB_APP_URL = '여기에_GAS_웹앱_URL을_넣어주세요';
+    const branchInfo = {
+      branch: '르노코리아 스타필드수원점',
+      manager: '박홍준',
+      phone: '010-3161-1761',
+      address: '경기 수원시 장안구 수성로 175'
+    };
+
+    function getSessionId() {
+      const key = 'suwonSfSessionId';
+      let value = sessionStorage.getItem(key);
+
+      if (!value) {
+        value = Date.now().toString(36) + Math.random().toString(36).slice(2);
+        sessionStorage.setItem(key, value);
+      }
+
+      return value;
+    }
+
+    function sendToSheet(type, data) {
+      if (!WEB_APP_URL || WEB_APP_URL.indexOf('여기에_') === 0) {
+        return;
+      }
+
+      const payload = Object.assign({
+        type: type,
+        page: location.href,
+        referrer: document.referrer || '',
+        userAgent: navigator.userAgent || '',
+        sessionId: getSessionId()
+      }, branchInfo, data || {});
+
+      const body = JSON.stringify(payload);
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(https://script.google.com/macros/s/AKfycbyNQlTxHZTvTeqc9r5GsuMB0j39YdjSweaCMcVwWbPgXPiUDBbwiEgZdfp4VLB5yVjfsA/exec, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
+        return;
+      }
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: true,
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: body
+      }).catch(function() {});
+    }
+
+    function trackCall() {
+      sendToSheet('call', {
+        event: 'call_click',
+        consent: ''
+      });
+    }
 
     function openSmsModal() {
       document.getElementById('smsModal').classList.add('show');
+      updateSmsButton();
       document.getElementById('smsName').focus();
     }
 
@@ -314,11 +397,16 @@
       document.getElementById('smsModal').classList.remove('show');
     }
 
+    function updateSmsButton() {
+      document.getElementById('sendSmsButton').disabled = !document.getElementById('privacyAgree').checked;
+    }
+
     function sendSms() {
       const name = document.getElementById('smsName').value.trim();
       const car = document.getElementById('smsCar').value;
       const age = document.getElementById('smsAge').value;
       const time = document.getElementById('smsTime').value;
+      const privacyAgree = document.getElementById('privacyAgree').checked;
 
       if (!name) {
         alert('이름을 입력해주세요.');
@@ -340,12 +428,26 @@
         return;
       }
 
+      if (!privacyAgree) {
+        alert('개인정보 수집·이용에 동의해주세요.');
+        return;
+      }
+
       const body =
-        '안녕하세요. 네이버 블로그 보고 연락드립니다.\n' +
+        '네이버 블로그 보고 연락드립니다.\n' +
         '이름: ' + name + '\n' +
         '관심 차종: ' + car + '\n' +
         '연령대: ' + age + '\n' +
         '연락 가능 시간대: ' + time;
+
+      sendToSheet('sms', {
+        event: 'sms_send',
+        customerName: name,
+        car: car,
+        age: age,
+        contactTime: time,
+        consent: 'Y'
+      });
 
       window.location.href = 'sms:' + phoneNumber + '?body=' + encodeURIComponent(body);
       closeSmsModal();
