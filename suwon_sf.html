@@ -318,7 +318,7 @@
       </label>
 
       <label class="privacy-check">
-        <input type="checkbox" id="privacyAgree" onchange="updateSmsButton()">
+        <input type="checkbox" id="privacyAgree" onclick="updateSmsButton()" onchange="updateSmsButton()">
         <span>개인정보 수집·이용에 동의합니다. (필수)</span>
       </label>
 
@@ -398,7 +398,14 @@
     }
 
     function updateSmsButton() {
-      document.getElementById('sendSmsButton').disabled = !document.getElementById('privacyAgree').checked;
+      const privacyAgree = document.getElementById('privacyAgree');
+      const sendSmsButton = document.getElementById('sendSmsButton');
+
+      if (!privacyAgree || !sendSmsButton) {
+        return;
+      }
+
+      sendSmsButton.disabled = !privacyAgree.checked;
     }
 
     function sendSms() {
@@ -458,6 +465,13 @@
         closeSmsModal();
       }
     });
+
+    document.getElementById('privacyAgree').addEventListener('change', updateSmsButton);
+    document.getElementById('privacyAgree').addEventListener('click', function() {
+      setTimeout(updateSmsButton, 0);
+    });
+
+    updateSmsButton();
   </script>
 </body>
 </html>
