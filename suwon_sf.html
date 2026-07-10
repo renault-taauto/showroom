@@ -318,20 +318,20 @@
       </label>
 
       <label class="privacy-check">
-        <input type="checkbox" id="privacyAgree" onclick="updateSmsButton()" onchange="updateSmsButton()">
+        <input type="checkbox" id="privacyAgree">
         <span>개인정보 수집·이용에 동의합니다. (필수)</span>
       </label>
 
       <div class="modal-actions">
         <button class="modal-button modal-cancel" type="button" onclick="closeSmsModal()">취소</button>
-        <button class="modal-button modal-confirm" id="sendSmsButton" type="button" onclick="sendSms()" disabled>문자 보내기</button>
+        <button class="modal-button modal-confirm" id="sendSmsButton" type="button" onclick="sendSms()">문자 보내기</button>
       </div>
     </section>
   </div>
 
   <script>
     const phoneNumber = '01031611761';
-    const WEB_APP_URL = '여기에_GAS_웹앱_URL을_넣어주세요';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyNQlTxHZTvTeqc9r5GsuMB0j39YdjSweaCMcVwWbPgXPiUDBbwiEgZdfp4VLB5yVjfsA/exec';
     const branchInfo = {
       branch: '르노코리아 스타필드수원점',
       manager: '박홍준',
@@ -367,7 +367,7 @@
       const body = JSON.stringify(payload);
 
       if (navigator.sendBeacon) {
-        navigator.sendBeacon(https://script.google.com/macros/s/AKfycbyNQlTxHZTvTeqc9r5GsuMB0j39YdjSweaCMcVwWbPgXPiUDBbwiEgZdfp4VLB5yVjfsA/exec, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
+        navigator.sendBeacon(WEB_APP_URL, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
         return;
       }
 
@@ -389,23 +389,11 @@
 
     function openSmsModal() {
       document.getElementById('smsModal').classList.add('show');
-      updateSmsButton();
       document.getElementById('smsName').focus();
     }
 
     function closeSmsModal() {
       document.getElementById('smsModal').classList.remove('show');
-    }
-
-    function updateSmsButton() {
-      const privacyAgree = document.getElementById('privacyAgree');
-      const sendSmsButton = document.getElementById('sendSmsButton');
-
-      if (!privacyAgree || !sendSmsButton) {
-        return;
-      }
-
-      sendSmsButton.disabled = !privacyAgree.checked;
     }
 
     function sendSms() {
@@ -466,12 +454,6 @@
       }
     });
 
-    document.getElementById('privacyAgree').addEventListener('change', updateSmsButton);
-    document.getElementById('privacyAgree').addEventListener('click', function() {
-      setTimeout(updateSmsButton, 0);
-    });
-
-    updateSmsButton();
   </script>
 </body>
 </html>
