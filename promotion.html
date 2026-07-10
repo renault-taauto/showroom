@@ -26,10 +26,10 @@
   /* 이미지 내 "프로모션 상담 및 문의" 버튼 위에 투명 클릭 영역 */
   .promo-overlay {
     position: absolute;
-   top: 61.2%;
-left: 59.0%;
-width: 32.0%;
-height: 4.4%;
+    top: 61.2%;
+    left: 59.0%;
+    width: 32.0%;
+    height: 4.4%;
     cursor: pointer;
     display: block;
     border-radius: 999px;
@@ -230,6 +230,21 @@ height: 4.4%;
     font-family: inherit;
   }
 
+  .privacy-agree {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0 12px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #666;
+  }
+
+  .privacy-agree input {
+    width: auto;
+    margin: 0;
+  }
+
   .modal-btns {
     display: flex;
     gap: 8px;
@@ -257,6 +272,12 @@ height: 4.4%;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
+  }
+
+  .modal-confirm:disabled {
+    background: #bbb;
+    color: #fff;
+    cursor: not-allowed;
   }
 </style>
 </head>
@@ -316,9 +337,14 @@ height: 4.4%;
       <option>언제든지 가능</option>
     </select>
 
+    <label class="privacy-agree">
+      <input type="checkbox" id="privacyAgree">
+      <span>개인정보 수집·이용에 동의합니다. (필수)</span>
+    </label>
+
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">취소</button>
-      <button class="modal-confirm" onclick="sendSms()">문자 보내기</button>
+      <button class="modal-confirm" id="smsConfirmBtn" onclick="sendSms()" disabled>문자 보내기</button>
     </div>
   </div>
 </div>
@@ -474,6 +500,8 @@ height: 4.4%;
     document.getElementById('smsCar').value = '';
     document.getElementById('smsAge').value = '';
     document.getElementById('smsTime').value = '';
+    document.getElementById('privacyAgree').checked = false;
+    document.getElementById('smsConfirmBtn').disabled = true;
     document.getElementById('smsModal').classList.add('show');
 
     sendTraffic('button_click', Object.assign({ buttonType: 'sms_open' }, currentBranchMeta));
@@ -488,11 +516,13 @@ height: 4.4%;
     const car  = document.getElementById('smsCar').value;
     const age  = document.getElementById('smsAge').value;
     const time = document.getElementById('smsTime').value;
+    const agreed = document.getElementById('privacyAgree').checked;
 
     if (!name) { alert('이름을 입력해주세요.'); return; }
     if (!car)  { alert('관심 차종을 선택해주세요.'); return; }
     if (!age)  { alert('연령대를 선택해주세요.'); return; }
     if (!time) { alert('연락 가능 시간대를 선택해주세요.'); return; }
+    if (!agreed) { alert('개인정보 수집·이용에 동의해주세요.'); return; }
 
     const body =
       `안녕하세요, ${name}입니다.\n` +
@@ -541,6 +571,10 @@ height: 4.4%;
   // 모달 바깥 터치 시 닫기
   document.getElementById('smsModal').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
+  });
+
+  document.getElementById('privacyAgree').addEventListener('change', function(e) {
+    document.getElementById('smsConfirmBtn').disabled = !e.target.checked;
   });
 
   function loadData() {
