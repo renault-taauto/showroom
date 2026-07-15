@@ -705,8 +705,10 @@
       if (!$('deliveryMood').value.trim()) throw new Error('차량 인도 분위기를 입력해주세요.');
       if (needsPhotos && files.length < 5) throw new Error('지점 블로그는 검수 사진을 5장 이상 선택해주세요.');
 
+      localId = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const request = {
         name: state.user.name, agency: state.user.agency,
+        requestId: localId,
         uploadBlog,
         deliveryDate: $('deliveryDate').value,
         vehicleModel: $('vehicleModel').value,
@@ -718,7 +720,6 @@
         customerHistory: $('customerHistory').value.trim(),
         deliveryMood: $('deliveryMood').value.trim(),
       };
-      localId = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       addRequestToHomeList({
         localId,
         title: [request.vehicleModel, request.trim, request.color].filter(Boolean).join(' ') || '블로그 원고 요청',
@@ -731,6 +732,24 @@
       alert('완료됐습니다.');
       openPage('mainPage');
 
+      await gasAction('saveRawPostRequest', {
+        ...request,
+        requestType: '출고후기',
+        title: request.vehicleModel,
+        photoCount: files.length,
+        inspectionFileNames: files.map(file => file.name || ''),
+      });
+      gasAction('debugPostRequest', {
+        requestId: localId,
+        requestType: '출고후기',
+        stage: '프론트 접수',
+        status: 'OK',
+        name: request.name,
+        agency: request.agency,
+        uploadBlog: request.uploadBlog,
+        title: request.vehicleModel,
+        photoCount: files.length,
+      }).catch(err => console.warn('debugPostRequest failed', err));
       const uploadedUrls = files.length ? await uploadPhotosToStorage(files) : [];
       const result = await gasAction('requestBlogDraft', { ...request, inspectionFiles: uploadedUrls });
       const serverPatch = { pageId: result.pageId || '' };
@@ -739,6 +758,18 @@
       updatePendingHomePost(localId, serverPatch);
       loadAppHome();
     } catch (e) {
+      if (localId) {
+        gasAction('debugPostRequest', {
+          requestId: localId,
+          requestType: '출고후기',
+          stage: '프론트/GAS 실패',
+          status: 'ERROR',
+          name: state.user && state.user.name,
+          agency: state.user && state.user.agency,
+          uploadBlog,
+          message: e.message || String(e),
+        }).catch(err => console.warn('debugPostRequest failed', err));
+      }
       if ($('mainPage').classList.contains('active')) {
         updatePendingHomePost(localId, { status: '연동 확인 필요' });
       } else {
@@ -858,8 +889,21 @@
       alert('완료됐습니다.');
       openPage('mainPage');
 
+      await gasAction('saveRawPostRequest', {
+        requestId: localId,
+        requestType: '르노차량',
+        name: state.user.name,
+        agency: state.user.agency,
+        uploadBlog,
+        title: keyword,
+        keyword,
+        requestDetails,
+        photoCount: selectedFiles.length,
+        inspectionFileNames: selectedFiles.map(file => file.name || ''),
+      });
       const inspectionFiles = uploadBlog === '지점 블로그' ? await uploadRenaultPhotosToStorage(selectedFiles) : [];
       const result = await gasAction('requestRenaultDraft', {
+        requestId: localId,
         name: state.user.name,
         agency: state.user.agency,
         uploadBlog,
@@ -870,6 +914,20 @@
       updatePendingHomePost(localId, { pageId: result.pageId || '', url: result.pageUrl || '' });
       loadAppHome();
     } catch (e) {
+      if (localId) {
+        gasAction('debugPostRequest', {
+          requestId: localId,
+          requestType: '르노차량',
+          stage: '프론트/GAS 실패',
+          status: 'ERROR',
+          name: state.user && state.user.name,
+          agency: state.user && state.user.agency,
+          uploadBlog,
+          title: keyword,
+          photoCount: selectedFiles.length,
+          message: e.message || String(e),
+        }).catch(err => console.warn('debugPostRequest failed', err));
+      }
       if (localId && $('mainPage').classList.contains('active')) {
         updatePendingHomePost(localId, { status: '연동 확인 필요' });
       } else {
