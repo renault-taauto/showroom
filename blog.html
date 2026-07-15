@@ -763,44 +763,92 @@
     return urls;
   }
 
-  async function uploadToStorage(path, blob) {
-    const endpoint = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`;
-    const res = await fetchWithRetry(endpoint, {
-      method: 'POST',
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': blob.type || 'image/jpeg',
-        'x-upsert': 'false',
-      },
-      body: blob,
-    }, 1);
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`사진 업로드 실패 (${res.status}): ${text.slice(0, 100)}`);
-    }
-    return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+ async function uploadToStorage(path, blob) {
+  const endpoint = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`;
+  const res = await fetchWithRetry(endpoint, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': blob.type || 'image/jpeg',
+      'x-upsert': 'false',
+    },
+    body: blob,
+  }); // retries 인자 제거 → fetchWithRetry 기본값(2회) 사용
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`사진 업로드 실패 (${res.status}): ${text.slice(0, 100)}`);
   }
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+}
 
-  function compressImage(file) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const maxSide = 1600;
-        const ratio = Math.min(1, maxSide / Math.max(img.width, img.height));
-        const w = Math.round(img.width * ratio);
-        const h = Math.round(img.height * ratio);
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('압축 실패')), 'image/jpeg', 0.78);
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('이미지 로드 실패')); };
-      img.src = url;
+// [교체] requestBlogDraft — 실패 시 서버 디버그 시트에도 흔적을 남김
+async function requestBlogDraft() {
+  if (state.requestSubmitting) return;
+  state.requestSubmitting = true;
+  $('requestSubmitBtn').disabled = true;
+  $('requestSubmitBtn').textContent = '제출 중...';
+  const uploadBlog = $('requestUploadBlog').value.trim();
+  const needsPhotos = uploadBlog === '지점 블로그';
+  let localId = '';
+  setPageStatus('requestStatus', needsPhotos ? '사진을 확인하는 중입니다.' : '정보를 제출하는 중입니다.');
+
+  try {
+    const files = getInspectionFiles();
+    if (!$('customerHistory').value.trim()) throw new Error('고객과의 히스토리를 입력해주세요.');
+    if (!$('deliveryMood').value.trim()) throw new Error('차량 인도 분위기를 입력해주세요.');
+    if (needsPhotos && files.length < 5) throw new Error('지점 블로그는 검수 사진을 5장 이상 선택해주세요.');
+
+    const request = {
+      name: state.user.name, agency: state.user.agency,
+      uploadBlog,
+      deliveryDate: $('deliveryDate').value,
+      vehicleModel: $('vehicleModel').value,
+      trim: $('vehicleTrim').value,
+      color: $('vehicleColor').value,
+      wheel: $('vehicleWheel').value,
+      visitRoutes: getActiveChoices('visitRouteChoices'),
+      satisfactionPoints: getActiveChoices('satisfactionChoices'),
+      customerHistory: $('customerHistory').value.trim(),
+      deliveryMood: $('deliveryMood').value.trim(),
+    };
+    localId = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    addRequestToHomeList({
+      localId,
+      title: [request.vehicleModel, request.trim, request.color].filter(Boolean).join(' ') || '블로그 원고 요청',
+      date: request.deliveryDate,
+      status: '접수',
+      url: '',
+      localPending: true,
     });
+    clearRequestForm();
+    alert('완료됐습니다.');
+    openPage('mainPage');
+
+    const uploadedUrls = files.length ? await uploadPhotosToStorage(files) : [];
+    const result = await gasAction('requestBlogDraft', { ...request, inspectionFiles: uploadedUrls });
+    const serverPatch = { pageId: result.pageId || '' };
+    if (result.title) serverPatch.title = result.title;
+    if (result.date) serverPatch.date = result.date;
+    updatePendingHomePost(localId, serverPatch);
+    loadAppHome();
+  } catch (e) {
+    if ($('mainPage').classList.contains('active')) {
+      updatePendingHomePost(localId, { status: '연동 확인 필요' });
+      // 서버까지 도달하지 못한 실패도 디버그 시트에 남긴다 (best-effort, 실패해도 무시)
+      gasAction('logClientFailure', {
+        name: state.user.name, agency: state.user.agency,
+        step: '블로그원고클라이언트', message: e.message || String(e), refId: localId,
+      }).catch(() => {});
+    } else {
+      setPageStatus('requestStatus', e.message || String(e), 'error');
+    }
+  } finally {
+    state.requestSubmitting = false;
+    $('requestSubmitBtn').disabled = false;
+    $('requestSubmitBtn').textContent = '요청하기';
   }
+}
 
   // ─────────────────────────────
   // 시책 참여
@@ -870,13 +918,20 @@
       updatePendingHomePost(localId, { pageId: result.pageId || '', url: result.pageUrl || '' });
       loadAppHome();
     } catch (e) {
-      if (localId && $('mainPage').classList.contains('active')) {
-        updatePendingHomePost(localId, { status: '연동 확인 필요' });
-      } else {
-        setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
-      }
-    }
+  gasAction('logClientFailure', {
+    name: state.user.name,
+    agency: state.user.agency,
+    step: '르노원고클라이언트',
+    message: e.message || String(e),
+    refId: localId
+  }).catch(() => {});
+
+  if (localId && $('mainPage').classList.contains('active')) {
+    updatePendingHomePost(localId, { status: '연동 확인 필요' });
+  } else {
+    setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
   }
+}
 
   function getRenaultInspectionFiles() {
     return state.renaultPhotoFiles || [];
