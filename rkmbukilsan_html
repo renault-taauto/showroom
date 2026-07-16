@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>LG E</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #fff; }
+    .creative { position: relative; width: min(100%, 1241px); margin: 0 auto; line-height: 0; }
+    .creative > img { display: block; width: 100%; height: auto; }
+
+    /* 원본 이미지 위에 얹는 투명 전화 버튼 */
+    .call-area {
+      position: absolute;
+      left: var(--call-left);
+      top: var(--call-top);
+      width: var(--call-width);
+      height: var(--call-height);
+      z-index: 2;
+      display: block;
+      cursor: pointer;
+      border-radius: 8px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .call-area:focus-visible { outline: 4px solid #1677ff; outline-offset: -4px; }
+
+    /* 좌표 조정 중에만 body에 debug 클래스를 추가하세요. */
+    body.debug .call-area { background: rgba(255, 0, 0, .25); outline: 2px solid red; }
+  </style>
+</head>
+<body>
+  <main class="creative"
+        style="--call-left: 12%; --call-top: 86%; --call-width: 76%; --call-height: 7%;">
+    <img
+      src="https://raw.githubusercontent.com/renault-taauto/showroom/main/20260715/LG%20E.png"
+      width="1241" height="2015" alt="LG E 안내 이미지">
+    <a id="callButton" class="call-area" href="#" aria-label="전화 걸기"></a>
+  </main>
+
+  <script>
+    // TODO 1: 숫자만 입력 (예: 0212345678)
+    const PHONE_NUMBER = '01077777737';
+
+    // TODO 2: GAS 웹 앱 배포 후 /exec 주소 입력
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyoHOS9rcMS75z-3mWJflzSnJYyGcxwQ1Lqcu6jYdq2fZOJxHa6nHVu8_cQxrwVpMH1/exec';
+
+    const PAGE_ID = 'LG-E-20260715';
+    const callButton = document.getElementById('callButton');
+
+    function id(prefix) {
+      return prefix + '-' + Date.now().toString(36) + '-' +
+        Math.random().toString(36).slice(2, 10);
+    }
+
+    function getSessionId() {
+      try {
+        let value = sessionStorage.getItem('traffic_session_id');
+        if (!value) {
+          value = id('s');
+          sessionStorage.setItem('traffic_session_id', value);
+        }
+        return value;
+      } catch (_) {
+        return id('s');
+      }
+    }
+
+    const sessionId = getSessionId();
+
+    function params(eventName) {
+      return new URLSearchParams({
+        event: eventName,
+        event_id: id('e'),
+        session_id: sessionId,
+        page_id: PAGE_ID,
+        page_url: location.href,
+        referrer: document.referrer,
+        user_agent: navigator.userAgent,
+        language: navigator.language || '',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+        screen: screen.width + 'x' + screen.height,
+        client_time: new Date().toISOString()
+      });
+    }
+
+    // 페이지 view: JSONP script 요청은 정적 호스팅에서도 CORS 영향을 받지 않습니다.
+    function trackView() {
+      if (!GAS_URL.includes('/exec')) return;
+      const callback = 'trafficViewCallback_' + Date.now();
+      const script = document.createElement('script');
+      window[callback] = function () {
+        delete window[callback];
+        script.remove();
+      };
+      const query = params('view');
+      query.set('callback', callback);
+      script.src = GAS_URL + '?' + query.toString();
+      script.onerror = function () { script.remove(); delete window[callback]; };
+      document.head.appendChild(script);
+    }
+
+    function trackCallAndDial(event) {
+      event.preventDefault();
+      const digits = PHONE_NUMBER.replace(/[^0-9+]/g, '');
+      if (!digits || PHONE_NUMBER === '전화번호입력') {
+        alert('HTML의 PHONE_NUMBER를 실제 전화번호로 변경해 주세요.');
+        return;
+      }
+
+      // Image 요청은 응답을 기다리지 않아도 전송되므로 tel: 이동 직전 로그에 적합합니다.
+      if (GAS_URL.includes('/exec')) {
+        const pixel = new Image();
+        pixel.src = GAS_URL + '?' + params('call_click').toString();
+      }
+
+      setTimeout(function () {
+        location.href = 'tel:' + digits;
+      }, 150);
+    }
+
+    callButton.addEventListener('click', trackCallAndDial);
+    trackView();
+  </script>
+</body>
+</html>
