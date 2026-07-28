@@ -18,6 +18,17 @@
 
     button { font: inherit; }
 
+    .promotion-heading {
+      width: min(100%, 560px);
+      margin: 0 auto;
+      padding: 13px 16px 11px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -.03em;
+    }
+
     .hero-carousel {
       position: relative;
       width: min(100%, 560px);
@@ -53,7 +64,7 @@
       padding: 6px 8px;
       border-radius: 999px;
       transform: translateX(-50%);
-      background: rgba(70, 70, 70, .78);
+      background: rgba(70, 70, 70, .48);
     }
 
     .hero-pagination[hidden] { display: none; }
@@ -71,6 +82,20 @@
     .hero-dot[aria-current="true"] {
       border-color: #fff;
       background: #111;
+    }
+
+    .hero-toggle {
+      width: 18px;
+      height: 14px;
+      margin-left: 1px;
+      padding: 0 0 0 6px;
+      border: 0;
+      border-left: 1px solid rgba(255, 255, 255, .65);
+      color: #fff;
+      background: transparent;
+      font-size: 9px;
+      line-height: 14px;
+      cursor: pointer;
     }
 
     .wrap {
@@ -217,6 +242,7 @@
   </style>
 </head>
 <body>
+  <header class="promotion-heading">르노코리아 진행중인 프로모션</header>
   <section id="heroCarousel" class="hero-carousel" aria-label="시승 서비스 안내 이미지">
     <div id="heroTrack" class="hero-track"></div>
     <div id="heroPagination" class="hero-pagination" aria-label="배너 선택"></div>
@@ -278,6 +304,8 @@
     let vehicles = [];
     let heroIndex = 0;
     let heroTimer = null;
+    let heroToggle = null;
+    let heroUserPaused = false;
     let swipeStartX = null;
 
     function setupHeroCarousel() {
@@ -297,7 +325,7 @@
         return image;
       }));
 
-      heroPagination.replaceChildren(...HEADER_IMAGES.map((url, index) => {
+      const dots = HEADER_IMAGES.map((url, index) => {
         const dot = document.createElement('button');
         dot.type = 'button';
         dot.className = 'hero-dot';
@@ -308,7 +336,23 @@
           restartHeroTimer();
         });
         return dot;
-      }));
+      });
+
+      heroToggle = document.createElement('button');
+      heroToggle.type = 'button';
+      heroToggle.className = 'hero-toggle';
+      heroToggle.textContent = heroUserPaused ? '▶' : 'Ⅱ';
+      heroToggle.setAttribute('aria-label', heroUserPaused ? '자동 재생 시작' : '자동 재생 정지');
+      heroToggle.addEventListener('click', event => {
+        event.stopPropagation();
+        heroUserPaused = !heroUserPaused;
+        heroToggle.textContent = heroUserPaused ? '▶' : 'Ⅱ';
+        heroToggle.setAttribute('aria-label', heroUserPaused ? '자동 재생 시작' : '자동 재생 정지');
+        if (heroUserPaused) stopHeroTimer();
+        else startHeroTimer();
+      });
+
+      heroPagination.replaceChildren(...dots, heroToggle);
 
       heroPagination.hidden = HEADER_IMAGES.length < 2;
       showHero(0);
@@ -344,7 +388,7 @@
     }
 
     function updateHeroDots() {
-      [...heroPagination.children].forEach((dot, dotIndex) => {
+      heroPagination.querySelectorAll('.hero-dot').forEach((dot, dotIndex) => {
         dot.setAttribute('aria-current', String(dotIndex === heroIndex));
       });
     }
@@ -374,7 +418,7 @@
     }
 
     function startHeroTimer() {
-      if (HEADER_IMAGES.length < 2 || heroTimer) return;
+      if (HEADER_IMAGES.length < 2 || heroTimer || heroUserPaused) return;
       heroTimer = setInterval(advanceHero, 3000);
     }
 
