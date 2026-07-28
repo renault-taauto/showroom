@@ -3,415 +3,508 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
   <title>시승 가능 차량 리스트</title>
   <style>
-    :root {
-      --ink: #171717;
-      --muted: #6f6f6f;
-      --line: #dedede;
-      --soft: #f5f5f3;
-      --accent: #f3d51c;
-      --accent-ink: #1b1b1b;
-      --danger: #b42318;
-    }
-
     * { box-sizing: border-box; }
 
+    html, body { margin: 0; min-height: 100%; }
+
     body {
-      margin: 0;
-      color: var(--ink);
-      background: #ececea;
-      font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
+      color: #111;
+      background: #fff;
+      font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      word-break: keep-all;
     }
 
     button { font: inherit; }
 
-    .app {
-      width: min(100%, 540px);
-      min-height: 100dvh;
+    .header-image {
+      display: block;
+      width: min(100%, 560px);
+      height: auto;
       margin: 0 auto;
-      padding: 30px 20px calc(36px + env(safe-area-inset-bottom));
-      background: #fff;
     }
 
-    .eyebrow {
-      margin: 0 0 8px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .08em;
+    .wrap {
+      width: min(100%, 560px);
+      margin: 0 auto;
+      padding: 11px 18px 38px;
+      text-align: center;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(27px, 7.5vw, 36px);
-      line-height: 1.18;
-      letter-spacing: -.045em;
+      font-size: 27px;
+      line-height: 1.35;
+      letter-spacing: -.04em;
     }
 
-    .intro {
-      margin: 12px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
+    .guide {
+      margin: 3px 0 18px;
+      font-size: 13px;
+      line-height: 1.5;
     }
 
-    .model-tabs {
+    .model-list {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin: 25px 0 0;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: start;
+      gap: 5px;
     }
 
-    .model-tab {
-      min-height: 54px;
-      padding: 11px 10px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      color: var(--ink);
-      background: #fff;
-      font-weight: 800;
-      cursor: pointer;
-      transition: border-color .15s ease, background .15s ease, transform .15s ease;
-    }
-
-    .model-tab:active { transform: scale(.98); }
-
-    .model-tab[aria-selected="true"] {
-      border-color: var(--ink);
-      background: var(--ink);
-      color: #fff;
-    }
-
-    .model-tab:focus-visible,
-    .vehicle-card:focus-visible,
-    .dealer-button:focus-visible,
-    .modal-close:focus-visible {
-      outline: 3px solid rgba(243, 213, 28, .75);
-      outline-offset: 2px;
-    }
-
-    .results {
-      margin-top: 26px;
-      padding-top: 22px;
-      border-top: 1px solid var(--line);
-    }
-
-    .results-title {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .results-title h2 {
-      margin: 0;
-      font-size: 20px;
-      letter-spacing: -.03em;
-    }
-
-    .count { color: var(--muted); font-size: 13px; }
-
-    .vehicle-list { display: grid; gap: 10px; }
-
-    .vehicle-card {
-      width: 100%;
-      padding: 17px 46px 17px 17px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      position: relative;
-      text-align: left;
-      color: var(--ink);
-      background: #fff;
+    .model-button,
+    .fuel-button,
+    .vehicle-button,
+    .dealer-button {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      color: #111;
+      background: transparent;
+      text-decoration: none;
       cursor: pointer;
     }
 
-    .vehicle-card::after {
-      content: "›";
-      position: absolute;
-      top: 50%;
-      right: 18px;
-      transform: translateY(-53%);
-      font-size: 30px;
-      font-weight: 300;
+    .model-column { min-width: 0; }
+
+    .model-button {
+      min-height: 32px;
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.25;
     }
 
-    .vehicle-name { display: block; font-size: 17px; font-weight: 800; }
-    .vehicle-meta { display: block; margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .model-button[aria-expanded="true"] { font-weight: 800; }
 
-    .state {
-      min-height: 130px;
+    .model-button:focus-visible,
+    .fuel-button:focus-visible,
+    .vehicle-button:focus-visible,
+    .dealer-button:focus-visible {
+      outline: 2px solid #111;
+      outline-offset: 4px;
+    }
+
+    .vehicles {
+      margin-top: 0;
+    }
+
+    .fuel-group { margin: 8px 0; }
+
+    .fuel-button {
+      padding: 0;
+      border: 0;
+      color: #111;
+      background: transparent;
+      font-size: 15px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .fuel-button::before {
+      content: "▶";
+      display: inline-block;
+      width: 17px;
+      font-size: 11px;
+    }
+
+    .fuel-button[aria-expanded="true"]::before { content: "▼"; }
+
+    .fuel-vehicles { margin-top: 6px; }
+
+    .vehicle-row { margin: 7px 0; }
+
+    .vehicle-button {
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    .dealers {
+      margin: 7px 0 13px;
+      font-size: 13px;
+    }
+
+    .dealer-button {
+      display: block;
+      margin: 7px auto;
+    }
+
+    .alert-layer[hidden] { display: none; }
+
+    .alert-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
       display: grid;
       place-items: center;
       padding: 24px;
+      background: rgba(0, 0, 0, .42);
+    }
+
+    .alert-box {
+      width: min(100%, 310px);
+      padding: 22px 20px 17px;
       border-radius: 14px;
-      text-align: center;
-      color: var(--muted);
-      background: var(--soft);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .state.error { color: var(--danger); }
-
-    .modal[hidden] { display: none; }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 10;
-      display: grid;
-      align-items: end;
-      background: rgba(0, 0, 0, .48);
-    }
-
-    .modal-panel {
-      width: min(100%, 540px);
-      max-height: 78dvh;
-      margin: 0 auto;
-      overflow: auto;
-      padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
-      border-radius: 22px 22px 0 0;
       background: #fff;
-      box-shadow: 0 -12px 40px rgba(0, 0, 0, .18);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, .22);
     }
 
-    .modal-head {
-      display: flex;
-      align-items: start;
-      justify-content: space-between;
-      gap: 16px;
+    .alert-box h2 {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.4;
     }
 
-    .modal-head h2 { margin: 0; font-size: 21px; letter-spacing: -.03em; }
-    .modal-copy { margin: 7px 0 18px; color: var(--muted); font-size: 14px; }
-
-    .modal-close {
-      width: 38px;
-      height: 38px;
-      flex: 0 0 38px;
-      border: 0;
-      border-radius: 50%;
-      background: var(--soft);
-      font-size: 24px;
-      line-height: 1;
-      cursor: pointer;
+    .alert-text {
+      margin: 7px 0 16px;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.5;
     }
 
-    .dealer-list { display: grid; gap: 9px; }
-
-    .dealer-button {
+    .alert-dealers .dealer-button {
       width: 100%;
-      min-height: 54px;
-      padding: 14px 16px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      text-align: left;
-      color: var(--accent-ink);
-      background: #fff;
-      font-weight: 800;
+      min-height: 42px;
+      margin: 0;
+      border-top: 1px solid #e5e5e5;
+      font-weight: 700;
+    }
+
+    .alert-close {
+      width: 100%;
+      min-height: 38px;
+      margin-top: 5px;
+      border: 0;
+      color: #777;
+      background: transparent;
+      font-size: 13px;
       cursor: pointer;
     }
 
-    .dealer-button:first-child { border-color: var(--accent); background: #fffdee; }
-    .dealer-button[disabled] { color: #999; background: var(--soft); cursor: not-allowed; }
-
-    @media (min-width: 541px) {
-      body { padding: 28px 0; }
-      .app { min-height: calc(100dvh - 56px); border-radius: 22px; box-shadow: 0 12px 45px rgba(0,0,0,.09); }
-      .modal { align-items: center; padding: 24px; }
-      .modal-panel { border-radius: 22px; }
+    @media (max-width: 390px) {
+      .wrap { padding-inline: 11px; }
+      h1 { font-size: 25px; }
+      .model-list { gap: 4px; }
+      .model-button { font-size: 17px; }
     }
   </style>
 </head>
 <body>
-  <main class="app">
-    <p class="eyebrow">RENAULT TEST DRIVE</p>
+  <img
+    class="header-image"
+    src="https://raw.githubusercontent.com/renault-taauto/showroom/main/20260728.png"
+    alt="르노 차가움 시승 서비스"
+    fetchpriority="high"
+  >
+  <main class="wrap">
     <h1>시승 가능 차량 리스트</h1>
-    <p class="intro">원하시는 차종을 선택해 주세요. 차량을 누르면 해당 대리점의 시승 신청 페이지로 이동합니다.</p>
+    <p class="guide">* 원하시는 차량을 누르면 바로 시승신청 링크로 넘어갑니다.</p>
 
-    <div id="modelTabs" class="model-tabs" role="tablist" aria-label="차종 선택"></div>
-
-    <section class="results" aria-live="polite">
-      <div class="results-title">
-        <h2 id="resultHeading">차량을 선택해 주세요</h2>
-        <span id="resultCount" class="count"></span>
-      </div>
-      <div id="vehicleList" class="vehicle-list">
-        <div class="state">시승 가능 차량 정보를 불러오는 중입니다.</div>
-      </div>
-    </section>
+    <div id="modelList" class="model-list" aria-label="차종 선택"></div>
   </main>
 
-  <div id="dealerModal" class="modal" hidden>
-    <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-head">
-        <div>
-          <h2 id="modalTitle">대리점 선택</h2>
-          <p id="modalCopy" class="modal-copy"></p>
-        </div>
-        <button id="modalClose" class="modal-close" type="button" aria-label="닫기">×</button>
-      </div>
-      <div id="dealerList" class="dealer-list"></div>
+  <div id="dealerAlert" class="alert-layer" hidden>
+    <section class="alert-box" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
+      <h2 id="alertTitle">대리점 선택</h2>
+      <p id="alertText" class="alert-text"></p>
+      <div id="alertDealers" class="alert-dealers"></div>
+      <button id="alertClose" class="alert-close" type="button">취소</button>
     </section>
   </div>
 
   <script>
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxPV1qjf5Z9vt8BtoGNUTtkVCHjF2GjY1U4Y0xadZ-lASg59WJZgUkPUI9KoaOFwdySlw/exec';
+    const CACHE_KEY = 'renault-test-drive-vehicles-v1';
 
-    const state = { vehicles: [], selectedModel: '' };
-    const tabsEl = document.getElementById('modelTabs');
-    const listEl = document.getElementById('vehicleList');
-    const headingEl = document.getElementById('resultHeading');
-    const countEl = document.getElementById('resultCount');
-    const modalEl = document.getElementById('dealerModal');
-    const modalCopyEl = document.getElementById('modalCopy');
-    const dealerListEl = document.getElementById('dealerList');
-    const closeEl = document.getElementById('modalClose');
-    let lastFocusedElement = null;
+    const modelList = document.getElementById('modelList');
+    const dealerAlert = document.getElementById('dealerAlert');
+    const alertText = document.getElementById('alertText');
+    const alertDealers = document.getElementById('alertDealers');
+    const alertClose = document.getElementById('alertClose');
+    const MODEL_ORDER = ['필랑트', '그랑 콜레오스', '아르카나'];
+    const FALLBACK_DEALER_URLS = {
+      '구리대리점': 'https://e-renaultkorea.com/?s=794',
+      '중랑대리점': 'https://e-renaultkorea.com/?s=845',
+      '의정부금오대리점': 'https://e-renaultkorea.com/?s=750',
+      '노원대리점': 'https://e-renaultkorea.com/?s=788'
+    };
+    let vehicles = [];
 
-    window.receiveVehicleData = function (data) {
-      document.getElementById('gasJsonp')?.remove();
-      if (!data || !data.ok) {
-        showError(data?.message || '차량 정보를 불러오지 못했습니다.');
-        return;
-      }
-      state.vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
-      renderModelTabs();
-      showInitialState();
+    window.receiveVehicleData = function (result) {
+      document.getElementById('vehicleDataScript')?.remove();
+
+      if (!result || !result.ok) return;
+
+      vehicles = Array.isArray(result.vehicles)
+        ? mergeDuplicateVehicles(result.vehicles.map(normalizeVehicle))
+        : [];
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(result.vehicles || [])); } catch (error) {}
+      renderModels();
     };
 
     function loadVehicles() {
-      if (GAS_WEB_APP_URL.includes('여기에_배포_ID')) {
-        showError('index.html의 GAS_WEB_APP_URL을 배포 주소로 교체해 주세요.');
-        return;
-      }
       const script = document.createElement('script');
-      script.id = 'gasJsonp';
-      script.src = GAS_WEB_APP_URL + '?callback=receiveVehicleData&t=' + Date.now();
-      script.onerror = function () { showError('차량 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); };
+      script.id = 'vehicleDataScript';
+      script.src = GAS_WEB_APP_URL + '?callback=receiveVehicleData&_=' + Date.now();
+      script.onerror = function () {};
       document.head.appendChild(script);
     }
 
-    function renderModelTabs() {
-      const models = [...new Set(state.vehicles.map(item => item.model))]
-        .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b, 'ko'));
+    function renderModels() {
+      const availableModels = new Set(vehicles.map(vehicle => vehicle.model).filter(Boolean));
+      const models = [
+        ...MODEL_ORDER.filter(model => availableModels.has(model)),
+        ...[...availableModels]
+          .filter(model => !MODEL_ORDER.includes(model))
+          .sort((a, b) => a.localeCompare(b, 'ko'))
+      ];
 
-      tabsEl.replaceChildren(...models.map(model => {
+      modelList.replaceChildren(...models.map(model => {
+        const column = document.createElement('div');
+        column.className = 'model-column';
+
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'model-tab';
-        button.role = 'tab';
+        button.className = 'model-button';
         button.textContent = model;
-        button.setAttribute('aria-selected', 'false');
-        button.addEventListener('click', () => selectModel(model));
-        return button;
+        button.setAttribute('aria-expanded', 'false');
+
+        const vehicleArea = document.createElement('div');
+        vehicleArea.className = 'vehicles';
+        vehicleArea.hidden = true;
+
+        button.addEventListener('click', () => toggleModel(model, button, vehicleArea));
+        column.append(button, vehicleArea);
+        return column;
       }));
 
-      if (!models.length) showError('현재 등록된 시승 가능 차량이 없습니다.');
     }
 
-    function selectModel(model) {
-      state.selectedModel = model;
-      [...tabsEl.children].forEach(tab => {
-        tab.setAttribute('aria-selected', String(tab.textContent === model));
+    function toggleModel(model, button, vehicleArea) {
+      trackEvent({ event: 'click', target: 'model', model });
+      const willOpen = button.getAttribute('aria-expanded') !== 'true';
+      modelList.querySelectorAll('.model-button').forEach(item => item.setAttribute('aria-expanded', 'false'));
+      modelList.querySelectorAll('.vehicles').forEach(area => {
+        area.hidden = true;
+        area.replaceChildren();
+      });
+      if (!willOpen) return;
+
+      const selected = vehicles.filter(vehicle => vehicle.model === model);
+      button.setAttribute('aria-expanded', 'true');
+      vehicleArea.hidden = false;
+      vehicleArea.replaceChildren(...createFuelGroups(selected));
+    }
+
+    function createFuelGroups(selected) {
+      const elements = [];
+      const fuels = ['하이브리드', '가솔린'];
+
+      fuels.forEach(fuel => {
+        const fuelVehicles = selected.filter(vehicle => vehicle.fuel === fuel);
+        if (!fuelVehicles.length) return;
+
+        const group = document.createElement('div');
+        group.className = 'fuel-group';
+
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'fuel-button';
+        toggle.textContent = fuel;
+        toggle.setAttribute('aria-expanded', 'false');
+
+        const list = document.createElement('div');
+        list.className = 'fuel-vehicles';
+        list.hidden = true;
+
+        toggle.addEventListener('click', () => {
+          trackEvent({ event: 'click', target: 'fuel', model: fuelVehicles[0].model, fuel });
+          const open = toggle.getAttribute('aria-expanded') !== 'true';
+          toggle.setAttribute('aria-expanded', String(open));
+          list.hidden = !open;
+          if (open && !list.childElementCount) {
+            list.replaceChildren(...fuelVehicles.map(createVehicleRow));
+          }
+        });
+
+        group.append(toggle, list);
+        elements.push(group);
       });
 
-      const vehicles = state.vehicles.filter(item => item.model === model);
-      headingEl.textContent = model + ' 시승 가능 차량';
-      countEl.textContent = vehicles.length + '종';
+      selected
+        .filter(vehicle => !fuels.includes(vehicle.fuel))
+        .forEach(vehicle => elements.push(createVehicleRow(vehicle)));
 
-      if (!vehicles.length) {
-        listEl.innerHTML = '<div class="state">현재 시승 가능한 차량이 없습니다.</div>';
-        return;
-      }
-
-      listEl.replaceChildren(...vehicles.map(createVehicleCard));
+      return elements;
     }
 
-    function createVehicleCard(vehicle) {
+    function normalizeVehicle(vehicle) {
+      const item = {
+        ...vehicle,
+        dealers: Array.isArray(vehicle.dealers)
+          ? vehicle.dealers.map(dealer => ({
+              ...dealer,
+              url: dealer.url || FALLBACK_DEALER_URLS[String(dealer.name || '').trim()] || ''
+            }))
+          : []
+      };
+      const rawModel = String(item.model || '').trim();
+
+      if (rawModel === '콜레오스') {
+        item.model = '그랑 콜레오스';
+      } else if (rawModel.startsWith('콜레오스 ')) {
+        item.model = '그랑 콜레오스';
+        item.color = [rawModel.slice('콜레오스 '.length), item.color]
+          .filter(Boolean).join(' ');
+      } else {
+        const knownModel = MODEL_ORDER.find(model => rawModel === model || rawModel.startsWith(model + ' '));
+        if (knownModel && rawModel !== knownModel) {
+          item.model = knownModel;
+          item.color = [rawModel.slice(knownModel.length).trim(), item.color]
+          .filter(Boolean).join(' ');
+        }
+      }
+
+      if (item.model === '필랑트') {
+        item.fuel = '하이브리드';
+      } else if (
+        (item.model === '그랑 콜레오스' || item.model === '아르카나') &&
+        !item.fuel
+      ) {
+        item.fuel = '가솔린';
+      }
+
+      return item;
+    }
+
+    function mergeDuplicateVehicles(items) {
+      const merged = new Map();
+
+      items.forEach(vehicle => {
+        const key = [vehicle.model, vehicle.fuel, vehicle.color]
+          .map(value => String(value || '').trim().toLowerCase())
+          .join('|');
+
+        if (!merged.has(key)) {
+          merged.set(key, { ...vehicle, dealers: [] });
+        }
+
+        const target = merged.get(key);
+        (vehicle.dealers || []).forEach(dealer => {
+          if (!target.dealers.some(saved => saved.name === dealer.name)) {
+            target.dealers.push(dealer);
+          }
+        });
+      });
+
+      return [...merged.values()];
+    }
+
+    function createVehicleRow(vehicle) {
+      const row = document.createElement('div');
+      row.className = 'vehicle-row';
+
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'vehicle-card';
+      button.className = 'vehicle-button';
+      button.textContent = vehicle.color || vehicle.fuel || '시승 신청';
 
-      const name = document.createElement('span');
-      name.className = 'vehicle-name';
-      name.textContent = [vehicle.fuel, vehicle.color].filter(Boolean).join(' · ') || vehicle.model;
+      button.addEventListener('click', function () {
+        const dealers = Array.isArray(vehicle.dealers) ? vehicle.dealers : [];
+        const linkedDealers = dealers.filter(dealer => dealer.url);
 
-      const meta = document.createElement('span');
-      meta.className = 'vehicle-meta';
-      meta.textContent = vehicle.dealers.length > 1
-        ? vehicle.dealers.length + '개 대리점에서 시승 가능'
-        : (vehicle.dealers[0]?.name || '대리점 정보 확인 필요');
+        if (dealers.length === 1 && linkedDealers.length === 1) {
+          goToDealer(vehicle, linkedDealers[0]);
+          return;
+        }
 
-      button.append(name, meta);
-      button.addEventListener('click', () => chooseVehicle(vehicle, button));
-      return button;
+        trackEvent({
+          event: 'click', target: 'vehicle', model: vehicle.model,
+          fuel: vehicle.fuel, color: vehicle.color
+        });
+        showDealerAlert(vehicle, linkedDealers);
+      });
+
+      row.appendChild(button);
+      return row;
     }
 
-    function chooseVehicle(vehicle, sourceButton) {
-      const validDealers = vehicle.dealers.filter(dealer => dealer.url);
-      if (vehicle.dealers.length === 1 && validDealers.length === 1) {
-        goToDealer(validDealers[0].url);
-        return;
-      }
-
-      lastFocusedElement = sourceButton;
-      modalCopyEl.textContent = vehicle.label + ' 시승을 원하는 대리점을 선택해 주세요.';
-      dealerListEl.replaceChildren(...vehicle.dealers.map(dealer => {
+    function showDealerAlert(vehicle, dealers) {
+      alertText.textContent = [vehicle.model, vehicle.fuel, vehicle.color]
+        .filter(Boolean).join(' ') + ' 시승 대리점을 선택해 주세요.';
+      alertDealers.replaceChildren();
+      dealers.forEach(dealer => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'dealer-button';
-        button.textContent = dealer.url ? dealer.name : dealer.name + ' · 링크 준비 중';
-        button.disabled = !dealer.url;
-        if (dealer.url) button.addEventListener('click', () => goToDealer(dealer.url));
-        return button;
-      }));
-      modalEl.hidden = false;
+        button.textContent = dealer.name;
+        button.addEventListener('click', () => goToDealer(vehicle, dealer));
+        alertDealers.appendChild(button);
+      });
+      dealerAlert.hidden = false;
       document.body.style.overflow = 'hidden';
-      closeEl.focus();
+      alertClose.focus();
     }
 
-    function goToDealer(url) {
-      window.location.href = url;
-    }
-https://github.com/renault-taauto/showroom/blob/main/august.html
-    function closeModal() {
-      modalEl.hidden = true;
+    function closeDealerAlert() {
+      dealerAlert.hidden = true;
       document.body.style.overflow = '';
-      lastFocusedElement?.focus();
     }
 
-    function showInitialState() {
-      headingEl.textContent = '차량을 선택해 주세요';
-      countEl.textContent = '';
-      listEl.innerHTML = '<div class="state">위에서 차종을 선택하면<br>시승 가능한 차량이 표시됩니다.</div>';
+    function goToDealer(vehicle, dealer) {
+      trackEvent({
+        event: 'click', target: 'dealer', model: vehicle.model,
+        fuel: vehicle.fuel, color: vehicle.color,
+        dealer: dealer.name, url: dealer.url
+      }, () => { window.location.href = dealer.url; });
     }
 
-    function showError(message) {
-      tabsEl.replaceChildren();
-      headingEl.textContent = '안내';
-      countEl.textContent = '';
-      listEl.innerHTML = '';
-      const box = document.createElement('div');
-      box.className = 'state error';
-      box.textContent = message;
-      listEl.appendChild(box);
+    function trackEvent(data, callback) {
+      const callbackName = 'trackingCallback_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      const script = document.createElement('script');
+      let finished = false;
+
+      const finish = function () {
+        if (finished) return;
+        finished = true;
+        script.remove();
+        try { delete window[callbackName]; } catch (error) {}
+        if (callback) callback();
+      };
+
+      window[callbackName] = finish;
+      const params = new URLSearchParams({
+        action: 'track',
+        callback: callbackName,
+        page: location.href,
+        ...data
+      });
+      script.src = GAS_WEB_APP_URL + '?' + params.toString();
+      script.onerror = finish;
+      document.head.appendChild(script);
+      setTimeout(finish, callback ? 450 : 3000);
     }
 
-    closeEl.addEventListener('click', closeModal);
-    modalEl.addEventListener('click', event => {
-      if (event.target === modalEl) closeModal();
+    function loadCachedVehicles() {
+      try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+        if (Array.isArray(cached) && cached.length) {
+          vehicles = mergeDuplicateVehicles(cached.map(normalizeVehicle));
+          renderModels();
+        }
+      } catch (error) {}
+    }
+
+    loadCachedVehicles();
+    loadVehicles();
+    trackEvent({ event: 'view', target: 'page' });
+
+    alertClose.addEventListener('click', closeDealerAlert);
+    dealerAlert.addEventListener('click', event => {
+      if (event.target === dealerAlert) closeDealerAlert();
     });
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !modalEl.hidden) closeModal();
+      if (event.key === 'Escape' && !dealerAlert.hidden) closeDealerAlert();
     });
-
-    loadVehicles();
   </script>
 </body>
 </html>
