@@ -18,11 +18,59 @@
 
     button { font: inherit; }
 
-    .header-image {
-      display: block;
+    .hero-carousel {
+      position: relative;
       width: min(100%, 560px);
-      height: auto;
       margin: 0 auto;
+      overflow: hidden;
+      touch-action: pan-y;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .hero-track {
+      display: flex;
+      transition: transform .42s ease;
+      will-change: transform;
+    }
+
+    .hero-slide {
+      display: block;
+      width: 100%;
+      min-width: 100%;
+      height: auto;
+      pointer-events: none;
+      -webkit-user-drag: none;
+    }
+
+    .hero-pagination {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      transform: translateX(-50%);
+      background: rgba(70, 70, 70, .78);
+    }
+
+    .hero-pagination[hidden] { display: none; }
+
+    .hero-dot {
+      width: 7px;
+      height: 7px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, .95);
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .hero-dot[aria-current="true"] {
+      border-color: #fff;
+      background: #111;
     }
 
     .wrap {
@@ -169,12 +217,10 @@
   </style>
 </head>
 <body>
-  <img
-    class="header-image"
-    src="https://raw.githubusercontent.com/renault-taauto/showroom/main/20260728.png"
-    alt="르노 차가움 시승 서비스"
-    fetchpriority="high"
-  >
+  <section id="heroCarousel" class="hero-carousel" aria-label="시승 서비스 안내 이미지">
+    <div id="heroTrack" class="hero-track"></div>
+    <div id="heroPagination" class="hero-pagination" aria-label="배너 선택"></div>
+  </section>
   <main class="wrap">
     <h1>시승 가능 차량 리스트</h1>
 
@@ -193,7 +239,16 @@
   <script>
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxPV1qjf5Z9vt8BtoGNUTtkVCHjF2GjY1U4Y0xadZ-lASg59WJZgUkPUI9KoaOFwdySlw/exec';
     const CACHE_KEY = 'renault-test-drive-vehicles-v1';
+    const HEADER_IMAGE_BASE = 'https://raw.githubusercontent.com/renault-taauto/showroom/main/renault/';
+    const HEADER_IMAGES = [
+      HEADER_IMAGE_BASE + '1.png',
+      HEADER_IMAGE_BASE + '2.png',
+      HEADER_IMAGE_BASE + '3.png'
+    ];
 
+    const heroCarousel = document.getElementById('heroCarousel');
+    const heroTrack = document.getElementById('heroTrack');
+    const heroPagination = document.getElementById('heroPagination');
     const modelList = document.getElementById('modelList');
     const dealerAlert = document.getElementById('dealerAlert');
     const alertDealers = document.getElementById('alertDealers');
@@ -221,6 +276,144 @@
       ] }
     ];
     let vehicles = [];
+    let heroIndex = 0;
+    let heroTimer = null;
+    let swipeStartX = null;
+
+    function setupHeroCarousel() {
+      stopHeroTimer();
+      heroIndex = 0;
+      const slideUrls = HEADER_IMAGES.length > 1
+        ? [...HEADER_IMAGES, HEADER_IMAGES[0]]
+        : HEADER_IMAGES;
+
+      heroTrack.replaceChildren(...slideUrls.map((url, index) => {
+        const image = document.createElement('img');
+        image.className = 'hero-slide';
+        image.src = url;
+        image.alt = '르노 시승 서비스 안내 ' + (index + 1);
+        image.draggable = false;
+        if (index === 0) image.fetchPriority = 'high';
+        return image;
+      }));
+
+      heroPagination.replaceChildren(...HEADER_IMAGES.map((url, index) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'hero-dot';
+        dot.setAttribute('aria-label', (index + 1) + '번 배너 보기');
+        dot.addEventListener('click', event => {
+          event.stopPropagation();
+          showHero(index);
+          restartHeroTimer();
+        });
+        return dot;
+      }));
+
+      heroPagination.hidden = HEADER_IMAGES.length < 2;
+      showHero(0);
+      startHeroTimer();
+    }
+
+    async function discoverAdditionalHeaderImages() {
+      for (let number = HEADER_IMAGES.length + 1; number <= 20; number += 1) {
+        const url = HEADER_IMAGE_BASE + number + '.png';
+        const exists = await imageExists(url);
+        if (!exists) break;
+        HEADER_IMAGES.push(url);
+      }
+
+      if (HEADER_IMAGES.length > 3) setupHeroCarousel();
+    }
+
+    function imageExists(url) {
+      return new Promise(resolve => {
+        const image = new Image();
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+        image.src = url + '?check=' + Math.floor(Date.now() / 300000);
+      });
+    }
+
+    function showHero(index) {
+      if (!HEADER_IMAGES.length) return;
+      heroIndex = (index + HEADER_IMAGES.length) % HEADER_IMAGES.length;
+      heroTrack.style.transition = 'transform .42s ease';
+      heroTrack.style.transform = 'translateX(-' + (heroIndex * 100) + '%)';
+      updateHeroDots();
+    }
+
+    function updateHeroDots() {
+      [...heroPagination.children].forEach((dot, dotIndex) => {
+        dot.setAttribute('aria-current', String(dotIndex === heroIndex));
+      });
+    }
+
+    function advanceHero() {
+      if (HEADER_IMAGES.length < 2) return;
+
+      if (heroIndex < HEADER_IMAGES.length - 1) {
+        showHero(heroIndex + 1);
+        return;
+      }
+
+      heroIndex = 0;
+      updateHeroDots();
+      heroTrack.style.transition = 'transform .42s ease';
+      heroTrack.style.transform = 'translateX(-' + (HEADER_IMAGES.length * 100) + '%)';
+
+      setTimeout(() => {
+        heroTrack.style.transition = 'none';
+        heroTrack.style.transform = 'translateX(0)';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            heroTrack.style.transition = 'transform .42s ease';
+          });
+        });
+      }, 430);
+    }
+
+    function startHeroTimer() {
+      if (HEADER_IMAGES.length < 2 || heroTimer) return;
+      heroTimer = setInterval(advanceHero, 3000);
+    }
+
+    function stopHeroTimer() {
+      clearInterval(heroTimer);
+      heroTimer = null;
+    }
+
+    function restartHeroTimer() {
+      stopHeroTimer();
+      startHeroTimer();
+    }
+
+    heroCarousel.addEventListener('pointerdown', event => {
+      swipeStartX = event.clientX;
+      stopHeroTimer();
+    });
+
+    heroCarousel.addEventListener('pointerup', event => {
+      if (swipeStartX !== null) {
+        const distance = event.clientX - swipeStartX;
+        if (Math.abs(distance) >= 38) {
+          if (distance < 0) advanceHero();
+          else showHero(heroIndex - 1);
+        }
+      }
+      swipeStartX = null;
+      startHeroTimer();
+    });
+
+    heroCarousel.addEventListener('pointercancel', () => {
+      swipeStartX = null;
+      startHeroTimer();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopHeroTimer();
+      else startHeroTimer();
+    });
 
     window.receiveVehicleData = function (result) {
       document.getElementById('vehicleDataScript')?.remove();
@@ -458,6 +651,8 @@
       renderModels();
     }
 
+    setupHeroCarousel();
+    discoverAdditionalHeaderImages();
     loadInitialVehicles();
     loadVehicles();
     trackEvent({ event: 'view', target: 'page' });
