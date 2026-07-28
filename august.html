@@ -235,6 +235,16 @@
       '의정부금오대리점': 'https://e-renaultkorea.com/?s=750',
       '노원대리점': 'https://e-renaultkorea.com/?s=788'
     };
+    const INITIAL_VEHICLES = [
+      { model: '그랑 콜레오스 그레이', fuel: '', color: '', dealers: [{ name: '구리대리점', url: '' }] },
+      { model: '그랑 콜레오스 화이트', fuel: '', color: '', dealers: [{ name: '구리대리점', url: '' }] },
+      { model: '아르카나', fuel: '하이브리드', color: '화이트', dealers: [{ name: '구리대리점', url: '' }] },
+      { model: '필랑트 블랙', fuel: '', color: '', dealers: [{ name: '중랑대리점', url: '' }] },
+      { model: '필랑트', fuel: '하이브리드', color: '블랙', dealers: [
+        { name: '구리대리점', url: '' },
+        { name: '중랑대리점', url: '' }
+      ] }
+    ];
     let vehicles = [];
 
     window.receiveVehicleData = function (result) {
@@ -497,17 +507,20 @@
       setTimeout(finish, callback ? 450 : 3000);
     }
 
-    function loadCachedVehicles() {
+    function loadInitialVehicles() {
+      let initialData = INITIAL_VEHICLES;
       try {
         const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
         if (Array.isArray(cached) && cached.length) {
-          vehicles = mergeDuplicateVehicles(cached.map(normalizeVehicle));
-          renderModels();
+          initialData = cached;
         }
       } catch (error) {}
+
+      vehicles = mergeDuplicateVehicles(initialData.map(normalizeVehicle));
+      renderModels();
     }
 
-    loadCachedVehicles();
+    loadInitialVehicles();
     loadVehicles();
     trackEvent({ event: 'view', target: 'page' });
 
