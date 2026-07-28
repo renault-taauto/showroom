@@ -56,7 +56,6 @@
     }
 
     .model-button,
-    .fuel-button,
     .vehicle-button,
     .dealer-button {
       padding: 0;
@@ -88,7 +87,6 @@
     .model-button[aria-expanded="true"] { font-weight: 800; }
 
     .model-button:focus-visible,
-    .fuel-button:focus-visible,
     .vehicle-button:focus-visible,
     .dealer-button:focus-visible {
       outline: 2px solid #111;
@@ -98,29 +96,6 @@
     .vehicles {
       margin-top: 0;
     }
-
-    .fuel-group { margin: 8px 0; }
-
-    .fuel-button {
-      padding: 0;
-      border: 0;
-      color: #111;
-      background: transparent;
-      font-size: 15px;
-      line-height: 1.4;
-      cursor: pointer;
-    }
-
-    .fuel-button::before {
-      content: "▶";
-      display: inline-block;
-      width: 17px;
-      font-size: 11px;
-    }
-
-    .fuel-button[aria-expanded="true"]::before { content: "▼"; }
-
-    .fuel-vehicles { margin-top: 6px; }
 
     .vehicle-row { margin: 7px 0; }
 
@@ -315,51 +290,10 @@
       if (!willOpen) return;
 
       const selected = vehicles.filter(vehicle => vehicle.model === model);
+      selected.sort((a, b) => vehicleDisplayName(a).localeCompare(vehicleDisplayName(b), 'ko'));
       button.setAttribute('aria-expanded', 'true');
       vehicleArea.hidden = false;
-      vehicleArea.replaceChildren(...createFuelGroups(selected));
-    }
-
-    function createFuelGroups(selected) {
-      const elements = [];
-      const fuels = ['하이브리드', '가솔린'];
-
-      fuels.forEach(fuel => {
-        const fuelVehicles = selected.filter(vehicle => vehicle.fuel === fuel);
-        if (!fuelVehicles.length) return;
-
-        const group = document.createElement('div');
-        group.className = 'fuel-group';
-
-        const toggle = document.createElement('button');
-        toggle.type = 'button';
-        toggle.className = 'fuel-button';
-        toggle.textContent = fuel;
-        toggle.setAttribute('aria-expanded', 'false');
-
-        const list = document.createElement('div');
-        list.className = 'fuel-vehicles';
-        list.hidden = true;
-
-        toggle.addEventListener('click', () => {
-          trackEvent({ event: 'click', target: 'fuel', model: fuelVehicles[0].model, fuel });
-          const open = toggle.getAttribute('aria-expanded') !== 'true';
-          toggle.setAttribute('aria-expanded', String(open));
-          list.hidden = !open;
-          if (open && !list.childElementCount) {
-            list.replaceChildren(...fuelVehicles.map(createVehicleRow));
-          }
-        });
-
-        group.append(toggle, list);
-        elements.push(group);
-      });
-
-      selected
-        .filter(vehicle => !fuels.includes(vehicle.fuel))
-        .forEach(vehicle => elements.push(createVehicleRow(vehicle)));
-
-      return elements;
+      vehicleArea.replaceChildren(...selected.map(createVehicleRow));
     }
 
     function normalizeVehicle(vehicle) {
@@ -431,7 +365,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'vehicle-button';
-      button.textContent = vehicle.color || vehicle.fuel || '시승 신청';
+      button.textContent = vehicleDisplayName(vehicle);
 
       button.addEventListener('click', function () {
         const dealers = Array.isArray(vehicle.dealers) ? vehicle.dealers : [];
@@ -451,6 +385,10 @@
 
       row.appendChild(button);
       return row;
+    }
+
+    function vehicleDisplayName(vehicle) {
+      return [vehicle.fuel, vehicle.color].filter(Boolean).join(' ') || '시승 신청';
     }
 
     function showDealerAlert(vehicle, dealers) {
