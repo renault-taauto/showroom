@@ -40,9 +40,12 @@
     }
 
     .guide {
-      margin: 3px 0 18px;
-      font-size: 13px;
+      width: fit-content;
+      max-width: 100%;
+      margin: 24px auto 0;
+      font-size: clamp(8px, 2.7vw, 13px);
       line-height: 1.5;
+      white-space: nowrap;
     }
 
     .model-list {
@@ -66,6 +69,14 @@
     }
 
     .model-column { min-width: 0; }
+
+    .model-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0 auto 5px;
+      object-fit: contain;
+    }
 
     .model-button {
       min-height: 32px;
@@ -150,15 +161,9 @@
 
     .alert-box h2 {
       margin: 0;
-      font-size: 19px;
+      font-size: 15px;
+      font-weight: 400;
       line-height: 1.4;
-    }
-
-    .alert-text {
-      margin: 7px 0 16px;
-      color: #555;
-      font-size: 13px;
-      line-height: 1.5;
     }
 
     .alert-dealers .dealer-button {
@@ -197,15 +202,14 @@
   >
   <main class="wrap">
     <h1>시승 가능 차량 리스트</h1>
-    <p class="guide">* 원하시는 차량을 누르면 바로 시승신청 링크로 넘어갑니다.</p>
 
     <div id="modelList" class="model-list" aria-label="차종 선택"></div>
+    <p class="guide">* 원하시는 차량의 기종, 색상을 누르면 바로 시승신청 링크로 넘어갑니다.</p>
   </main>
 
   <div id="dealerAlert" class="alert-layer" hidden>
     <section class="alert-box" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
-      <h2 id="alertTitle">대리점 선택</h2>
-      <p id="alertText" class="alert-text"></p>
+      <h2 id="alertTitle">대리점을 선택해주세요</h2>
       <div id="alertDealers" class="alert-dealers"></div>
       <button id="alertClose" class="alert-close" type="button">취소</button>
     </section>
@@ -217,10 +221,14 @@
 
     const modelList = document.getElementById('modelList');
     const dealerAlert = document.getElementById('dealerAlert');
-    const alertText = document.getElementById('alertText');
     const alertDealers = document.getElementById('alertDealers');
     const alertClose = document.getElementById('alertClose');
     const MODEL_ORDER = ['필랑트', '그랑 콜레오스', '아르카나'];
+    const MODEL_IMAGES = {
+      '필랑트': 'https://raw.githubusercontent.com/renault-taauto/showroom/main/renault/filante.png',
+      '그랑 콜레오스': 'https://raw.githubusercontent.com/renault-taauto/showroom/main/renault/koleos.png',
+      '아르카나': 'https://raw.githubusercontent.com/renault-taauto/showroom/main/renault/arkana.png'
+    };
     const FALLBACK_DEALER_URLS = {
       '구리대리점': 'https://e-renaultkorea.com/?s=794',
       '중랑대리점': 'https://e-renaultkorea.com/?s=845',
@@ -262,6 +270,13 @@
         const column = document.createElement('div');
         column.className = 'model-column';
 
+        const image = document.createElement('img');
+        image.className = 'model-image';
+        image.src = MODEL_IMAGES[model] || '';
+        image.alt = model;
+        image.decoding = 'async';
+        if (!MODEL_IMAGES[model]) image.hidden = true;
+
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'model-button';
@@ -273,7 +288,7 @@
         vehicleArea.hidden = true;
 
         button.addEventListener('click', () => toggleModel(model, button, vehicleArea));
-        column.append(button, vehicleArea);
+        column.append(image, button, vehicleArea);
         return column;
       }));
 
@@ -429,8 +444,6 @@
     }
 
     function showDealerAlert(vehicle, dealers) {
-      alertText.textContent = [vehicle.model, vehicle.fuel, vehicle.color]
-        .filter(Boolean).join(' ') + ' 시승 대리점을 선택해 주세요.';
       alertDealers.replaceChildren();
       dealers.forEach(dealer => {
         const button = document.createElement('button');
