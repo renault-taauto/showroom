@@ -128,9 +128,41 @@
       gap: 5px;
     }
 
+    .dealer-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 18px;
+      margin: 18px auto 0;
+    }
+
+    .dealer-select-button {
+      min-height: 38px;
+      padding: 5px 2px;
+      border: 0;
+      border-bottom: 1px solid #d8d8d8;
+      color: #111;
+      background: transparent;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .dealer-select-button[aria-pressed="true"] {
+      border-bottom: 2px solid #111;
+      font-weight: 700;
+    }
+
+    .vehicle-section { margin-top: 30px; }
+    .vehicle-section[hidden] { display: none; }
+
+    .vehicle-section h2 {
+      margin: 0 0 16px;
+      font-size: 23px;
+      line-height: 1.35;
+      letter-spacing: -.04em;
+    }
+
     .model-button,
-    .vehicle-button,
-    .dealer-button {
+    .vehicle-button {
       padding: 0;
       border: 0;
       border-radius: 0;
@@ -161,7 +193,7 @@
 
     .model-button:focus-visible,
     .vehicle-button:focus-visible,
-    .dealer-button:focus-visible {
+    .dealer-select-button:focus-visible {
       outline: 2px solid #111;
       outline-offset: 4px;
     }
@@ -175,62 +207,6 @@
     .vehicle-button {
       font-size: 16px;
       line-height: 1.4;
-    }
-
-    .dealers {
-      margin: 7px 0 13px;
-      font-size: 13px;
-    }
-
-    .dealer-button {
-      display: block;
-      margin: 7px auto;
-    }
-
-    .alert-layer[hidden] { display: none; }
-
-    .alert-layer {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: rgba(0, 0, 0, .42);
-    }
-
-    .alert-box {
-      width: min(100%, 310px);
-      padding: 22px 20px 17px;
-      border-radius: 14px;
-      background: #fff;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, .22);
-    }
-
-    .alert-box h2 {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 400;
-      line-height: 1.4;
-    }
-
-    .alert-dealers .dealer-button {
-      width: 100%;
-      min-height: 42px;
-      margin: 0;
-      border-top: 1px solid #e5e5e5;
-      font-weight: 700;
-    }
-
-    .alert-close {
-      width: 100%;
-      min-height: 38px;
-      margin-top: 5px;
-      border: 0;
-      color: #777;
-      background: transparent;
-      font-size: 13px;
-      cursor: pointer;
     }
 
     @media (max-width: 390px) {
@@ -248,19 +224,15 @@
     <div id="heroPagination" class="hero-pagination" aria-label="배너 선택"></div>
   </section>
   <main class="wrap">
-    <h1>시승 가능 차량 리스트</h1>
+    <h1>시승 대리점 선택</h1>
+    <div id="dealerList" class="dealer-list" aria-label="대리점 선택"></div>
 
-    <div id="modelList" class="model-list" aria-label="차종 선택"></div>
-    <p class="guide">* 원하시는 차량의 기종, 색상을 누르면 바로 시승신청 링크로 넘어갑니다.</p>
-  </main>
-
-  <div id="dealerAlert" class="alert-layer" hidden>
-    <section class="alert-box" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
-      <h2 id="alertTitle">대리점을 선택해주세요</h2>
-      <div id="alertDealers" class="alert-dealers"></div>
-      <button id="alertClose" class="alert-close" type="button">취소</button>
+    <section id="vehicleSection" class="vehicle-section" hidden>
+      <h2>관심 차종 선택</h2>
+      <div id="modelList" class="model-list" aria-label="차종 선택"></div>
+      <p class="guide">* 시승 가능한 차량을 누르면 선택한 대리점의 시승신청 링크로 넘어갑니다.</p>
     </section>
-  </div>
+  </main>
 
   <script>
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxPV1qjf5Z9vt8BtoGNUTtkVCHjF2GjY1U4Y0xadZ-lASg59WJZgUkPUI9KoaOFwdySlw/exec';
@@ -275,10 +247,9 @@
     const heroCarousel = document.getElementById('heroCarousel');
     const heroTrack = document.getElementById('heroTrack');
     const heroPagination = document.getElementById('heroPagination');
+    const dealerList = document.getElementById('dealerList');
+    const vehicleSection = document.getElementById('vehicleSection');
     const modelList = document.getElementById('modelList');
-    const dealerAlert = document.getElementById('dealerAlert');
-    const alertDealers = document.getElementById('alertDealers');
-    const alertClose = document.getElementById('alertClose');
     const MODEL_ORDER = ['필랑트', '그랑 콜레오스', '아르카나'];
     const MODEL_IMAGES = {
       '필랑트': 'https://raw.githubusercontent.com/renault-taauto/showroom/main/renault/filante.png',
@@ -302,6 +273,7 @@
       ] }
     ];
     let vehicles = [];
+    let selectedDealer = null;
     let heroIndex = 0;
     let heroTimer = null;
     let heroToggle = null;
@@ -495,22 +467,22 @@
         const image = document.createElement('img');
         image.className = 'model-image';
         image.src = MODEL_IMAGES[model] || '';
-        image.alt = model;
+        image.alt = '';
         image.decoding = 'async';
         if (!MODEL_IMAGES[model]) image.hidden = true;
 
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'model-button';
-        button.textContent = model;
         button.setAttribute('aria-expanded', 'false');
+        button.append(image, document.createTextNode(model));
 
         const vehicleArea = document.createElement('div');
         vehicleArea.className = 'vehicles';
         vehicleArea.hidden = true;
 
         button.addEventListener('click', () => toggleModel(model, button, vehicleArea));
-        column.append(image, button, vehicleArea);
+        column.append(button, vehicleArea);
         return column;
       }));
 
@@ -605,19 +577,7 @@
       button.textContent = vehicleDisplayName(vehicle);
 
       button.addEventListener('click', function () {
-        const dealers = Array.isArray(vehicle.dealers) ? vehicle.dealers : [];
-        const linkedDealers = dealers.filter(dealer => dealer.url);
-
-        if (dealers.length === 1 && linkedDealers.length === 1) {
-          goToDealer(vehicle, linkedDealers[0]);
-          return;
-        }
-
-        trackEvent({
-          event: 'click', target: 'vehicle', model: vehicle.model,
-          fuel: vehicle.fuel, color: vehicle.color
-        });
-        showDealerAlert(vehicle, linkedDealers);
+        if (selectedDealer) goToDealer(vehicle, selectedDealer);
       });
 
       row.appendChild(button);
@@ -628,24 +588,29 @@
       return [vehicle.fuel, vehicle.color].filter(Boolean).join(' ') || '시승 신청';
     }
 
-    function showDealerAlert(vehicle, dealers) {
-      alertDealers.replaceChildren();
-      dealers.forEach(dealer => {
+    function renderDealers() {
+      const dealers = Object.entries(FALLBACK_DEALER_URLS).map(([name, url]) => ({ name, url }));
+      dealerList.replaceChildren(...dealers.map(dealer => {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'dealer-button';
-        button.textContent = dealer.name;
-        button.addEventListener('click', () => goToDealer(vehicle, dealer));
-        alertDealers.appendChild(button);
-      });
-      dealerAlert.hidden = false;
-      document.body.style.overflow = 'hidden';
-      alertClose.focus();
+        button.className = 'dealer-select-button';
+        button.textContent = dealer.name.replace(/대리점$/, '');
+        button.setAttribute('aria-pressed', String(selectedDealer?.name === dealer.name));
+        button.addEventListener('click', () => selectDealer(dealer));
+        return button;
+      }));
     }
 
-    function closeDealerAlert() {
-      dealerAlert.hidden = true;
-      document.body.style.overflow = '';
+    function selectDealer(dealer) {
+      selectedDealer = dealer;
+      renderDealers();
+      vehicleSection.hidden = false;
+      modelList.querySelectorAll('.model-button').forEach(button => button.setAttribute('aria-expanded', 'false'));
+      modelList.querySelectorAll('.vehicles').forEach(area => {
+        area.hidden = true;
+        area.replaceChildren();
+      });
+      trackEvent({ event: 'click', target: 'dealer_select', dealer: dealer.name });
     }
 
     function goToDealer(vehicle, dealer) {
@@ -697,17 +662,10 @@
 
     setupHeroCarousel();
     discoverAdditionalHeaderImages();
+    renderDealers();
     loadInitialVehicles();
     loadVehicles();
     trackEvent({ event: 'view', target: 'page' });
-
-    alertClose.addEventListener('click', closeDealerAlert);
-    dealerAlert.addEventListener('click', event => {
-      if (event.target === dealerAlert) closeDealerAlert();
-    });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !dealerAlert.hidden) closeDealerAlert();
-    });
   </script>
 </body>
 </html>
