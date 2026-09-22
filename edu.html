@@ -45,13 +45,21 @@
 
     function getVisitorId() {
       const key = 'renault_visitor_id';
-      let id = localStorage.getItem(key);
-      if (!id) {
-        id = (crypto.randomUUID && crypto.randomUUID()) ||
-          `v-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        localStorage.setItem(key, id);
+      try {
+        let id = localStorage.getItem(key);
+        if (!id) {
+          id = makeVisitorId_();
+          localStorage.setItem(key, id);
+        }
+        return id;
+      } catch (_) {
+        return makeVisitorId_();
       }
-      return id;
+    }
+
+    function makeVisitorId_() {
+      return (window.crypto && crypto.randomUUID && crypto.randomUUID()) ||
+        `v-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     }
 
     function getDevice() {
@@ -71,7 +79,13 @@
 
     async function getCity() {
       try {
-        const response = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 2500);
+        const response = await fetch('https://ipapi.co/json/', {
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
         if (!response.ok) return '';
         const data = await response.json();
         return data.city || '';
@@ -81,28 +95,32 @@
     }
 
     async function recordVisit() {
-      if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL === 'YOUR_GAS_WEB_APP_URL') {
-        return;
-      }
-
-      const payload = {
-        visitorId: getVisitorId(),
-        city: await getCity(),
-        device: getDevice(),
-        browser: getBrowser(),
-        referrer: document.referrer || '',
-        pageUrl: document.referrer || ''
-      };
-
       try {
-        // text/plain은 브라우저의 CORS 사전 요청을 피하기 위한 방식입니다.
-        await fetch(GAS_WEB_APP_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-          keepalive: true
-        });
+        if (!GAS_WEB_APP_URL) return;
+
+        const payload = {
+          visitorId: getVisitorId(),
+          city: await getCity(),
+          device: getDevice(),
+          browser: getBrowser(),
+          referrer: document.referrer || '',
+          pageUrl: document.referrer || ''
+        };
+
+        const body = JSON.stringify(payload);
+        const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
+
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(GAS_WEB_APP_URL, blob);
+        } else {
+          await fetch(GAS_WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body,
+            keepalive: true
+          });
+        }
       } catch (_) {
       }
     }
