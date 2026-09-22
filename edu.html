@@ -24,8 +24,8 @@
     }
     .logo {
       display: block;
-      width: 64px;
-      height: 64px;
+      width: 32px;
+      height: 32px;
       object-fit: contain;
     }
   </style>
@@ -40,7 +40,7 @@
   </main>
 
   <script>
-    // GAS 웹앱 배포 후 아래 주소를 교체하세요.
+    // 기존에 전달받은 GAS 웹앱 주소를 그대로 사용합니다.
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxeAb0XCmlguVGV5WunqGATyiYiw8HVZ1lXjP4Oic2ru4T72-MB0jKsXclVXko5woEK/exec';
 
     function getVisitorId() {
@@ -81,7 +81,7 @@
     }
 
     async function recordVisit() {
-      if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL === 'https://script.google.com/macros/s/AKfycbxeAb0XCmlguVGV5WunqGATyiYiw8HVZ1lXjP4Oic2ru4T72-MB0jKsXclVXko5woEK/exec') {
+      if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL === 'YOUR_GAS_WEB_APP_URL') {
         return;
       }
 
