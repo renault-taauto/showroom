@@ -11,7 +11,7 @@
     body {
       display: grid;
       place-items: center;
-      min-height: 100px;
+      min-height: 120px;
       padding: 20px;
       background: #fff;
       font-family: Arial, sans-serif;
@@ -19,13 +19,13 @@
     .widget {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       color: #111;
     }
     .logo {
       display: block;
-      width: 40px;
-      height: 40px;
+      width: 64px;
+      height: 64px;
       object-fit: contain;
     }
   </style>
@@ -42,7 +42,6 @@
   <script>
     // GAS 웹앱 배포 후 아래 주소를 교체하세요.
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxeAb0XCmlguVGV5WunqGATyiYiw8HVZ1lXjP4Oic2ru4T72-MB0jKsXclVXko5woEK/exec';
-    const PAGE_ID = 'renault-public-page';
 
     function getVisitorId() {
       const key = 'renault_visitor_id';
@@ -92,7 +91,7 @@
         device: getDevice(),
         browser: getBrowser(),
         referrer: document.referrer || '',
-        pageId: PAGE_ID
+        pageUrl: document.referrer || ''
       };
 
       try {
