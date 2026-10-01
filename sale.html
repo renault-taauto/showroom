@@ -140,14 +140,58 @@
 
     .item-grid {
       display: grid;
-      grid-template-columns: 1fr 120px;
+      grid-template-columns: 1fr 118px;
       gap: 10px;
-      align-items: end;
+      align-items: center;
       margin-bottom: 12px;
     }
 
     .item-grid label {
       margin-bottom: 0;
+    }
+
+    .quantity-control {
+      display: grid;
+      grid-template-columns: 32px 1fr 32px;
+      align-items: center;
+      height: 42px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .step-button {
+      width: 32px;
+      height: 40px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--blue-dark);
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .step-button:hover {
+      background: #eff6ff;
+    }
+
+    .step-button:disabled {
+      background: transparent;
+      color: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    .quantity-input {
+      height: 40px;
+      border: 0 !important;
+      border-radius: 0 !important;
+      padding: 0;
+      text-align: center;
+      font-weight: 800;
+      cursor: default;
+      box-shadow: none !important;
     }
 
     .total {
@@ -183,7 +227,7 @@
 <body>
   <main>
     <h1>용품 시책 신청</h1>
-    <p class="sub">영업담당 이름을 입력한 뒤 배정된 수량 안에서 신청 수량을 작성해주세요.</p>
+    <p class="sub">영업담당 이름을 입력한 뒤 선택 가능한 수량에 맞춰 신청해주세요.</p>
 
     <div class="field">
       <label for="salesName">영업담당</label>
@@ -196,7 +240,7 @@
       <div class="summary">
         <div class="summary-row"><span>시책월</span><span id="monthText"></span></div>
         <div class="summary-row"><span>거점</span><span id="branchText"></span></div>
-        <div class="summary-row"><span>기간</span><span id="periodText"></span></div>
+        <div class="summary-row"><span>선택 기간</span><span id="periodText"></span></div>
         <div class="summary-row"><span>선택 가능</span><span id="limitText"></span></div>
       </div>
 
@@ -269,7 +313,7 @@
       try {
         const data = await jsonp({ action: 'getConfig' });
         if (!data.ok) throw new Error(data.message || '설정을 불러오지 못했습니다.');
-        if (!data.items || data.items.length === 0) throw new Error('현황 탭에서 기프트 품목을 찾지 못했습니다.');
+        if (!data.items || data.items.length === 0) throw new Error('기프트 품목을 찾지 못했습니다.');
         state.config = data;
         els.checkButton.disabled = false;
         els.checkButton.textContent = '확인';
@@ -315,8 +359,8 @@
         }
 
         state.config.defaultMonth = data.defaultMonth || state.config.defaultMonth;
-        state.selectedRep = data.rep;
-        showSurvey(data.rep);
+        state.selectedRep = normalizeRep(data.rep || {});
+        showSurvey(state.selectedRep);
       } catch (err) {
         els.lookupMessage.textContent = err.message;
       } finally {
@@ -325,17 +369,43 @@
       }
     }
 
+    function normalizeRep(rep) {
+      const limit = Number(rep.selectionLimit ?? rep.selectableLimit ?? rep.limit ?? 0);
+      return {
+        ...rep,
+        limit: Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0
+      };
+    }
+
     function showSurvey(rep) {
       els.monthText.textContent = state.config.defaultMonth || '-';
-      els.branchText.textContent = rep.branch;
-      els.periodText.textContent = rep.periodDetail || '-';
+      els.branchText.textContent = rep.branch || '-';
+      els.periodText.textContent = getSelectablePeriodText(rep);
       els.limitText.textContent = rep.limit + '개';
       els.limitTotalText.textContent = rep.limit;
       renderItemFields();
-      els.submitButton.disabled = false;
       els.submitButton.textContent = '제출';
       els.surveyPanel.style.display = 'block';
       updateTotal();
+    }
+
+    function getSelectablePeriodText(rep) {
+      if (rep.periodDetail) return rep.periodDetail;
+
+      const repPeriods = Array.isArray(rep.selectablePeriods) ? rep.selectablePeriods : [];
+      if (repPeriods.length) return repPeriods.map(formatPeriodLabel).join(' / ');
+
+      const configPeriods = Array.isArray(state.config.selectablePeriods)
+        ? state.config.selectablePeriods
+        : (Array.isArray(state.config.periods) ? state.config.periods.filter((period) => period.selectable !== false) : []);
+      if (configPeriods.length) return configPeriods.map(formatPeriodLabel).join(' / ');
+
+      return '-';
+    }
+
+    function formatPeriodLabel(period) {
+      if (typeof period === 'string') return period;
+      return period.header || period.label || period.column || '';
     }
 
     function hideSurvey() {
@@ -347,23 +417,46 @@
       els.itemFields.innerHTML = '';
       const items = state.config.items || [];
       items.forEach((item) => {
+        const itemName = typeof item === 'string' ? item : item.name;
         const row = document.createElement('div');
         row.className = 'item-grid';
 
         const label = document.createElement('label');
-        label.textContent = item.name;
+        label.textContent = itemName;
+
+        const control = document.createElement('div');
+        control.className = 'quantity-control';
+
+        const minusButton = document.createElement('button');
+        minusButton.type = 'button';
+        minusButton.className = 'step-button';
+        minusButton.textContent = '-';
+        minusButton.setAttribute('aria-label', itemName + ' 수량 줄이기');
+        minusButton.addEventListener('click', () => changeCount(input, -1));
 
         const input = document.createElement('input');
         input.type = 'number';
         input.min = '0';
         input.step = '1';
         input.value = '0';
-        input.inputMode = 'numeric';
-        input.dataset.itemName = item.name;
-        input.addEventListener('input', () => updateTotal(input));
+        input.readOnly = true;
+        input.inputMode = 'none';
+        input.className = 'quantity-input';
+        input.dataset.itemName = itemName;
+        input.setAttribute('aria-label', itemName + ' 선택 수량');
 
+        const plusButton = document.createElement('button');
+        plusButton.type = 'button';
+        plusButton.className = 'step-button';
+        plusButton.textContent = '+';
+        plusButton.setAttribute('aria-label', itemName + ' 수량 늘리기');
+        plusButton.addEventListener('click', () => changeCount(input, 1));
+
+        control.appendChild(minusButton);
+        control.appendChild(input);
+        control.appendChild(plusButton);
         row.appendChild(label);
-        row.appendChild(input);
+        row.appendChild(control);
         els.itemFields.appendChild(row);
       });
     }
@@ -378,19 +471,54 @@
       return value;
     }
 
-    function updateTotal(changedInput) {
-      const limit = state.selectedRep ? Number(state.selectedRep.limit) : 0;
-      const inputs = getItemInputs();
-      let total = inputs.reduce((sum, input) => sum + getCount(input), 0);
+    function getTotal() {
+      return getItemInputs().reduce((sum, input) => sum + getCount(input), 0);
+    }
 
-      if (total > limit && changedInput) {
-        const other = inputs.reduce((sum, input) => input === changedInput ? sum : sum + getCount(input), 0);
-        changedInput.value = Math.max(0, limit - other);
-        total = inputs.reduce((sum, input) => sum + getCount(input), 0);
-      }
+    function changeCount(input, delta) {
+      const limit = getLimit();
+      const current = getCount(input);
+      const total = getTotal();
+      const next = current + delta;
+
+      if (next < 0) return;
+      if (delta > 0 && total >= limit) return;
+
+      input.value = next;
+      updateTotal();
+    }
+
+    function getLimit() {
+      return state.selectedRep ? Number(state.selectedRep.limit || 0) : 0;
+    }
+
+    function updateTotal() {
+      const limit = getLimit();
+      const total = getTotal();
 
       els.totalText.textContent = total;
-      els.submitMessage.textContent = total > limit ? '선택 가능 개수를 초과할 수 없습니다.' : '';
+      updateStepButtons(total, limit);
+
+      const isComplete = limit > 0 && total === limit;
+      els.submitButton.disabled = !isComplete;
+      els.submitMessage.textContent = getSelectionMessage(total, limit);
+    }
+
+    function updateStepButtons(total, limit) {
+      getItemInputs().forEach((input) => {
+        const control = input.closest('.quantity-control');
+        const buttons = control ? control.querySelectorAll('.step-button') : [];
+        if (buttons.length < 2) return;
+        buttons[0].disabled = getCount(input) <= 0;
+        buttons[1].disabled = total >= limit;
+      });
+    }
+
+    function getSelectionMessage(total, limit) {
+      if (limit <= 0) return '선택 가능한 수량이 없습니다.';
+      if (total < limit) return '선택 가능 개수만큼 선택해야 제출할 수 있습니다.';
+      if (total > limit) return '선택 가능 개수를 초과할 수 없습니다.';
+      return '';
     }
 
     async function submitSurvey() {
@@ -398,14 +526,12 @@
       if (!state.selectedRep) return;
 
       const inputs = getItemInputs();
-      const total = inputs.reduce((sum, input) => sum + getCount(input), 0);
+      const total = getTotal();
+      const limit = getLimit();
 
-      if (total <= 0) {
-        els.submitMessage.textContent = '최소 1개 이상 입력해주세요.';
-        return;
-      }
-      if (total > state.selectedRep.limit) {
-        els.submitMessage.textContent = '선택 가능 개수를 초과할 수 없습니다.';
+      if (total !== limit) {
+        els.submitMessage.textContent = getSelectionMessage(total, limit);
+        updateTotal();
         return;
       }
 
@@ -432,6 +558,7 @@
 
         els.salesName.disabled = true;
         getItemInputs().forEach((input) => input.disabled = true);
+        Array.from(document.querySelectorAll('.step-button')).forEach((button) => button.disabled = true);
         els.submitButton.textContent = '제출 완료';
         els.submitMessage.className = 'message done';
         els.submitMessage.textContent = '제출되었습니다.';
@@ -440,6 +567,7 @@
         els.submitButton.textContent = '제출';
         els.submitMessage.className = 'message';
         els.submitMessage.textContent = err.message;
+        updateTotal();
       }
     }
 
