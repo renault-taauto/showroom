@@ -149,6 +149,10 @@
     .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
     .modal-close{width:38px;height:38px;border-radius:12px;background:#eef1f5}
     .modal-body{display:grid;gap:12px}
+    .service-shutdown-overlay{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px 18px;background:#eef1f5;pointer-events:auto}
+    .service-shutdown-card{width:min(440px,100%);display:grid;gap:12px;padding:28px 22px;border-radius:18px;background:#fff;border:1px solid #eaecf0;box-shadow:0 18px 50px rgba(15,23,42,.14);text-align:center}
+    .service-shutdown-card h1{font-size:24px;line-height:1.3}
+    .service-shutdown-card p{font-size:16px;color:#475467;line-height:1.6}
     @media (max-width:380px){
       .notice-row{gap:5px}
       .notice-title{font-size:13px}
@@ -163,6 +167,12 @@
   </style>
 </head>
 <body>
+<div id="serviceShutdownOverlay" class="service-shutdown-overlay" role="dialog" aria-modal="true" aria-labelledby="serviceShutdownTitle">
+  <section class="service-shutdown-card">
+    <h1 id="serviceShutdownTitle">블로그 원고 서비스 종료</h1>
+    <p>11월 중 다른 플랫폼으로 안내 드리겠습니다.</p>
+  </section>
+</div>
 <main class="app">
 
   <!-- 로그인 화면 -->
@@ -380,6 +390,8 @@
   const CAMPAIGN_DONE_KEY = 'salesCampaignDone_v1';
   const UPLOAD_CONTENTS_CACHE_KEY = 'salesUploadContentsCache_v1';
   const SKIN_REQUESTS_CACHE_KEY = 'salesSkinRequestsCache_v1';
+  const PHOTO_RETRY_MESSAGE = '사진 저장에 실패했습니다. 사진은 10장 이하로 다시 선택해서 요청해주세요.';
+  const PHOTO_MAX_COUNT = 10;
 
   const FALLBACK_OPTIONS = {
     vehicles: {
@@ -701,10 +713,9 @@
 
     try {
       const files = getInspectionFiles();
+      if (files.length > PHOTO_MAX_COUNT) throw new Error(PHOTO_RETRY_MESSAGE);
       if (!$('customerHistory').value.trim()) throw new Error('고객과의 히스토리를 입력해주세요.');
       if (!$('deliveryMood').value.trim()) throw new Error('차량 인도 분위기를 입력해주세요.');
-      if (needsPhotos && files.length < 5) throw new Error('지점 블로그는 검수 사진을 5장 이상 선택해주세요.');
-
       localId = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const request = {
         name: state.user.name, agency: state.user.agency,
@@ -775,10 +786,12 @@
           message: e.message || String(e),
         }).catch(err => console.warn('debugPostRequest failed', err));
       }
+      const message = e.message || String(e);
+      if (message.includes('사진') || message.includes('이미지')) alert(message);
       if ($('mainPage').classList.contains('active')) {
-        updatePendingHomePost(localId, { status: '접수', lastError: e.message || String(e) });
+        updatePendingHomePost(localId, { status: message.includes('사진') || message.includes('이미지') ? '사진 저장 실패' : '접수', lastError: message });
       } else {
-        setPageStatus('requestStatus', e.message || String(e), 'error');
+        setPageStatus('requestStatus', message, 'error');
       }
     } finally {
       state.requestSubmitting = false;
@@ -788,15 +801,20 @@
   }
 
   async function uploadPhotosToStorage(files) {
-    const urls = [];
-    for (let i = 0; i < files.length; i++) {
-      setPageStatus('requestStatus', `사진 업로드 중 (${i + 1}/${files.length})`);
-      const blob = await compressImage(files[i]);
-      const path = `requests/${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-      const url = await uploadToStorage(path, blob);
-      urls.push(url);
+    try {
+      const urls = [];
+      for (let i = 0; i < files.length; i++) {
+        setPageStatus('requestStatus', `사진 업로드 중 (${i + 1}/${files.length})`);
+        const blob = await compressImage(files[i]);
+        const path = `requests/${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+        const url = await uploadToStorage(path, blob);
+        urls.push(url);
+      }
+      return urls;
+    } catch (error) {
+      console.warn('uploadPhotosToStorage failed', error);
+      throw new Error(PHOTO_RETRY_MESSAGE);
     }
-    return urls;
   }
 
   async function uploadToStorage(path, blob) {
@@ -870,6 +888,10 @@
     if (!uploadBlog) return setPageStatus('renaultDraftStatus', '업로드를 선택해주세요.', 'error');
     if (!keyword) return setPageStatus('renaultDraftStatus', '키워드를 입력해주세요.', 'error');
     if (!requestDetails) return setPageStatus('renaultDraftStatus', '요청 사항을 입력해주세요.', 'error');
+    if (selectedFiles.length > PHOTO_MAX_COUNT) {
+      alert(PHOTO_RETRY_MESSAGE);
+      return setPageStatus('renaultDraftStatus', PHOTO_RETRY_MESSAGE, 'error');
+    }
 
     setPageStatus('renaultDraftStatus', '요청 중입니다.');
     try {
@@ -946,10 +968,12 @@
           message: e.message || String(e),
         }).catch(err => console.warn('debugPostRequest failed', err));
       }
+      const message = e.message || String(e);
+      if (message.includes('사진') || message.includes('이미지')) alert(message);
       if (localId && $('mainPage').classList.contains('active')) {
-        updatePendingHomePost(localId, { status: '접수', lastError: e.message || String(e) });
+        updatePendingHomePost(localId, { status: message.includes('사진') || message.includes('이미지') ? '사진 저장 실패' : '접수', lastError: message });
       } else {
-        setPageStatus('renaultDraftStatus', e.message || String(e), 'error');
+        setPageStatus('renaultDraftStatus', message, 'error');
       }
     }
   }
@@ -1000,14 +1024,19 @@
   }
 
   async function uploadRenaultPhotosToStorage(files) {
-    const urls = [];
-    for (let i = 0; i < files.length; i++) {
-      setPageStatus('renaultDraftStatus', `사진 업로드 중 (${i + 1}/${files.length})`);
-      const file = files[i];
-      const path = `renault-requests/${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 8)}${getImageExtension(file)}`;
-      urls.push(await uploadToStorage(path, file));
+    try {
+      const urls = [];
+      for (let i = 0; i < files.length; i++) {
+        setPageStatus('renaultDraftStatus', `사진 업로드 중 (${i + 1}/${files.length})`);
+        const file = files[i];
+        const path = `renault-requests/${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 8)}${getImageExtension(file)}`;
+        urls.push(await uploadToStorage(path, file));
+      }
+      return urls;
+    } catch (error) {
+      console.warn('uploadRenaultPhotosToStorage failed', error);
+      throw new Error(PHOTO_RETRY_MESSAGE);
     }
-    return urls;
   }
 
   function getImageExtension(file) {
@@ -1552,7 +1581,7 @@
     if (type === '본인 블로그') {
       $('inspectionGuide').textContent = '본인 블로그는 사진 없이도 제출할 수 있습니다. 사진을 선택하면 함께 저장됩니다.';
     } else if (type === '지점 블로그') {
-      $('inspectionGuide').textContent = `지점 블로그는 검수 사진 5장 이상 필수입니다. 현재 ${count}장 선택됨.`;
+      $('inspectionGuide').textContent = `지점 블로그도 사진 없이 제출할 수 있습니다. 사진을 선택하면 함께 저장됩니다. 현재 ${count}장 선택됨.`;
     } else {
       $('inspectionGuide').textContent = '업로드 블로그를 선택하면 사진 제출 기준이 표시됩니다.';
     }
